@@ -56,23 +56,7 @@
   }
   chips.forEach((c) => c.addEventListener('click', () => go(+c.dataset.p)));
   scrub.addEventListener('input', () => go(+scrub.value));
-  $('reset').addEventListener('click', () => go(0));
-
-  // Fake download: uneven chunks with a short stall, like a real network.
-  function stopSim() { clearTimeout(timer); timer = null; $('simulate').disabled = false; }
-  $('simulate').addEventListener('click', () => {
-    stopSim(); go(0, false); $('simulate').disabled = true;
-    setMode(true);                              // connecting: file size unknown yet
-    let p = 0, stalled = false;
-    const step = () => {
-      p = Math.min(100, p + 1.5 + Math.random() * 6);
-      go(Math.round(p), false);
-      if (p >= 100) { $('simulate').disabled = false; timer = null; return; }
-      const wait = !stalled && p > 55 ? (stalled = true, 1200) : 160 + Math.random() * 260;
-      timer = setTimeout(step, wait);
-    };
-    timer = setTimeout(() => { go(0, false); step(); }, 3000);
-  });
+  function stopSim() { clearTimeout(timer); timer = null; }
 
   // Open in a working state: show the progress state on load.
   go(45, false);

@@ -45,22 +45,5 @@
   }
   chips.forEach((c) => c.addEventListener('click', () => go(+c.dataset.p)));
   scrub.addEventListener('input', () => go(+scrub.value));
-  $('reset').addEventListener('click', () => go(0));
-
-  // Fake upload: bursty progress events, a stall at 25%, then the rest.
-  function stopSim() { clearTimeout(timer); timer = null; $('simulate').disabled = false; }
-  $('simulate').addEventListener('click', () => {
-    stopSim(); go(0, false); $('simulate').disabled = true;
-    setMode(true);                              // connecting: size unknown yet
-    let p = 0;
-    const step = () => {
-      if (p < 25) { p = Math.min(25, p + 2 + Math.random() * 4); timer = setTimeout(step, 140 + Math.random() * 160); }
-      else if (p === 25 && !step.held) { step.held = true; timer = setTimeout(step, 1100); return go(25, false); }
-      else if (p < 100) { p = Math.min(100, p + 3 + Math.random() * 7); timer = setTimeout(step, 150 + Math.random() * 200); }
-      else { $('simulate').disabled = false; timer = null; }
-      go(Math.round(p), false);
-    };
-    step.held = false;
-    timer = setTimeout(() => { go(0, false); step(); }, 2600);
-  });
+  function stopSim() { clearTimeout(timer); timer = null; }
 })();

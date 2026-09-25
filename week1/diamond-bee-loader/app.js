@@ -63,21 +63,8 @@
   mDet.addEventListener('click', () => { stop(); go(+scrub.value); });
   chips.forEach((c) => c.addEventListener('click', () => go(+c.dataset.p)));
   scrub.addEventListener('input', () => go(+scrub.value));
-  $('reset').addEventListener('click', () => go(0));
 
-  function stop() { clearTimeout(timer); timer = null; $('simulate').disabled = false; }
-  $('simulate').addEventListener('click', () => {
-    stop(); $('simulate').disabled = true;
-    go(0, false); setMode(true);                 // contacting the payment provider: duration unknown
-    let p = 0, paused = false;
-    const step = () => {
-      p = Math.min(100, p + 1.5 + Math.random() * 5);
-      go(Math.round(p), false);
-      if (p >= 100) { $('simulate').disabled = false; timer = null; return; }
-      timer = setTimeout(step, !paused && p > 45 ? (paused = true, 1100) : 160 + Math.random() * 240);
-    };
-    timer = setTimeout(() => { go(0, false); step(); }, 4200);
-  });
+  function stop() { clearTimeout(timer); timer = null; }
 
   go(50, false);   // open in flight so the motion is visible at a glance
 })();

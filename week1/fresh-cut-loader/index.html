@@ -13,11 +13,6 @@
   </figure>
 
   <section class="panel">
-    <div>
-      <p class="eyebrow">Loader · indeterminate + determinate · 400 ASA</p>
-      <h1>Fresh <span>Cut</span></h1>
-      <p class="lede">A progress indicator shot on a disposable camera. The fringe starts whole; as progress rises, the blade runs along the diagonal and each lock drops away. At 100% the cut matches the final frame.</p>
-    </div>
 
     <div class="lcd" id="readout" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Cut progress">
       <div class="big"><span id="pct">000</span><small>%</small></div>
@@ -31,16 +26,7 @@
         <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · cut &amp; regrow</span></button>
         <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · one cut</span></button>
       </div>
-      <div class="states" role="group" aria-label="Jump to a determinate state">
-        <button id="s0" data-p="0" aria-pressed="false"><strong>Default</strong><span>0% · uncut</span></button>
-        <button id="s50" data-p="50" aria-pressed="true"><strong>Progress</strong><span>50% · half cut</span></button>
-        <button id="s100" data-p="100" aria-pressed="false"><strong>Complete</strong><span>100% · full cut</span></button>
-      </div>
       <div class="row"><label for="scrub">Progress</label><input type="range" id="scrub" min="0" max="100" step="1" value="50"></div>
-      <div class="row"><button id="simulate">Simulate a download</button><button id="reset" class="ghost">Grow it back</button></div>
-      <code>const loader = CutLoader(canvas);
-await loader.ready;
-xhr.onprogress = e =&gt; loader.setProgress(e.loaded / e.total * 100);</code>
     </div>
   </section>
 </main>

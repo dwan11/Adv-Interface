@@ -2,13 +2,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Hanken+Grotesk:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css"></head><body>
 <main class="wrap">
-  <header>
-    <div>
-      <p class="eyebrow">Loader · indeterminate + determinate</p>
-      <h1>The <em>Diamond</em> Bee</h1>
-    </div>
-    <p class="lede">A 3D brooch in yellow gold and platinum: brilliant-cut diamonds (a canary oval body, a white round thorax) and translucent enamel wings framed in metal. It rests at 0%, flies while work is under way, and lands with a flicker of its wings when it's done.</p>
-  </header>
 
   <section class="stage" id="stage" aria-label="3D bee brooch. Drag to turn it in the light.">
     <div class="fallback" id="fallback" hidden>This preview needs WebGL, which isn't available in this browser.</div>
@@ -27,19 +20,8 @@
         <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · waggle dance</span></button>
         <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · flight</span></button>
       </div>
-      <div class="states" role="group" aria-label="Jump to a determinate state">
-        <button id="s0" data-p="0" aria-pressed="true"><strong>At rest</strong><span>0% · still</span></button>
-        <button id="s50" data-p="50" aria-pressed="false"><strong>In flight</strong><span>50% · bobbing</span></button>
-        <button id="s100" data-p="100" aria-pressed="false"><strong>Landed</strong><span>100% · wings flicker</span></button>
-      </div>
       <div class="row"><label for="scrub">Progress</label><input type="range" id="scrub" min="0" max="100" step="1" value="0"></div>
-      <div class="row"><button id="simulate">Simulate a checkout</button><button id="reset" class="ghost">Back to rest</button></div>
     </div>
-<code><b>const</b> loader = BeeLoader(document.getElementById('stage'));
-loader.setIndeterminate(true);      // waiting, size unknown
-loader.setIndeterminate(false);
-xhr.onprogress = e =&gt;
-  loader.setProgress(e.loaded / e.total * 100);</code>
   </section>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

@@ -17,39 +17,16 @@
   </section>
 
   <section class="panel">
-    <div>
-      <p class="eyebrow">Loader · indeterminate + determinate</p>
-      <h1>The Coupe</h1>
-      <p class="lede">A progress indicator that pours. Progress drives the pour frame by frame, so the glass fills exactly as far as the task has gone.</p>
-    </div>
 
     <div class="mode" role="radiogroup" aria-label="Indicator type">
       <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · loops</span></button>
       <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · fills</span></button>
     </div>
 
-    <div class="states" role="group" aria-label="Jump to a determinate state">
-      <button id="s0"   data-p="0"   aria-pressed="true"><strong>Empty</strong><span>0%</span></button>
-      <button id="s25"  data-p="25"  aria-pressed="false"><strong>Pouring</strong><span>25%</span></button>
-      <button id="s100" data-p="100" aria-pressed="false"><strong>Full</strong><span>100%</span></button>
-    </div>
-
     <div class="row">
       <label for="scrub">Progress</label>
       <input type="range" id="scrub" min="0" max="100" step="1" value="0">
     </div>
-
-    <div class="row">
-      <button id="simulate">Simulate an upload</button>
-      <button id="reset" class="ghost">Empty the glass</button>
-    </div>
-
-<pre><span class="k">const</span> loader = CoupeLoader(canvas);
-<span class="k">await</span> loader.ready;
-
-upload.onprogress = e =&gt;
-  loader.setProgress(e.loaded / e.total * <span class="s">100</span>);
-<span class="c">// 0 = empty · 25 = quarter · 100 = full</span></pre>
   </section>
 </main>
 <script src="loader.js"></script><script src="app.js"></script></body></html>

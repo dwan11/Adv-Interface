@@ -50,21 +50,8 @@
   }
   chips.forEach((c) => c.addEventListener('click', () => go(+c.dataset.p)));
   scrub.addEventListener('input', () => go(+scrub.value));
-  $('reset').addEventListener('click', () => go(0));
 
-  function stop() { clearTimeout(timer); timer = null; $('simulate').disabled = false; }
-  $('simulate').addEventListener('click', () => {
-    stop(); go(0, false); $('simulate').disabled = true;
-    setMode(true);                              // waiting for the server: size unknown
-    let p = 0, paused = false;
-    const step = () => {
-      p = Math.min(100, p + 1.5 + Math.random() * 5);
-      go(Math.round(p), false);
-      if (p >= 100) { $('simulate').disabled = false; timer = null; return; }
-      timer = setTimeout(step, !paused && p > 48 ? (paused = true, 1000) : 150 + Math.random() * 230);
-    };
-    timer = setTimeout(() => { go(0, false); step(); }, 4400);
-  });
+  function stop() { clearTimeout(timer); timer = null; }
 
   // film grain: a tiny noise canvas redrawn ~12 times a second, stretched over the print
   const g = $('grain'), gctx = g.getContext('2d'), img = gctx.createImageData(g.width, g.height);

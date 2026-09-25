@@ -2,13 +2,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Titan+One&family=Nunito:wght@600;800&family=Pacifico&family=Permanent+Marker&display=swap">
 <link rel="stylesheet" href="style.css"></head><body>
 <main class="wrap">
-  <header>
-    <div>
-      <p class="eyebrow">Loader · indeterminate + determinate · est. 2010</p>
-      <h1>Glitter Diary</h1>
-    </div>
-    <p class="lede">Retro reward badges, iron-on patches, rhinestone strips and holo glitter stars. While it works the pages flip, every sticker tips ten degrees, and LOADING is pressed on one letter sticker at a time. At 100% it peels off and READY goes down.</p>
-  </header>
 
   <section class="stage" id="diary" aria-label="Diary loader"></section>
 
@@ -23,19 +16,8 @@
         <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · keeps flipping</span></button>
         <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · fills the hearts</span></button>
       </div>
-      <div class="states" role="group" aria-label="Jump to a determinate state">
-        <button id="s0" data-p="0" aria-pressed="true"><strong>Default</strong><span>0% · pencil guide</span></button>
-        <button id="s50" data-p="50" aria-pressed="false"><strong>Flipping</strong><span>50% · 4 letters down</span></button>
-        <button id="s100" data-p="100" aria-pressed="false"><strong>Ready</strong><span>100% · pages stop</span></button>
-      </div>
       <div class="row"><label for="scrub">Progress</label><input type="range" id="scrub" min="0" max="100" step="1" value="0"></div>
-      <div class="row"><button id="simulate">Simulate an upload</button><button id="reset" class="ghost">Start over</button></div>
     </div>
-<code><b>const</b> loader = DiaryLoader(document.getElementById('diary'));
-loader.setIndeterminate(true);   // size unknown: keep flipping
-loader.setIndeterminate(false);
-xhr.upload.onprogress = e =&gt;
-  loader.setProgress(e.loaded / e.total * 100);</code>
   </section>
 </main>
 <script src="diary-loader.js"></script><script src="app.js"></script></body></html>

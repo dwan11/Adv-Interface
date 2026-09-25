@@ -2,13 +2,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Manrope:wght@400;500&family=Poiret+One&display=swap">
 <link rel="stylesheet" href="style.css"></head><body>
 <main class="wrap">
-  <header>
-    <div>
-      <p class="eyebrow">Loader · indeterminate + determinate · 16 stars</p>
-      <h1>Pisces</h1>
-    </div>
-    <p class="lede">A progress indicator that draws the constellation. Starting at the top star, a gold line links each star to the next until the two fishes are joined.</p>
-  </header>
 
   <section class="stage" aria-label="Loader preview">
     <div class="sky" id="sky"></div>
@@ -27,26 +20,11 @@
         <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · comet loops</span></button>
         <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · links fill</span></button>
       </div>
-      <div class="states" role="group" aria-label="Jump to a determinate state">
-        <button id="s0" data-p="0" aria-pressed="true"><strong>Default</strong><span>0% · stars only</span></button>
-        <button id="s45" data-p="45" aria-pressed="false"><strong>Progress</strong><span>45% · linking</span></button>
-        <button id="s100" data-p="100" aria-pressed="false"><strong>Complete</strong><span>100% · joined</span></button>
-      </div>
       <div class="row">
         <label for="scrub">Progress</label>
         <input type="range" id="scrub" min="0" max="100" step="1" value="0">
       </div>
-      <div class="row">
-        <button id="simulate">Simulate a download</button>
-        <button id="reset" class="ghost">Unlink</button>
-      </div>
     </div>
-<pre><span class="k">const</span> loader = PiscesLoader(el, {
-  onUpdate: ({ percent, state }) =&gt; {}
-});
-xhr.onprogress = e =&gt;
-  loader.setProgress(e.loaded / e.total * <span class="s">100</span>);
-<span class="c">// state: 'empty' · 'progress' · 'complete'</span></pre>
   </section>
 </main>
 <script src="pisces-loader.js"></script><script src="app.js"></script></body></html>
