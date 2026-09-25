@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fresh Cut Loader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=Archivo+Narrow:wght@500;600;700&family=VT323&display=swap">
+<link rel="stylesheet" href="style.css"></head><body>
+<main class="wrap">
+  <figure class="print" style="margin:0">
+    <div class="photo">
+      <canvas id="cut" width="1008" height="1200" role="img" aria-label="Close-up portrait; the fringe is cut along a sharp diagonal as progress rises"></canvas>
+      <div class="halate"></div><div class="leak"></div><canvas class="grain" id="grain" width="504" height="600" aria-hidden="true"></canvas><div class="vig"></div>
+      <div class="boot" id="boot">LOADING FILM…</div>
+    </div>
+    <div class="stamp" id="stamp" aria-hidden="true">'98 9 25</div>
+    <figcaption class="caption"><span>Fresh cut</span><span id="frameNo">Frame 00 / 24</span></figcaption>
+  </figure>
+
+  <section class="panel">
+    <div>
+      <p class="eyebrow">Loader · indeterminate + determinate · 400 ASA</p>
+      <h1>Fresh <span>Cut</span></h1>
+      <p class="lede">A progress indicator shot on a disposable camera. The fringe starts whole; as progress rises, the blade runs along the diagonal and each lock drops away. At 100% the cut matches the final frame.</p>
+    </div>
+
+    <div class="lcd" id="readout" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Cut progress">
+      <div class="big"><span id="pct">000</span><small>%</small></div>
+      <div class="label" id="stateLabel">UNCUT</div>
+      <div class="exp" id="exp">24 EXP</div>
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <div class="controls">
+      <div class="mode" role="radiogroup" aria-label="Indicator type">
+        <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · cut &amp; regrow</span></button>
+        <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · one cut</span></button>
+      </div>
+      <div class="states" role="group" aria-label="Jump to a determinate state">
+        <button id="s0" data-p="0" aria-pressed="false"><strong>Default</strong><span>0% · uncut</span></button>
+        <button id="s50" data-p="50" aria-pressed="true"><strong>Progress</strong><span>50% · half cut</span></button>
+        <button id="s100" data-p="100" aria-pressed="false"><strong>Complete</strong><span>100% · full cut</span></button>
+      </div>
+      <div class="row"><label for="scrub">Progress</label><input type="range" id="scrub" min="0" max="100" step="1" value="50"></div>
+      <div class="row"><button id="simulate">Simulate a download</button><button id="reset" class="ghost">Grow it back</button></div>
+      <code>const loader = CutLoader(canvas);
+await loader.ready;
+xhr.onprogress = e =&gt; loader.setProgress(e.loaded / e.total * 100);</code>
+    </div>
+  </section>
+</main>
+<script src="cut-loader.js"></script><script src="app.js"></script></body></html>

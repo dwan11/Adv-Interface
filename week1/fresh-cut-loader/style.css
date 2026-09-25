@@ -1,0 +1,93 @@
+:root{
+  color-scheme: light;
+  --desk:#D8D0C2;
+  --desk-2:#CFC6B6;
+  --print:#F6F2EA;
+  --ink:#231E1A;
+  --muted:#7A6F63;
+  --rule:#BDB2A2;
+  --stamp:#FF8B2D;
+  --stamp-glow:rgba(255,120,30,.55);
+  --lcd-bg:#1E2019;
+  --lcd:#C9D8A8;
+  --kodak:#E9B21C;
+  --red:#C8342A;
+  --display:"Archivo Narrow","Arial Narrow",system-ui,sans-serif;
+  --body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --lcd-font:"VT323",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--desk-2)}
+body{color:var(--ink);min-height:100vh}
+body{margin:0;font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:32px 56px;
+  background:radial-gradient(120% 90% at 30% 20%,#E2DBCE 0%,var(--desk) 55%,var(--desk-2) 100%) fixed var(--desk)}
+.wrap{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:56px;align-items:center}
+@media (max-width:840px){.wrap{grid-template-columns:1fr;gap:36px}}
+
+/* ---------- the print ---------- */
+.print{position:relative;justify-self:center;width:min(100%,440px);background:var(--print);padding:14px 14px 44px;
+  transform:rotate(-1.6deg);box-shadow:0 1px 1px rgba(0,0,0,.08),0 14px 28px -10px rgba(40,30,20,.45),0 30px 60px -30px rgba(40,30,20,.35)}
+.photo{position:relative;overflow:hidden;aspect-ratio:1008/1200;background:#2a2320}
+.photo canvas{display:block;width:100%;height:100%;filter:contrast(1.06) saturate(.88) sepia(.14) brightness(1.02)}
+.photo .leak,.photo .grain,.photo .vig,.photo .halate{position:absolute;inset:0;pointer-events:none}
+.photo .leak{mix-blend-mode:screen;opacity:.55;
+  background:radial-gradient(40% 55% at -4% 30%,rgba(255,96,32,.75),transparent 70%),
+             radial-gradient(28% 40% at 104% 88%,rgba(255,170,60,.45),transparent 70%);
+  animation:leak 9s ease-in-out infinite alternate}
+@keyframes leak{to{opacity:.32;transform:translateY(2%)}}
+.photo .grain{opacity:.16;mix-blend-mode:overlay;width:100%;height:100%}
+.photo .vig{background:radial-gradient(120% 95% at 50% 45%,transparent 55%,rgba(30,15,5,.42) 100%)}
+.photo .halate{mix-blend-mode:soft-light;background:linear-gradient(180deg,rgba(255,220,180,.18),rgba(120,80,40,.12))}
+.stamp{position:absolute;right:26px;bottom:56px;font:28px/1 var(--lcd-font);letter-spacing:.06em;color:var(--stamp);
+  text-shadow:0 0 6px var(--stamp-glow),0 0 1px #ffb46b;opacity:.92}
+.caption{position:absolute;left:16px;right:16px;bottom:12px;display:flex;justify-content:space-between;
+  font:500 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#8C8174}
+.boot{position:absolute;inset:0;display:grid;place-items:center;font:22px/1 var(--lcd-font);color:var(--stamp)}
+
+/* ---------- camera-label panel ---------- */
+.panel{display:grid;gap:28px}
+.eyebrow{margin:0;font:600 12px/1 var(--display);letter-spacing:.22em;text-transform:uppercase;color:var(--red)}
+h1{margin:10px 0 10px;font:700 clamp(46px,7vw,76px)/.9 var(--display);letter-spacing:-.01em;text-transform:uppercase}
+h1 span{display:inline-block;background:var(--kodak);padding:0 .12em;margin-left:-.06em}
+.lede{margin:0;max-width:42ch;color:#4D453D}
+
+.lcd{background:var(--lcd-bg);color:var(--lcd);border-radius:6px;padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:6px 18px;
+  box-shadow:inset 0 2px 0 rgba(0,0,0,.4),inset 0 -1px 0 rgba(255,255,255,.06),0 1px 0 rgba(255,255,255,.5)}
+.lcd .big{font:64px/.8 var(--lcd-font);font-variant-numeric:tabular-nums;text-shadow:0 0 8px rgba(201,216,168,.35)}
+.lcd .big small{font-size:30px;opacity:.7}
+.lcd .label{font:22px/1 var(--lcd-font);letter-spacing:.06em;opacity:.85}
+.lcd .exp{justify-self:end;text-align:right;font:22px/1 var(--lcd-font);opacity:.8}
+.lcd .bar{grid-column:1/-1;display:grid;grid-template-columns:repeat(24,1fr);gap:3px;height:10px;margin-top:6px}
+.lcd .bar i{background:rgba(201,216,168,.12);border-radius:1px}
+.lcd .bar i.on{background:var(--lcd);box-shadow:0 0 6px rgba(201,216,168,.4)}
+
+.controls{display:grid;gap:14px}
+.states{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.states button{all:unset;cursor:pointer;background:var(--print);border:1px solid var(--rule);border-radius:3px;padding:12px;display:grid;gap:4px;
+  box-shadow:0 1px 0 rgba(0,0,0,.05);transition:transform .15s,border-color .2s}
+.states button:hover{transform:translateY(-1px)}
+.states button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.states strong{font:700 14px/1.1 var(--display);letter-spacing:.08em;text-transform:uppercase}
+.states span{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+label{font:600 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--red)}
+.row button{all:unset;cursor:pointer;font:700 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;padding:13px 20px;border-radius:999px;background:var(--red);color:#FFF6EC;
+  box-shadow:0 2px 0 #8E2019}
+.row button:active{transform:translateY(1px);box-shadow:0 1px 0 #8E2019}
+.row button.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);box-shadow:none}
+.row button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+code{display:block;overflow-x:auto;white-space:pre;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(255,255,255,.45);border:1px dashed var(--rule);padding:10px 12px;color:#3B342E}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* indicator type switch */
+.mode{display:grid;grid-template-columns:1fr 1fr;background:var(--print);border:1px solid var(--rule);border-radius:999px;padding:4px;gap:4px}
+.mode button{all:unset;cursor:pointer;border-radius:999px;padding:9px 16px;display:grid;gap:2px;transition:background .2s,color .2s}
+.mode button strong{font:700 13px/1.1 var(--display);letter-spacing:.1em;text-transform:uppercase}
+.mode button span{font-size:11.5px;color:var(--muted)}
+.mode button[aria-checked="true"]{background:var(--ink);color:#F6F2EA}
+.mode button[aria-checked="true"] span{color:#BDB2A2}
+.mode button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.lcd.indet .bar i{animation:lcdrun 1.6s steps(1) infinite;animation-delay:calc(var(--k) * 0.066s)}
+@keyframes lcdrun{0%{background:var(--lcd);box-shadow:0 0 6px rgba(201,216,168,.4)}8%{background:rgba(201,216,168,.12);box-shadow:none}}

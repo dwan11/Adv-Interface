@@ -1,0 +1,105 @@
+:root{
+  color-scheme: dark;
+  --ink:#0F1119;
+  --panel:#161924;
+  --line:#2A2E3D;
+  --text:#EFE6CF;
+  --muted:#938D7E;
+  --gold:#D4AF5A;
+  --gold-hi:#F2DDA0;
+  --gold-lo:#8C6524;
+  --display:"Poiret One","Futura","Avenir Next",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink);color:var(--text)}
+body{margin:0;font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;gap:28px}
+
+/* header */
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.eyebrow{margin:0;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+h1{margin:4px 0 0;font:400 clamp(38px,6vw,64px)/1 var(--display);letter-spacing:.06em;color:var(--gold-hi);text-wrap:balance}
+.lede{margin:0;max-width:44ch;color:#BDB5A1}
+
+/* stage */
+.stage{position:relative;border:1px solid var(--line);border-radius:4px;padding:clamp(12px,3vw,32px);
+  background:
+    radial-gradient(60% 70% at 50% 40%,rgba(212,175,90,.06),transparent 70%),
+    var(--ink)}
+.stage::before,.stage::after{content:"";position:absolute;width:22px;height:22px;border:1px solid var(--gold);opacity:.7}
+.stage::before{top:8px;left:8px;border-right:0;border-bottom:0}
+.stage::after{bottom:8px;right:8px;border-left:0;border-top:0}
+.sky{max-width:860px;margin:0 auto}
+
+/* engine classes */
+.pl-sky{width:100%;height:auto;display:block;overflow:visible}
+.pl-star{transform-box:fill-box;transform-origin:center;opacity:.72;transition:opacity .5s}
+.pl-star.lit{opacity:1;animation:pl-pop .7s cubic-bezier(.2,.9,.3,1.4)}
+.pl-glow{opacity:0;transition:opacity .7s}
+.pl-star.lit .pl-glow{opacity:1}
+.pl-bit{opacity:0;transition:opacity .3s}
+.pl-bit.on{opacity:1}
+.pl-orbit{transform-box:fill-box;transform-origin:center}
+.pl-sky[data-state="complete"] .pl-orbit{animation:pl-spin 60s linear infinite}
+.pl-sky[data-state="complete"] .pl-star{animation:pl-shimmer 3.6s ease-in-out infinite;animation-delay:calc(var(--i) * -0.23s)}
+.pl-sky[data-state="complete"] .pl-links{animation:pl-breathe 3.6s ease-in-out infinite}
+@keyframes pl-pop{0%{transform:scale(.82)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes pl-spin{to{transform:rotate(360deg)}}
+@keyframes pl-shimmer{0%,100%{opacity:1}50%{opacity:.78}}
+@keyframes pl-breathe{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* readout */
+.readout{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:10px 24px}
+.pct{font:300 48px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--gold-hi)}
+.pct small{font-size:18px;color:var(--muted)}
+.now{font:13px/1.4 var(--mono);color:#BDB5A1;min-height:1.4em}
+.now b{color:var(--gold-hi);font-weight:400}
+.state{justify-self:end;display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.state i{width:8px;height:8px;transform:rotate(45deg);border:1px solid var(--muted);transition:background .4s,border-color .4s}
+[data-state="progress"] .state i{border-color:var(--gold);animation:blink 1.1s ease-in-out infinite}
+[data-state="complete"] .state i{background:var(--gold);border-color:var(--gold)}
+[data-state="complete"] .state{color:var(--gold-hi)}
+@keyframes blink{50%{opacity:.3}}
+
+.track{position:relative;height:14px;grid-column:1/-1}
+.track .rail{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.track .fill{position:absolute;left:0;top:50%;height:1px;margin-top:-.5px;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi))}
+.track .mark{position:absolute;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;transform:rotate(45deg);background:var(--ink);border:1px solid var(--line);transition:background .3s,border-color .3s}
+.track .mark.on{background:var(--gold);border-color:var(--gold-hi)}
+
+/* controls */
+.controls{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px}
+@media (max-width:760px){.controls{grid-template-columns:1fr}.readout{grid-template-columns:auto 1fr}.state{grid-column:1/-1;justify-self:start}}
+.group{display:grid;gap:14px;align-content:start}
+.states{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.states button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:2px;padding:12px;display:grid;gap:4px;transition:border-color .2s,background .2s}
+.states button:hover{border-color:#454a5c}
+.states button[aria-pressed="true"]{border-color:var(--gold);background:rgba(212,175,90,.07)}
+.states strong{font:500 13px/1.2 var(--body)}
+.states span{font:12px/1.3 var(--mono);color:var(--muted)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+label{font-size:12px;color:var(--muted);letter-spacing:.06em}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--gold)}
+.row button{all:unset;cursor:pointer;font:500 13px/1 var(--body);padding:12px 18px;border-radius:2px;background:var(--gold);color:var(--ink);letter-spacing:.04em}
+.row button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.row button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+pre{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:14px 16px;overflow-x:auto;font:12.5px/1.65 var(--mono);color:#CFC7B2}
+pre .k{color:var(--gold)} pre .s{color:var(--gold-hi)} pre .c{color:#6F6A5E}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* indicator type switch */
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:2px}
+.mode button{all:unset;cursor:pointer;padding:11px 12px;display:grid;gap:3px;transition:background .2s}
+.mode button+button{border-left:1px solid var(--line)}
+.mode button strong{font:500 13px/1.2 var(--body)}
+.mode button span{font:12px/1.3 var(--mono);color:var(--muted)}
+.mode button[aria-checked="true"]{background:rgba(212,175,90,.1);box-shadow:inset 0 -2px 0 var(--gold)}
+[data-state="indeterminate"] .state i{border-color:var(--gold);animation:blink 1.1s ease-in-out infinite}
+[data-state="indeterminate"] .pct small{visibility:hidden}
+.track.indet{overflow:hidden}
+.track.indet .fill{width:22%!important;animation:comet 2.2s cubic-bezier(.45,0,.2,1) infinite}
+.track.indet .mark{opacity:.35}
+@keyframes comet{0%{transform:translateX(-100%)}100%{transform:translateX(460%)}}

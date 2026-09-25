@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Coupe Loader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=JetBrains+Mono:wght@300;400&family=Manrope:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css"></head><body>
+<main class="wrap">
+  <section class="stage" id="stage" data-state="empty" aria-label="Loader preview">
+    <div class="glass" id="glass" data-state="empty">
+      <div class="halo"></div>
+      <canvas id="cup" width="544" height="720" role="img" aria-label="Coupe glass filling as progress rises"></canvas>
+      <div class="boot" id="boot">pouring frames… 0%</div>
+    </div>
+    <div class="readout" role="progressbar" id="pbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="pct"><span id="pct">0</span><small>%</small></div>
+      <div class="state"><i></i><span id="stateLabel">Empty</span></div>
+    </div>
+    <div class="bar"><b id="fill"></b></div>
+    <div class="ticks" aria-hidden="true"><span style="left:0">0</span><span style="left:25%">¼</span><span style="right:0">full</span></div>
+  </section>
+
+  <section class="panel">
+    <div>
+      <p class="eyebrow">Loader · indeterminate + determinate</p>
+      <h1>The Coupe</h1>
+      <p class="lede">A progress indicator that pours. Progress drives the pour frame by frame, so the glass fills exactly as far as the task has gone.</p>
+    </div>
+
+    <div class="mode" role="radiogroup" aria-label="Indicator type">
+      <button id="mIndet" role="radio" aria-checked="false"><strong>Indeterminate</strong><span>Progress unknown · loops</span></button>
+      <button id="mDet" role="radio" aria-checked="true"><strong>Determinate</strong><span>0–100% · fills</span></button>
+    </div>
+
+    <div class="states" role="group" aria-label="Jump to a determinate state">
+      <button id="s0"   data-p="0"   aria-pressed="true"><strong>Empty</strong><span>0%</span></button>
+      <button id="s25"  data-p="25"  aria-pressed="false"><strong>Pouring</strong><span>25%</span></button>
+      <button id="s100" data-p="100" aria-pressed="false"><strong>Full</strong><span>100%</span></button>
+    </div>
+
+    <div class="row">
+      <label for="scrub">Progress</label>
+      <input type="range" id="scrub" min="0" max="100" step="1" value="0">
+    </div>
+
+    <div class="row">
+      <button id="simulate">Simulate an upload</button>
+      <button id="reset" class="ghost">Empty the glass</button>
+    </div>
+
+<pre><span class="k">const</span> loader = CoupeLoader(canvas);
+<span class="k">await</span> loader.ready;
+
+upload.onprogress = e =&gt;
+  loader.setProgress(e.loaded / e.total * <span class="s">100</span>);
+<span class="c">// 0 = empty · 25 = quarter · 100 = full</span></pre>
+  </section>
+</main>
+<script src="loader.js"></script><script src="app.js"></script></body></html>
