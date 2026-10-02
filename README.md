@@ -13,6 +13,7 @@ Badges and tooltips in three tones: Playful, Intimate and Quirky. Each set has a
 | Firefly | Intimate | [week2/firefly](week2/firefly) |
 | Harvest | Quirky | [week2/harvest](week2/harvest) |
 | Shy Icon | Quirky | [week2/shy](week2/shy) |
+| Motion Study | All five, motion-led | [week2/motion](week2/motion) |
 
 Shared engine: [week2/shared](week2/shared).
 
