@@ -23,6 +23,27 @@
   };
   const wheels = String(COUNT).split('').map(() => `<span class="pn-wh">${[...Array(10)].map((_, d) => `<span>${d}</span>`).join('')}</span>`).join('');
 
+  /* ---------- each design's own graphics ---------- */
+  const GRASS = '<svg class="pn-art" viewBox="0 0 40 22" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
+    [[6,14,-2,'#5E8C45',2.8,-.4],[11,20,-3,'#3F6B30',2.4,-1.2],[16,16,1,'#6E9A4B',3.1,-2],[21,21,-1,'#355E2B',2.7,-.8],[26,17,2,'#5E8C45',3.3,-1.6],[31,19,2,'#3F6B30',2.9,-.2],[35,13,3,'#6E9A4B',2.6,-2.4]]
+      .map(([x,h,dx,c,d,dl]) => `<path style="--d:${d}s;--dl:${dl}s" fill="${c}" d="M${x-1.6} 22 Q${x+dx*.25} ${22-h*.6} ${x+dx} ${22-h} Q${x+dx*.25+1.1} ${22-h*.55} ${x+1.6} 22Z"/>`).join('') + '</svg>';
+  const FLOWER = '<svg class="pn-art" viewBox="-17 -17 34 34" aria-hidden="true">' +
+    [0,72,144,216,288].map((a,n) => `<ellipse cx="0" cy="-8" rx="5.6" ry="8.6" transform="rotate(${a})" fill="${n % 2 ? '#F7C59F' : '#F2A7B5'}"/>`).join('') +
+    `<circle r="8" fill="#F3C847"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#1F2A1C">${COUNT}</text></svg>`;
+  const PUFF = '<svg class="pn-art" viewBox="-18 -18 36 36" aria-hidden="true"><g class="sds">' +
+    [...Array(16)].map((_,n) => { const a = n / 16 * Math.PI * 2, x = (Math.cos(a) * 15).toFixed(1), y = (Math.sin(a) * 15).toFixed(1); return `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="#8E9CA4" stroke-width=".8"/><circle cx="${x}" cy="${y}" r="1.1" fill="#5D6A71"/>`; }).join('') +
+    `</g><circle r="8.5" fill="#fff" stroke="#8E9CA4" stroke-width=".8"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#1D2A33">${COUNT}</text></svg>`;
+  const CHUTE = '<svg class="pn-chute" viewBox="0 0 44 18" aria-hidden="true">' +
+    [...Array(11)].map((_,n) => { const a = Math.PI * (1.08 + n * .084), x = (22 + Math.cos(a) * 20).toFixed(1), y = (18 + Math.sin(a) * 16).toFixed(1); return `<line x1="22" y1="18" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r=".9"/>`; }).join('') + '</svg>';
+  const SEARCH = '<svg class="pn-srch" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>';
+  const GROC = ['g-carrot', 'g-straw', 'g-banana'].map((id, n) => `<svg viewBox="0 0 24 24" style="--i:${n};--gx:${[-16, 4, 18][n]}px"><use href="#${id}" width="24" height="24"/></svg>`).join('');
+  const H1ART = SET === 'bloom' ? GRASS : SET === 'shy' ? '<span class="pn-art"><i></i><i></i></span>' : '';
+  const BADGEART = SET === 'bloom' ? FLOWER : SET === 'dandelion' ? PUFF : '';
+  const fireflies = n => SET !== 'firefly' ? '' : [...Array(n)].map((_, k) => {
+    const r = a => ((Math.sin(k * 12.9898 + a) * 43758.5453) % 1 + 1) % 1;
+    return `<span class="pn-ffl" style="left:${(8 + r(1) * 84).toFixed(0)}%;top:${(30 + r(2) * 60).toFixed(0)}%;--d:${(5 + r(3) * 5).toFixed(1)}s;--dl:-${(r(4) * 4).toFixed(1)}s;--x1:${(r(5) * 40 - 20).toFixed(0)}px;--y1:${(r(6) * 30 - 15).toFixed(0)}px;--x2:${(r(7) * 40 - 20).toFixed(0)}px;--y2:${(r(8) * 30 - 15).toFixed(0)}px;--x3:${(r(9) * 40 - 20).toFixed(0)}px;--y3:${(r(10) * 30 - 15).toFixed(0)}px"></span>`; }).join('');
+  const ORBS = kind => SET !== 'firefly' ? '' : `<span class="pn-orbs" style="--sy:${kind === 'desk' ? .3 : .55}">${[[3.2, kind === 'desk' ? 125 : 70], [4.4, kind === 'desk' ? 105 : 58], [5.6, kind === 'desk' ? 140 : 76]].map(([d, rr], n) => `<span class="pn-orb" style="--d:${d}s;--r:${rr}px;animation-delay:-${n * 1.3}s"><i></i></span>`).join('')}</span>`;
+
   if (!document.getElementById('pn-goo')) document.body.insertAdjacentHTML('afterbegin',
     `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
       <filter id="pn-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"/></filter>
@@ -31,14 +52,14 @@
 
   const bar = kind => `<div class="pn-nav" data-c="${CONCEPT}" role="tablist" aria-label="App navigation (${kind === 'desk' ? 'desktop' : 'phone'})">
       <span class="pn-bg"></span>
-      <span class="pn-hl"><span class="pn-h1"></span></span>
+      <span class="pn-hl"><span class="pn-h1">${H1ART}</span></span>
       <span class="pn-rip"></span><span class="pn-rip"></span>
       <span class="pn-tabs">${ICON.map((s, k) => `<button class="pn-tb${k ? '' : ' on'}" data-k="${k}" style="--k:${k}" role="tab" aria-selected="${!k}" aria-label="${LABEL[k]}">${s}</button>`).join('')}</span>
       <span class="pn-bd"><i class="d2"></i><i class="d1"></i></span>
       <span class="pn-pets">${[0, 60, 120, 180, 240, 300].map(a => `<i style="--a:${a}deg"></i>`).join('')}</span>
-      <span class="pn-badge" aria-hidden="true"><span class="pn-n">${COUNT}</span><span class="pn-odo">${wheels}</span></span>
-      <span class="pn-isl">${ISL[kind]}</span>
-      <span class="pn-tipwrap"><span class="pn-tg"><i class="pn-neck"></i><i class="pn-tbd"></i></span><span class="pn-tip" role="tooltip"><span class="pn-txt"></span><span class="pn-caret"></span></span></span>
+      <span class="pn-badge" aria-hidden="true">${BADGEART}<span class="pn-n">${COUNT}</span><span class="pn-odo">${wheels}</span></span>
+      <span class="pn-isl">${ORBS(kind)}${ISL[kind]}</span><span class="pn-groc">${SET === 'harvest' ? GROC : ''}</span>
+      <span class="pn-tipwrap"><span class="pn-stem"></span>${SET === 'dandelion' ? CHUTE : ''}<span class="pn-tg"><i class="pn-neck"></i><i class="pn-tbd"></i></span><span class="pn-tip" role="tooltip">${SET === 'shy' ? SEARCH : ''}<span class="pn-txt"></span><span class="pn-caret"></span></span></span>
       <span class="pn-ptr">${kind === 'desk' ? CURSOR : '<i></i>'}</span>
     </div>`;
   const card = document.createElement('article');
@@ -49,16 +70,17 @@
     <div class="pn-row"><div class="seg" role="group" aria-label="Notification state"><button aria-pressed="true">None</button><button aria-pressed="false">Badge</button></div><button class="pn-play" type="button">Play demo</button></div>
     <div class="pn-stage">
       <div class="pn-desk-wrap"><p class="pn-cap">Desktop · bar on top, tooltip below</p><div class="pn-desk"><div class="pn-bar"><i></i><i></i><i></i></div>
-        <div class="pn-screen"><div class="pn-feed">${'<i></i>'.repeat(6)}</div>${bar('desk')}</div></div></div>
+        <div class="pn-screen"><div class="pn-feed">${'<i></i>'.repeat(6)}</div>${fireflies(5)}${bar('desk')}</div></div></div>
       <div class="pn-mob-wrap"><p class="pn-cap">Phone · bar at bottom, tooltip above</p><div class="pn-mob"><div class="pn-screen"><span class="pn-notch"></span>
-        <div class="pn-feed">${'<i></i>'.repeat(6)}</div>${bar('mob')}<span class="pn-homebar"></span></div></div></div>
+        <div class="pn-feed">${'<i></i>'.repeat(6)}</div>${fireflies(4)}${bar('mob')}<span class="pn-homebar"></span></div></div></div>
     </div>
     <div class="trig"><span><i>switch</i>tap a tab</span><span><i>badge</i>a note arrives · open the bell</span><span><i>tooltip</i>hover · long-press</span></div>`;
   grid.prepend(card);
 
   /* ---------- timers live in one list so the demo can be stopped cleanly ---------- */
   let timers = [];
-  const later = (f, ms) => timers.push(setTimeout(f, ms));
+  const later = (f, ms) => setTimeout(f, ms);            // a bar's own follow-up steps: always finish
+  const at = (ms, f) => timers.push(setTimeout(f, ms));   // the demo script: cancelled when you take over
   const stopAll = () => { timers.forEach(clearTimeout); timers = []; };
   const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
   const segs = [...card.querySelectorAll('.seg button')];
@@ -77,7 +99,7 @@
     };
     const api = {
       el,
-      reset() { el.classList.add('pn-noanim'); el.classList.remove('b-on', 'ton', 'toff', 'ping', 'unping', 'moving', 'ringing', 'isl-on', 'stretch', 'fwd', 'back', 'commit');
+      reset() { el.classList.add('pn-noanim'); el.classList.remove('b-on', 'ton', 'toff', 'ping', 'unping', 'moving', 'ringing', 'isl-on', 'stretch', 'fwd', 'back', 'commit', 'lean');
         i = 0; setHL(0); tabs.forEach((t, k) => { t.classList.toggle('on', !k); t.setAttribute('aria-selected', String(!k)); });
         el.querySelectorAll('.pn-wh').forEach(w => w.style.setProperty('--d', 0)); badge.querySelector('.pn-n').textContent = COUNT;
         ptr.classList.remove('hold', 'tap'); ptr.style.opacity = 0; void el.offsetWidth; el.classList.remove('pn-noanim'); },
@@ -96,10 +118,10 @@
           el.classList.toggle('fwd', k > from); el.classList.toggle('back', k < from); restart(el, 'moving'); setHL(k);
         } else if (c === 'shy') {
           // hesitate: lean toward the new tab, pull back, then commit
-          el.classList.remove('commit');
+          el.classList.remove('commit'); el.classList.add('lean');
           el.style.setProperty('--i', from + (k - from) * .38);
           later(() => el.style.setProperty('--i', from + (k - from) * .12), 260);
-          later(() => { el.classList.add('commit'); el.style.setProperty('--i', k); }, 560);
+          later(() => { el.classList.add('commit'); el.classList.remove('lean'); el.style.setProperty('--i', k); }, 560);
         } else setHL(k);
         if (c === 'spring' || c === 'hop') { restart(el, 'moving'); later(() => el.classList.remove('moving'), 520); restart(tabs[k], 'pn-pop'); }
         if (k === 3) api.clear();
@@ -175,7 +197,6 @@
   /* ---------- demo: tap Links, tap Info, a note arrives, ask about the bell, open it, back Home ---------- */
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let auto = false;
-  const at = (ms, f) => later(f, ms);
   const slow = CONCEPT === 'island' ? 900 : 0;   // firefly takes its time
   function demo() {
     auto = true; stopAll();
