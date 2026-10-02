@@ -179,15 +179,6 @@ body[data-set="firefly"]{--bg:#131B29;--ink:#E6E4D8;--line:rgba(230,228,216,.13)
 [data-set="firefly"] .tw .anchor:hover .glyph{transform:translate(-50%,-50%)}
 
 /* action exits */
-html{overflow-x:hidden}
-.shard{position:absolute;margin:0;pointer-events:none;z-index:2}
-.wisp{position:absolute;width:20px;height:26px;margin:-11px 0 0 -10px;pointer-events:none;z-index:3;opacity:0}
-.wisp svg{width:100%;height:100%;overflow:visible}
-.wisp line{stroke:var(--pappus,#8E9CA4);stroke-width:.8}
-.wisp circle,.wisp ellipse{fill:#5D6A71}
-.hang.blown>.tip:not(.shard){visibility:hidden}
+.fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:60}
 .hang.blown>.stem,.hang.blown>.chute{opacity:0;transition:opacity .4s}
-.hang.swarmed>.stem{opacity:0;transition:opacity 1s 2.9s}
-.swarm{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
-.sw{position:absolute;left:0;top:0;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#FDFFE6,#DCEB78);box-shadow:0 0 7px 3px rgba(233,245,154,.55),0 0 18px 7px rgba(233,245,154,.14);animation:twinkle 1.4s ease-in-out infinite alternate}
-@keyframes twinkle{from{scale:.65}to{scale:1.15}}
+.hang.swarmed>.stem{opacity:0;transition:opacity .6s 1.6s}

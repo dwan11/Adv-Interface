@@ -134,87 +134,133 @@
   /* ---------- action exits: the rich tooltip leaves in character ---------- */
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rnd = (a, b) => a + Math.random() * (b - a);
-  // run fn(), then close the tooltip and put everything back once the pop has faded
-  function exitThen(api, anims, cleanup) {
-    Promise.all(anims.map(a => a.finished.catch(() => {}))).then(() => {
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const easeOut = u => 1 - Math.pow(1 - u, 3), easeIn = u => u * u * u;
+  const bez = (a, c, b, u) => (1 - u) * (1 - u) * a + 2 * (1 - u) * u * c + u * u * b;
+  // wait for every animation / promise, then close the tooltip and tidy up once the pop has faded
+  function exitThen(api, list, cleanup) {
+    Promise.all(list.map(x => (x.finished || x).catch(() => {}))).then(() => {
       api.busy = false; api.set(false);
       setTimeout(cleanup, 650);
     });
   }
+  // a full-screen canvas above the page; draw(ctx, ms) returns false when the scene is over
+  function overlay(draw) {
+    const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio || 1);
+    cv.className = 'fx'; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+    document.body.appendChild(cv);
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return new Promise(res => {
+      const t0 = performance.now();
+      const frame = now => {
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        if (draw(ctx, now - t0) === false) { cv.remove(); res(); } else requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+  function sprite(w, h, paint) {
+    const s = document.createElement('canvas'), k = 3; s.width = w * k; s.height = h * k;
+    const c = s.getContext('2d'); c.scale(k, k); paint(c); return s;
+  }
 
-  // Dandelion · "Make a wish": the card breaks into pieces, each piece becomes a seed and drifts off on the wind
-  const WISP = '<svg viewBox="0 0 20 26" aria-hidden="true">' +
-    [...Array(9)].map((_, i) => { const a = Math.PI * (1.1 + i * 0.1), x = (10 + Math.cos(a) * 9).toFixed(1), y = (11 + Math.sin(a) * 9).toFixed(1); return `<line x1="10" y1="11" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r=".8"/>`; }).join('') +
-    '<line x1="10" y1="11" x2="10" y2="21"/><ellipse cx="10" cy="22.5" rx="1.3" ry="2"/></svg>';
+  // Dandelion · "Make a wish": the card turns into seeds, and the wind carries them off
+  let SEED;
+  const seedSprite = () => SEED || (SEED = sprite(40, 52, c => {
+    c.translate(20, 16); c.lineCap = 'round';
+    c.strokeStyle = 'rgba(142,156,164,.95)'; c.lineWidth = .55;
+    for (let i = 0; i < 26; i++) {                                // the pappus: fine filaments fanning upward
+      const a = Math.PI * (1.04 + i / 25 * .92), L = 11 + Math.sin(i * 2.3) * 2.5;
+      const x = Math.cos(a) * L, y = Math.sin(a) * L * .78;
+      c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(x * .5, y * .62, x, y); c.stroke();
+      c.fillStyle = 'rgba(142,156,164,.9)'; c.beginPath(); c.arc(x, y, .55, 0, 7); c.fill();
+    }
+    c.lineWidth = .7; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 17); c.stroke();   // the beak
+    c.fillStyle = '#5D6A71'; c.beginPath(); c.ellipse(0, 20.5, 1.3, 3.2, 0, 0, 7); c.fill();   // the seed
+  }));
   function blowAway(api) {
     if (api.busy) return;
     if (REDUCED) return api.set(false);
     api.busy = true;
-    const tip = api.w.querySelector('.tip'), hang = api.w.querySelector('.hang');
-    const W = tip.offsetWidth, H = tip.offsetHeight, L = tip.offsetLeft, T = tip.offsetTop;
-    const cols = 7, rows = 4, cw = W / cols, rh = H / rows, made = [], anims = [];
+    const tip = api.w.querySelector('.tip'), hang = api.w.querySelector('.hang'), R = tip.getBoundingClientRect(), img = seedSprite();
     hang.classList.add('blown');
+    const fade = tip.animate([{ opacity: 1, filter: 'blur(0)', transform: 'scale(1)' }, { opacity: 0, filter: 'blur(3px)', transform: 'scale(.97)' }], { duration: 520, easing: 'ease-in', fill: 'forwards' });
+    // seeds fill the card's shape, so the card reads as having become them
+    const gap = 21, cols = Math.max(4, Math.round(R.width / gap)), rows = Math.max(3, Math.round(R.height / gap)), seeds = [];
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const cx = (c + .5) * cw, cy = (r + .5) * rh;
-      const dx = rnd(150, 380) + c * 14, dy = -rnd(70, 230) - (rows - r) * 12, rot = rnd(-70, 70), phase = rnd(0, 6.28);
-      const delay = (cols - 1 - c) * 55 + rnd(0, 140);   // the wind peels it from the right edge first
-      const p = tip.cloneNode(true);
-      p.removeAttribute('role'); p.removeAttribute('aria-label'); p.setAttribute('aria-hidden', 'true'); p.classList.add('shard');
-      p.style.cssText = `left:${L}px;top:${T}px;width:${W}px;height:${H}px;transform-origin:${cx}px ${cy}px;clip-path:inset(${r * rh - .5}px ${W - (c + 1) * cw - .5}px ${H - (r + 1) * rh - .5}px ${c * cw - .5}px)`;
-      hang.appendChild(p); made.push(p);
-      anims.push(p.animate([
-        { transform: 'none', opacity: 1 },
-        { transform: `translate(${dx * .06}px,${-6}px) rotate(${rot * .1}deg)`, opacity: 1, offset: .14 },
-        { transform: `translate(${dx * .4}px,${dy * .35}px) rotate(${rot * .6}deg) scale(.55)`, opacity: .9, offset: .55 },
-        { transform: `translate(${dx * .6}px,${dy * .55}px) rotate(${rot}deg) scale(.12)`, opacity: 0 }
-      ], { duration: 1250, delay, easing: 'cubic-bezier(.35,.1,.4,1)', fill: 'both' }));
-      // the seed that the piece turns into, carried further on with a flutter
-      const s = document.createElement('span');
-      s.className = 'wisp'; s.innerHTML = WISP; s.style.cssText = `left:${L + cx}px;top:${T + cy}px`;
-      hang.appendChild(s); made.push(s);
-      const frames = [...Array(9)].map((_, k) => {
-        const t = k / 8, x = dx * (.45 + 1.25 * t) + Math.sin(t * 9 + phase) * 16, y = dy * (.4 + 1.1 * t) - t * 50;
-        return { transform: `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${(Math.sin(t * 6 + phase) * 22).toFixed(1)}deg) scale(${(.6 + t * .3).toFixed(2)})`, opacity: t < .18 ? t / .18 : t > .68 ? (1 - t) / .32 : 1 };
-      });
-      anims.push(s.animate(frames, { duration: rnd(1800, 2500), delay: delay + 520, easing: 'linear', fill: 'both' }));
+      const x = R.left + (c + .5) / cols * R.width + rnd(-5, 5), y = R.top + (r + .5) / rows * R.height + rnd(-5, 5) - 8, xn = c / (cols - 1);
+      seeds.push({ x, y, s: rnd(.6, .95), form: rnd(80, 480), go: 620 + (1 - xn) * 650 + rnd(0, 320), life: rnd(1900, 2700),
+        dx: rnd(260, 560), dy: -rnd(130, 340), tilt: rnd(-8, 26), ph: rnd(0, 6.28) });
     }
-    exitThen(api, anims, () => { made.forEach(n => n.remove()); hang.classList.remove('blown'); });
+    const end = Math.max(...seeds.map(p => p.go + p.life));
+    const run = overlay((ctx, t) => {
+      for (const p of seeds) {
+        const f = clamp01((t - p.form) / 260); if (!f) continue;
+        let x = p.x, y = p.y, rot = p.tilt * .3 + Math.sin(t / 260 + p.ph) * 4, a = f;
+        const u = clamp01((t - p.go) / p.life);
+        if (u > 0) {
+          const g = Math.pow(u, 1.35);                                   // a gust that picks up
+          x += p.dx * g + Math.sin(u * 9 + p.ph) * 14 * u;
+          y += p.dy * g + Math.sin(u * 6 + p.ph) * 6;
+          rot = p.tilt + Math.sin(u * 11 + p.ph) * 18;
+          a *= u > .62 ? 1 - (u - .62) / .38 : 1;
+        }
+        const sc = p.s * (.35 + .65 * easeOut(f));
+        ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(rot * Math.PI / 180); ctx.scale(sc, sc);
+        ctx.drawImage(img, -20, -16, 40, 52); ctx.restore();
+      }
+      return t < end;
+    });
+    exitThen(api, [fade, run], () => { hang.classList.remove('blown'); fade.cancel(); });
   }
 
-  // Firefly · "keep it close": a swarm lands on the note, then scatters and carries its light away
+  // Firefly · "keep it close": a dense swarm settles on the note, rests there 600ms, then bursts away and takes the note with it
+  let GLOW;
+  const glowSprite = () => GLOW || (GLOW = sprite(64, 64, c => {
+    const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,246,140,1)'); g.addColorStop(.3, 'rgba(246,222,24,1)'); g.addColorStop(.38, 'rgba(236,206,16,.6)');
+    g.addColorStop(.64, 'rgba(230,200,20,.18)'); g.addColorStop(1, 'rgba(230,200,20,0)');
+    c.fillStyle = g; c.fillRect(0, 0, 64, 64);
+  }));
   function swarm(api) {
     if (api.busy) return;
     if (REDUCED) return api.set(false);
     api.busy = true;
-    const tip = api.w.querySelector('.tip'), hang = api.w.querySelector('.hang'), R = tip.getBoundingClientRect();
-    const layer = document.createElement('div'); layer.className = 'swarm'; document.body.appendChild(layer);
-    const N = innerWidth < 600 ? 80 : 180, ccx = R.left + R.width / 2, ccy = R.top + R.height / 2, OUT = 2900, anims = [];
-    hang.classList.add('swarmed');
+    const tip = api.w.querySelector('.tip'), hang = api.w.querySelector('.hang'), R = tip.getBoundingClientRect(), img = glowSprite();
+    const W = innerWidth, H = innerHeight, cx = R.left + R.width / 2, cy = R.top + R.height / 2, reach = Math.hypot(W, H) * .6;
+    const N = W < 600 ? 950 : 2000, flies = [];
+    const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
     for (let i = 0; i < N; i++) {
-      const f = document.createElement('span'); f.className = 'sw';
-      f.style.animationDelay = `-${rnd(0, 1.4).toFixed(2)}s`; layer.appendChild(f);
-      const a = rnd(0, 6.28), d = rnd(260, 780), sx = ccx + Math.cos(a) * d, sy = ccy + Math.sin(a) * d;
-      const tx = rnd(R.left + 6, R.right - 6), ty = rnd(R.top + 6, R.bottom - 6);
-      const mx = (sx + tx) / 2 + rnd(-140, 140), my = (sy + ty) / 2 + rnd(-140, 140);
-      const b = rnd(0, 6.28), e = rnd(320, 900), ox = tx + Math.cos(b) * e, oy = ty + Math.sin(b) * e - 90;
-      const qx = (tx + ox) / 2 + rnd(-120, 120), qy = (ty + oy) / 2 + rnd(-120, 120);
-      // fly in on a curve and settle on the note
-      f.animate([
-        { transform: `translate(${sx}px,${sy}px) scale(.5)`, opacity: 0 },
-        { transform: `translate(${mx}px,${my}px) scale(.8)`, opacity: 1, offset: .55 },
-        { transform: `translate(${tx}px,${ty}px) scale(1)`, opacity: 1 }
-      ], { duration: rnd(900, 1600), delay: rnd(0, 1100), easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'both' });
-      // then scatter in every direction
-      anims.push(f.animate([
-        { transform: `translate(${tx}px,${ty}px) scale(1)`, opacity: 1 },
-        { transform: `translate(${qx}px,${qy}px) scale(.85)`, opacity: .95, offset: .5 },
-        { transform: `translate(${ox}px,${oy}px) scale(.4)`, opacity: 0 }
-      ], { duration: rnd(1300, 2200), delay: OUT + rnd(0, 600), easing: 'cubic-bezier(.45,0,.7,.6)', fill: 'forwards' }));
+      const a = rnd(0, 6.28), d = reach * rnd(.55, 1.15), sx = cx + Math.cos(a) * d, sy = cy + Math.sin(a) * d;
+      const on = Math.random() < .82;                                   // most settle on the note, the rest spill past its edges
+      const tx = on ? R.left + rnd(-.03, 1.03) * R.width : cx + gauss() * R.width * .8, ty = on ? R.top + rnd(-.04, 1.04) * R.height : cy + gauss() * R.height * .9;
+      const b = rnd(0, 6.28), e = reach * rnd(.6, 1.3), ox = tx + Math.cos(b) * e, oy = ty + Math.sin(b) * e - 60;
+      const big = Math.random() < .12;                                // a few out-of-focus ones, like bokeh
+      flies.push({ sx, sy, tx, ty, ox, oy, c1x: (sx + tx) / 2 + rnd(-160, 160), c1y: (sy + ty) / 2 + rnd(-160, 160),
+        c2x: (tx + ox) / 2 + rnd(-140, 140), c2y: (ty + oy) / 2 + rnd(-140, 140),
+        size: big ? rnd(12, 24) : rnd(3.5, 9), alpha: big ? rnd(.18, .38) : rnd(.7, 1),
+        d0: rnd(0, 520), dIn: rnd(650, 1050), od: rnd(0, 320), dOut: rnd(900, 1500), ph: rnd(0, 6.28) });
     }
-    // the note warms under them, then leaves with their light
-    tip.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.28)' }], { duration: 1500, delay: 800, fill: 'forwards', easing: 'ease-out' });
-    anims.push(tip.animate([{ opacity: 1, filter: 'brightness(1.28) blur(0)' }, { opacity: 0, filter: 'brightness(1.9) blur(6px)' }], { duration: 1400, delay: OUT + 150, fill: 'forwards', easing: 'ease-in' }));
-    exitThen(api, anims, () => { layer.remove(); hang.classList.remove('swarmed'); tip.getAnimations().forEach(x => x.cancel()); });
+    const LAND = Math.max(...flies.map(p => p.d0 + p.dIn)), OUT = LAND + 600, END = OUT + Math.max(...flies.map(p => p.od + p.dOut));
+    hang.classList.add('swarmed');
+    const warm = tip.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.08)' }], { duration: LAND, fill: 'forwards' });
+    const gone = tip.animate([{ opacity: 1, filter: 'brightness(1.08) blur(0)' }, { opacity: 0, filter: 'brightness(2) blur(6px)' }], { duration: 750, delay: OUT, easing: 'ease-in', fill: 'forwards' });
+    const run = overlay((ctx, t) => {
+            for (const p of flies) {
+        if (t < p.d0) continue;
+        let x, y, a = p.alpha * (.72 + .28 * Math.sin(t / 130 + p.ph));
+        const uo = clamp01((t - OUT - p.od) / p.dOut);
+        if (uo > 0) { const e = easeIn(uo); x = bez(p.tx, p.c2x, p.ox, e); y = bez(p.ty, p.c2y, p.oy, e); a *= 1 - uo * uo; }
+        else {
+          const ui = clamp01((t - p.d0) / p.dIn), e = easeOut(ui);
+          x = bez(p.sx, p.c1x, p.tx, e) + Math.sin(t / 210 + p.ph) * 1.6; y = bez(p.sy, p.c1y, p.ty, e) + Math.cos(t / 190 + p.ph) * 1.6;
+          a *= Math.min(1, ui * 4);
+        }
+        ctx.globalAlpha = a; ctx.drawImage(img, x - p.size, y - p.size, p.size * 2, p.size * 2);
+      }
+      return t < END;
+    });
+    exitThen(api, [gone, run], () => { hang.classList.remove('swarmed'); warm.cancel(); gone.cancel(); });
   }
 
   /* ================= BLOOM ================= */
