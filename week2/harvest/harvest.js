@@ -16,22 +16,41 @@
   const X = ['20px', '56px', '36px', '48px'];
   const MID = [['-4px','-62px'],['64px','-86px'],['22px','-100px'],['90px','-58px']];
   const item = (id, i, extra = '') => `<g class="it" style="--i:${i};--x:${X[i]};--mx:${MID[i][0]};--my:${MID[i][1]}${extra}"><use href="#${id}" x="0" y="0" width="55" height="55"/></g>`;
-  function bag(kind) {
+  // four bag materials: kraft paper, canvas tote, woven straw, glossy plastic
+  const STRAW_ROWS = [58, 70, 82, 94, 106, 118, 130, 142].map((y, r) => `<line x1="10" y1="${y}" x2="122" y2="${y}" stroke="#C4943E" stroke-width="7" stroke-dasharray="8 4" stroke-dashoffset="${r % 2 ? 6 : 0}"/><line x1="10" y1="${y + 6}" x2="122" y2="${y + 6}" stroke="#A9772A" stroke-width=".8" opacity=".5"/>`).join('');
+  const MAT = {
+    paper: {
+      back: `<path d="M42 46 C40 12 62 12 62 46" stroke="#A9773F" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M18 46 L114 46 L109 38 L23 38 Z" fill="#7E5C38"/>`,
+      body: `<path d="M16 46 H116 L111 148 H21 Z" fill="#C99A64"/><path d="M16 46 L27 56 L27 148 L21 148 Z" fill="rgba(70,40,10,.12)"/><rect x="16" y="46" width="100" height="10" fill="#D9B07B"/><path d="M27 124 H108 M40 66 l6 18 M80 70 l-5 22 M95 98 l7 6 M52 104 l-8 9 M67 82 l3 10" stroke="rgba(80,50,20,.16)" stroke-width="1.4" fill="none" stroke-linecap="round"/>`,
+      front: `<path d="M68 46 C68 8 96 10 94 46" stroke="#B5844F" stroke-width="7" fill="none" stroke-linecap="round"/>` },
+    canvas: {
+      back: `<path d="M34 52 C34 2 98 2 98 52" stroke="#22395A" stroke-width="8" fill="none" stroke-linecap="round"/>`,
+      body: `<path d="M18 44 H114 L110 148 H22 Z" fill="#2F4A6B"/><path d="M18 44 L28 54 L28 148 L22 148 Z" fill="rgba(0,0,0,.14)"/><rect x="18" y="44" width="96" height="11" fill="#26405E"/><path d="M22 59 H110 M25 143 H107" stroke="rgba(255,255,255,.42)" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/><rect x="50" y="88" width="32" height="22" rx="3" fill="#E9DFC8"/><path d="M56 96 h20 M56 102 h13" stroke="#2F4A6B" stroke-width="1.6" stroke-linecap="round"/>`,
+      front: `<path d="M44 54 C44 10 88 10 88 54" stroke="#3E5C80" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M40 50 h8 v9 h-8z M84 50 h8 v9 h-8z" fill="#3E5C80"/><path d="M44 52 l0 5 M88 52 l0 5" stroke="rgba(255,255,255,.45)" stroke-width="1" stroke-dasharray="1.6 1.6"/>` },
+    straw: {
+      back: `<path d="M40 48 C40 8 92 8 92 48" stroke="#5E361C" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+      body: `<clipPath id="hv-straw"><path d="M14 44 H118 L108 148 H24 Z"/></clipPath><path d="M14 44 H118 L108 148 H24 Z" fill="#D9A954"/><g clip-path="url(#hv-straw)">${STRAW_ROWS}<path d="M14 44 L26 54 L30 148 L24 148 Z" fill="rgba(90,50,10,.14)"/></g><rect x="12" y="42" width="108" height="10" rx="4" fill="#B8862F"/><path d="M18 47 l6 -3 M30 47 l6 -3 M42 47 l6 -3 M54 47 l6 -3 M66 47 l6 -3 M78 47 l6 -3 M90 47 l6 -3 M102 47 l6 -3" stroke="#8E6420" stroke-width="1.4" stroke-linecap="round"/>`,
+      front: `<path d="M48 48 C48 14 84 14 84 48" stroke="#7A4A2A" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="48" cy="50" r="2.6" fill="#E8C98A"/><circle cx="84" cy="50" r="2.6" fill="#E8C98A"/>` },
+    plastic: {
+      back: `<path d="M38 46 C36 10 60 10 60 46" stroke="#76C2A2" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M18 46 L114 46 L110 38 L22 38 Z" fill="#6AB596"/>`,
+      body: `<path d="M16 46 H116 L111 148 H21 Z" fill="#8FD3B6"/><path d="M16 46 L26 56 L26 148 L21 148 Z" fill="rgba(20,80,60,.12)"/><path d="M32 62 Q37 100 32 138" stroke="rgba(255,255,255,.6)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M44 66 Q47 84 44 98" stroke="rgba(255,255,255,.35)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M60 128 l14 -10 M88 70 l10 14 M70 96 l-6 10" stroke="rgba(20,90,65,.16)" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="82" cy="104" r="12" fill="none" stroke="#fff" stroke-width="2.4" opacity=".75"/><path d="M76 106 q6 7 12 0" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".75"/>`,
+      front: `<path d="M72 46 C72 8 98 10 96 46" stroke="#A6E0C7" stroke-width="7" fill="none" stroke-linecap="round" opacity=".95"/>` }
+  };
+  function bag(kind, mat = 'paper') {
+    const m = MAT[mat];
     const group = kind === 'loop' ? `<g class="inbag">${ITEMS.map((id, i) => item(id, i)).join('')}</g>` : `<g class="burst">${ITEMS.map((id, i) => item(id, i)).join('')}</g>`;
     return `<svg class="bag" viewBox="0 0 132 154" aria-hidden="true">
-      <path d="M42 46 C40 12 62 12 62 46" stroke="#A9773F" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <path d="M18 46 L114 46 L109 38 L23 38 Z" fill="#7E5C38"/>
+      ${m.back}
       ${kind === 'loop' ? group : ''}
-      <g class="body">
-        <path d="M16 46 H116 L111 148 H21 Z" fill="#C99A64"/>
-        <path d="M16 46 L27 56 L27 148 L21 148 Z" fill="rgba(70,40,10,.12)"/>
-        <rect x="16" y="46" width="100" height="10" fill="#D9B07B"/>
-        <path d="M27 124 H108 M40 66 l6 18 M80 70 l-5 22 M95 98 l7 6 M52 104 l-8 9 M67 82 l3 10" stroke="rgba(80,50,20,.16)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-      </g>
-      <path d="M68 46 C68 8 96 10 94 46" stroke="#B5844F" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <g class="body">${m.body}</g>
+      ${m.front}
       ${kind === 'burst' ? group : ''}
     </svg>`;
   }
+  // badge · content is shown as a row of app icons, the way it would sit on a phone
+  const APPS = [['Todo', 'paper', 4], ['Record', 'canvas', 2], ['Friend', 'straw', 1], ['Recipes', 'plastic', 7]];
+  const SHELF = `<div class="shelf">${APPS.map(([name, mat], i) => `<div class="app"><div class="bw" data-i="${i}">${'<span class="ring" aria-hidden="true"><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="36"/></svg></span>'}<button class="bag-a" aria-label="${name}">${bag('burst', mat)}</button><span class="num-badge" aria-hidden="true">0</span></div><span class="app-name">${name}</span></div>`).join('')}</div>`;
+
   const PATCH = `<svg class="patch" viewBox="0 0 96 96" aria-hidden="true"><clipPath id="hv-clip"><rect x="-20" y="-90" width="136" height="186"/></clipPath>
       <path d="M8 66 Q48 50 88 66 Z" fill="#5A3D25"/>
       <g clip-path="url(#hv-clip)"><g class="carrot">
@@ -63,7 +82,7 @@
     <header><a class="back" href="../../" aria-label="All projects">←</a><h1>Harvest</h1><span class="tone">Quirky</span></header>
     <div class="grid">
       ${card('dot', 'Badge · no content', ['None', 'Badge'], `<div class="bw loop">${RING}<button class="bag-a" aria-label="Groceries">${bag('loop')}</button><span class="dot-badge" aria-hidden="true"></span></div>`, 'groceries arrive', 'double-click')}
-      ${card('count', 'Badge · content', ['None', 'Badge'], `<div class="bw">${RING}<button class="bag-a" aria-label="Groceries">${bag('burst')}</button><span class="num-badge" aria-hidden="true">4</span></div>`, 'shake the bag', 'hold')}
+      ${card('count', 'Badge · content', ['None', 'Badge'], SHELF, 'shake a bag', 'hold')}
       ${card('plain', 'Tooltip · plain', ['Default', 'Open'], `<div class="tw plain"><button class="carrot-a" aria-label="Garden" aria-describedby="hv-tip">${PATCH}</button><div class="pop"><div class="carry"><div class="tag" id="hv-tip" role="tooltip">Check your garden</div></div></div></div>${GARDENER}`, 'hover · or circle it', 'leave')}
       ${card('rich', 'Tooltip · rich', ['Default', 'Open'], `<div class="tw rich"><button class="carrot-a" aria-label="Harvest">${PATCH}</button><div class="pop"><div class="carry"><div class="note" role="dialog" aria-label="Ready to harvest"><b>Ready to harvest</b><p>Three carrots are ready to pick today.</p><button class="act">Harvest</button></div></div></div></div>${GARDENER}`, 'hover · or circle it', 'leave · Harvest')}
     </div>`;
@@ -90,24 +109,34 @@
   dot.a.addEventListener('dblclick', () => { if (dot.on()) { dot.set(false); arrive(3000); } });
   dot.a.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); dot.set(!dot.on()); } });
 
-  /* badge · content — in: shake the bag (wiggle over it), groceries fly out into a number · out: press & hold */
-  const cnt = ctl('count'); let n = 0; const num = cnt.w.querySelector('.num-badge');
-  const burst = () => { n += 4; num.textContent = n > 99 ? '99+' : n; restart(cnt.w, 'shake'); restart(cnt.w, 'go'); if (cnt.on()) restart(cnt.w, 'bump'); cnt.set(true); };
+  /* badge · content — four app bags. in: shake one (wiggle over it) and its groceries fly out into its count · out: press & hold it */
+  const cc = $('.card[data-k="count"]'), cstage = cc.querySelector('.stage'), csegs = [...cc.querySelectorAll('.seg button')];
+  const syncSeg = () => { const on = bags.some(b => b.n > 0); csegs[0].setAttribute('aria-pressed', String(!on)); csegs[1].setAttribute('aria-pressed', String(on)); };
+  const bags = APPS.map(([name, , start], i) => {
+    const w = cc.querySelector(`.bw[data-i="${i}"]`), a = w.querySelector('.bag-a'), num = w.querySelector('.num-badge');
+    const b = { w, a, n: 0, start };
+    b.show = () => { num.textContent = b.n > 99 ? '99+' : b.n; a.setAttribute('aria-label', b.n ? `${name}, ${b.n} new` : name); w.classList.toggle('on', b.n > 0); syncSeg(); };
+    b.burst = (k = 4) => { const had = b.n > 0; b.n += k; restart(w, 'shake'); restart(w, 'go'); if (had) restart(w, 'bump'); b.show(); };
+    b.clear = () => { b.n = 0; w.classList.remove('go', 'bump'); b.show(); };
+    let ht; w.style.setProperty('--hold', '.7s');
+    a.addEventListener('pointerdown', e => { if (!b.n) return; a.setPointerCapture(e.pointerId); w.classList.add('holding'); ht = setTimeout(() => { w.classList.remove('holding'); b.clear(); }, 700); });
+    const stopH = () => { clearTimeout(ht); w.classList.remove('holding'); };
+    a.addEventListener('pointerup', stopH); a.addEventListener('pointercancel', stopH);
+    a.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); b.burst(); } if (e.key === 'Backspace' || e.key === 'Delete') b.clear(); });
+    return b;
+  });
+  csegs[0].addEventListener('click', () => bags.forEach(b => b.clear()));
+  csegs[1].addEventListener('click', () => bags.forEach(b => { if (!b.n) b.burst(b.start); }));
+  const nearestBag = (x, y) => { let best = null, bd = 80; bags.forEach(b => { const [cx, cy] = center(b.a), d = Math.hypot(x - cx, y - cy); if (d < bd) { bd = d; best = b; } }); return best; };
   let flips = [], lastX = null, dir = 0;
-  cnt.stage.addEventListener('pointermove', e => {
+  cstage.addEventListener('pointermove', e => {
     if (lastX !== null) {
       const d = Math.sign(e.clientX - lastX);
       if (d && d !== dir) { dir = d; const t = performance.now(); flips = flips.filter(f => t - f < 700); flips.push(t);
-        const [cx, cy] = center(cnt.a); if (flips.length >= 5 && Math.hypot(e.clientX - cx, e.clientY - cy) < 130) { flips = []; burst(); } }
+        if (flips.length >= 5) { const b = nearestBag(e.clientX, e.clientY); if (b) { flips = []; b.burst(); } } }
     }
     lastX = e.clientX;
   });
-  let ht; cnt.w.style.setProperty('--hold', '.7s');
-  cnt.a.addEventListener('pointerdown', e => { if (!cnt.on()) return; cnt.a.setPointerCapture(e.pointerId); cnt.w.classList.add('holding'); ht = setTimeout(() => { cnt.w.classList.remove('holding'); n = 0; cnt.set(false); cnt.w.classList.remove('go'); }, 700); });
-  const stopH = () => { clearTimeout(ht); cnt.w.classList.remove('holding'); };
-  cnt.a.addEventListener('pointerup', stopH); cnt.a.addEventListener('pointercancel', stopH);
-  cnt.a.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); burst(); } if (e.key === 'Backspace' || e.key === 'Delete') { n = 0; cnt.set(false); } });
-  cnt.c.querySelector('.seg button:last-child').addEventListener('click', () => { if (!n) { n = 4; num.textContent = 4; } restart(cnt.w, 'go'); });
 
   /* tooltips — cursor is a gardener; hover the carrot, or circle it, and it grows up carrying the info */
   function garden(api, rich) {
