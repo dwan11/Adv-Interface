@@ -171,3 +171,9 @@ body[data-set="firefly"]{--bg:#131B29;--ink:#E6E4D8;--line:rgba(230,228,216,.13)
 .stage.up{height:470px}
 @media (max-width:560px){.stage>.bw{transform:scale(1.3)}.stage>.tw{transform:none}}
 .stage.down{height:440px;padding-top:44px}
+
+/* anchor hovered state (brief): the grass parts and the icon lifts */
+.tw .anchor:hover .gl,.tw .anchor:focus-visible .gl{transform:rotate(-13deg)}
+.tw .anchor:hover .gr,.tw .anchor:focus-visible .gr{transform:rotate(13deg)}
+.tw .anchor:hover .glyph{transform:translateX(-50%) translateY(-3px)}
+[data-set="firefly"] .tw .anchor:hover .glyph{transform:translate(-50%,-50%)}

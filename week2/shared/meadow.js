@@ -45,13 +45,13 @@
     bloom: { tone: 'Playful', name: 'Bloom',
       dot:   { in: 'wait', out: 'double-click' },
       count: { in: 'drag a seed in', out: 'drag down' },
-      plain: { in: 'press & hold', out: 'release', text: 'Tuck this away' },
-      rich:  { in: 'pull up', out: 'push down', title: 'Your garden is growing', body: 'Every unread note is a bud.', act: 'Got it' } },
+      plain: { in: 'hover · or hold', out: 'leave', text: 'Tuck this away' },
+      rich:  { in: 'hover · or pull up', out: 'leave · push down', title: 'Your garden is growing', body: 'Every unread note is a bud.', act: 'Got it' } },
     dandelion: { tone: 'Playful', name: 'Dandelion',
       dot:   { in: 'scroll to it', out: 'flick' },
       count: { in: 'wiggle', out: 'flick' },
-      plain: { in: 'scroll wheel', out: 'stop', text: 'Blow it away for now' },
-      rich:  { in: 'hold, release', out: 'swipe away', title: 'Make a wish', body: 'Send a seed to someone far away.', act: 'Make a wish' } },
+      plain: { in: 'hover · or scroll', out: 'leave', text: 'Blow it away for now' },
+      rich:  { in: 'hover · or hold', out: 'leave · swipe away', title: 'Make a wish', body: 'Send a seed to someone far away.', act: 'Make a wish' } },
     firefly: { tone: 'Intimate', name: 'Firefly',
       dot:   { in: 'be still', out: 'come close' },
       count: { in: 'wait', out: 'hold (cup)' },
@@ -117,6 +117,13 @@
     const stop = () => { clearTimeout(t); api.w.classList.remove('holding'); return done; };
     return { start, stop };
   }
+  // brief: anchor default -> anchor hovered -> tooltip. Hover always works; the gestures are extras.
+  function hoverTip(api, rich) {
+    let ct;
+    api.a.addEventListener('mouseenter', () => { clearTimeout(ct); api.a.classList.add('part'); api.set(true); });
+    api.a.addEventListener('mouseleave', () => { api.a.classList.remove('part'); if (!rich) api.set(false); });
+    if (rich) { api.w.addEventListener('mouseenter', () => clearTimeout(ct)); api.w.addEventListener('mouseleave', () => { clearTimeout(ct); ct = setTimeout(() => api.set(false), 500); }); }
+  }
   function outsideClose(api) {
     document.addEventListener('pointerdown', e => { if (api.on() && !api.w.contains(e.target)) api.set(false); });
     ESC.push(() => api.set(false));
@@ -156,7 +163,7 @@
     cnt.a.addEventListener('keydown', e => { if (e.key === 'Backspace' || e.key === 'Delete') { n = 0; cnt.set(false); } });
 
     // plain · in: press & hold · out: release
-    const pl = ctl('plain'); const h = hold(pl, 350, () => pl.set(true)); let lt;
+    const pl = ctl('plain'); hoverTip(pl, false); const h = hold(pl, 350, () => pl.set(true)); let lt;
     pl.a.addEventListener('pointerdown', e => { clearTimeout(lt); pl.a.setPointerCapture(e.pointerId); h.start(); });
     const rel = () => { h.stop(); lt = setTimeout(() => pl.set(false), 250); };
     pl.a.addEventListener('pointerup', rel); pl.a.addEventListener('pointercancel', rel);
@@ -165,7 +172,7 @@
     pl.a.addEventListener('keyup', () => pl.set(false));
 
     // rich · in: pull the stem up · out: push it down (or the action / Esc)
-    const rc = ctl('rich'); outsideClose(rc); let ry = null;
+    const rc = ctl('rich'); outsideClose(rc); hoverTip(rc, true); let ry = null;
     rc.a.addEventListener('pointerdown', e => { ry = e.clientY; rc.a.setPointerCapture(e.pointerId); rc.a.classList.add('part'); if (!rc.on()) rc.w.classList.add('pulling'); });
     rc.a.addEventListener('pointermove', e => {
       if (ry === null) return; const dy = ry - e.clientY;
@@ -210,7 +217,7 @@
     cnt.a.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); n++; cnt.set(true); setNum(cnt, n); } if (e.key === 'Backspace' || e.key === 'Delete') { n = 0; cnt.set(false); } });
 
     // plain · in: scroll wheel over the grass (a breeze) · out: stop
-    const pl = ctl('plain'); let wt;
+    const pl = ctl('plain'); hoverTip(pl, false); let wt;
     const breeze = () => { pl.set(true); pl.a.classList.add('part'); clearTimeout(wt); wt = setTimeout(() => { pl.set(false); pl.a.classList.remove('part'); }, 1200); };
     pl.stage.addEventListener('wheel', e => { e.preventDefault(); breeze(); }, { passive: false });
     let ty = null; pl.stage.addEventListener('pointerdown', e => (ty = e.clientY));
@@ -219,7 +226,7 @@
     pl.a.addEventListener('focus', () => { if (pl.a.matches(':focus-visible')) pl.set(true); }); pl.a.addEventListener('blur', () => pl.set(false));
 
     // rich · in: hold, then release (a seed floats down) · out: swipe the card away
-    const rc = ctl('rich'); outsideClose(rc);
+    const rc = ctl('rich'); outsideClose(rc); hoverTip(rc, true);
     const h = hold(rc, 600, () => { rc.ready = true; });
     rc.a.addEventListener('pointerdown', e => { rc.ready = false; rc.a.setPointerCapture(e.pointerId); h.start(); });
     rc.a.addEventListener('pointerup', () => { h.stop(); if (rc.ready) rc.set(true); });
