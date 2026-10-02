@@ -53,6 +53,7 @@
       <filter id="pn-goo-s"><feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"/></filter>
     </defs></svg>`);
 
+  const PETALS = '<span class="pn-petals">' + [-78, -52, -26, 0, 26, 52, 78].map((a, n) => `<i style="--a:${a}deg;--n:${n}"></i>`).join('') + '</span>';
   const bar = kind => `<div class="pn-nav" data-c="${CONCEPT}" role="tablist" aria-label="App navigation (${kind === 'desk' ? 'desktop' : 'phone'})">
       <span class="pn-bg"></span>
       <span class="pn-hl"><span class="pn-h1">${H1ART}</span></span>
@@ -62,7 +63,7 @@
       <span class="pn-pets">${[0, 60, 120, 180, 240, 300].map(a => `<i style="--a:${a}deg"></i>`).join('')}</span>
       <span class="pn-badge" aria-hidden="true">${BADGEART}<span class="pn-n">${COUNT}</span><span class="pn-odo">${wheels}</span></span>
       <span class="pn-isl">${ORBS(kind)}${ISL[kind]}</span><span class="pn-groc">${SET === 'harvest' ? GROC : ''}</span>
-      <span class="pn-tipwrap"><span class="pn-stem"></span>${SET === 'dandelion' ? CHUTE : ''}<span class="pn-tg"><i class="pn-neck"></i><i class="pn-tbd"></i></span><span class="pn-tip" role="tooltip">${SET === 'shy' ? SEARCH : ''}<span class="pn-txt"></span><span class="pn-caret"></span></span></span>
+      <span class="pn-tipwrap">${SET === 'bloom' && kind === 'mob' ? PETALS : ''}<span class="pn-stem"></span>${SET === 'dandelion' ? CHUTE : ''}<span class="pn-tg"><i class="pn-neck"></i><i class="pn-tbd"></i></span><span class="pn-tip" role="tooltip">${SET === 'shy' ? SEARCH : ''}<span class="pn-txt"></span><span class="pn-caret"></span></span></span>
       <span class="pn-ptr">${kind === 'desk' ? CURSOR : '<i></i>'}</span>
     </div>`;
   const card = document.createElement('article');
@@ -128,6 +129,44 @@
       out.push({ x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr - 6, s: rnd(.32, .5), form: 0, go: rnd(0, 380), life: rnd(1500, 2300), dx: rnd(120, 300), dy: -rnd(70, 200), tilt: rnd(-10, 30), ph: rnd(0, 6.28) }); }
     return windSeeds(out); };
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function fxCanvas(draw) {
+    const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio || 1);
+    cv.className = 'pn-fx'; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; document.body.appendChild(cv);
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); const t0 = performance.now();
+    return new Promise(res => { const frame = now => { ctx.clearRect(0, 0, innerWidth, innerHeight); if (draw(ctx, now - t0) === false) { cv.remove(); res(); } else requestAnimationFrame(frame); }; requestAnimationFrame(frame); });
+  }
+  let GLOW;
+  const glowSprite = () => GLOW || (GLOW = (() => { const cv = document.createElement('canvas'), k = 3; cv.width = cv.height = 64 * k; const c = cv.getContext('2d'); c.scale(k, k);
+    const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,246,140,1)'); g.addColorStop(.3, 'rgba(246,222,24,1)'); g.addColorStop(.38, 'rgba(236,206,16,.6)');
+    g.addColorStop(.64, 'rgba(230,200,20,.18)'); g.addColorStop(1, 'rgba(230,200,20,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64); return cv; })());
+  const bez = (a, c, b, u) => (1 - u) * (1 - u) * a + 2 * (1 - u) * u * c + u * u * b, easeIn = u => u * u * u;
+  // Firefly · "keep it close": a swarm settles on the note, rests 600ms, then scatters and carries the note's light away
+  function swarmOnto(note) {
+    const R = note.getBoundingClientRect(), img = glowSprite(), cx = R.left + R.width / 2, cy = R.top + R.height / 2, reach = Math.max(260, Math.hypot(R.width, R.height) * 2.4);
+    const N = Math.round(Math.min(900, Math.max(260, R.width * R.height / 12))), flies = [];
+    const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    for (let n = 0; n < N; n++) {
+      const a = rnd(0, 6.28), d = reach * rnd(.55, 1.15), sx = cx + Math.cos(a) * d, sy = cy + Math.sin(a) * d, on = Math.random() < .82;
+      const tx = on ? R.left + rnd(-.03, 1.03) * R.width : cx + gauss() * R.width * .8, ty = on ? R.top + rnd(-.04, 1.04) * R.height : cy + gauss() * R.height * .9;
+      const b = rnd(0, 6.28), e = reach * rnd(.6, 1.3), ox = tx + Math.cos(b) * e, oy = ty + Math.sin(b) * e - 50, big = Math.random() < .1;
+      flies.push({ sx, sy, tx, ty, ox, oy, c1x: (sx + tx) / 2 + rnd(-100, 100), c1y: (sy + ty) / 2 + rnd(-100, 100), c2x: (tx + ox) / 2 + rnd(-90, 90), c2y: (ty + oy) / 2 + rnd(-90, 90),
+        size: big ? rnd(7, 14) : rnd(2, 5.5), alpha: big ? rnd(.18, .38) : rnd(.7, 1), d0: rnd(0, 520), dIn: rnd(650, 1050), od: rnd(0, 320), dOut: rnd(900, 1500), ph: rnd(0, 6.28) });
+    }
+    const LAND = Math.max(...flies.map(p => p.d0 + p.dIn)), OUT = LAND + 600, END = OUT + Math.max(...flies.map(p => p.od + p.dOut));
+    const warm = note.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.08)' }], { duration: LAND, fill: 'forwards' });
+    const gone = note.animate([{ opacity: 1, filter: 'brightness(1.08) blur(0)' }, { opacity: 0, filter: 'brightness(2) blur(6px)' }], { duration: 750, delay: OUT, easing: 'ease-in', fill: 'forwards' });
+    const run = fxCanvas((ctx, t) => {
+      for (const p of flies) {
+        if (t < p.d0) continue; let x, y, a = p.alpha * (.72 + .28 * Math.sin(t / 130 + p.ph));
+        const uo = clamp01((t - OUT - p.od) / p.dOut);
+        if (uo > 0) { const e = easeIn(uo); x = bez(p.tx, p.c2x, p.ox, e); y = bez(p.ty, p.c2y, p.oy, e); a *= 1 - uo * uo; }
+        else { const ui = clamp01((t - p.d0) / p.dIn), e = easeOut(ui); x = bez(p.sx, p.c1x, p.tx, e) + Math.sin(t / 210 + p.ph) * 1.4; y = bez(p.sy, p.c1y, p.ty, e) + Math.cos(t / 190 + p.ph) * 1.4; a *= Math.min(1, ui * 4); }
+        ctx.globalAlpha = a; ctx.drawImage(img, x - p.size, y - p.size, p.size * 2, p.size * 2);
+      }
+      return t < END;
+    });
+    return { done: Promise.all([run, gone.finished]), anims: [warm, gone] };
+  }
 
   /* ---------- timers live in one list so the demo can be stopped cleanly ---------- */
   let timers = [];
@@ -215,6 +254,17 @@
         tipwrap.style.setProperty('--tx', (clamped - left) + 'px'); tipwrap.style.setProperty('--tw', w + 'px');
         tipwrap.style.setProperty('--th', h + 'px'); tipwrap.style.setProperty('--off', (h / 2 + (SET === 'dandelion' ? 32 : 12)) + 'px');
         if (isMob) { const act = txt.querySelector('.pn-act'); act.addEventListener('click', e => { e.stopPropagation(); takeOver(); api.act(); }); }
+        if (isMob && SET === 'shy') {
+          const b = txt.querySelector('b'), slip = label.length > 3 ? label.slice(0, -2) + label.slice(-1) + label.slice(-2, -1) : label; let t = 0;
+          tip.classList.remove('typed'); b.textContent = '';
+          [...slip].forEach(ch => typing.push(setTimeout(() => b.insertAdjacentText('beforeend', ch), t += 65)));
+          if (slip !== label) {
+            typing.push(setTimeout(() => { b.innerHTML = label.slice(0, -2) + '<s>' + slip.slice(-2) + '</s>'; }, t += 300));
+            typing.push(setTimeout(() => { b.textContent = label.slice(0, -2); }, t += 220));
+            [...label.slice(-2)].forEach(ch => typing.push(setTimeout(() => b.insertAdjacentText('beforeend', ch), t += 85)));
+          }
+          typing.push(setTimeout(() => tip.classList.add('typed'), t += 120));
+        }
         if (c === 'shy' && !isMob) {  // types its own name, slips, corrects itself
           const slip = label.length > 3 ? label.slice(0, -2) + label.slice(-1) + label.slice(-2, -1) : label;
           txt.textContent = ''; let t = 0;
@@ -229,11 +279,21 @@
       },
       act() {
         if (tipK < 0 || wishing) return; const k = tipK;
-        if (SET === 'dandelion' && !REDUCED) {
-          wishing = true; el.classList.add('wished');
+        const finish = (anims = []) => { tipK = -1; el.classList.remove('ton', 'wished'); later(() => { anims.forEach(a => a.cancel()); wishing = false; }, 450); if (k === 3) api.clear(); };
+        const tx = parseFloat(tipwrap.style.getPropertyValue('--tx')) || 0, off = parseFloat(tipwrap.style.getPropertyValue('--off')) || 26, dir = isMob ? -1 : 1;
+        if (REDUCED) { api.tip(k, false); if (k === 3) api.clear(); return; }
+        if (SET === 'dandelion') {          // the note becomes seeds, and the puff lets go of its seeds too
+          wishing = true; el.classList.add('wished'); if (k === 3) api.clear();
           const R = tip.getBoundingClientRect(), fades = [tip, el.querySelector('.pn-tg')].map(n => n.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: 'blur(3px)' }], { duration: 480, easing: 'ease-in', fill: 'forwards' }));
-          cardToSeeds(R).then(() => { tipK = -1; el.classList.remove('ton', 'wished'); later(() => { fades.forEach(f => f.cancel()); wishing = false; }, 400); });
-        } else api.tip(k, false);
+          cardToSeeds(R).then(() => finish(fades));
+        } else if (SET === 'harvest' && window.harvestReward) {   // the note turns into a pot of cooked carrots, rays shining behind
+          wishing = true; el.classList.add('wished');
+          const fade = tip.animate([{ opacity: 1, scale: '1' }, { opacity: 0, scale: '.5' }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+          window.harvestReward(tipwrap, tx + 'px', dir * off + 'px', isMob ? .5 : .62).then(() => finish([fade]));
+        } else if (SET === 'firefly') {     // the fireflies come for the note and carry it off
+          wishing = true; el.classList.add('wished');
+          const sw = swarmOnto(tip); sw.done.then(() => finish(sw.anims));
+        } else { api.tip(k, false); if (k === 3) api.clear(); }
       },
       pointAct() { const b = tip.querySelector('.pn-act'); if (!b) return; const r = b.getBoundingClientRect(), nr = el.getBoundingClientRect();
         ptr.style.setProperty('--px', r.left - nr.left + r.width / 2 + 'px'); ptr.style.setProperty('--py', r.top - nr.top + r.height / 2 + 'px'); ptr.style.opacity = 1; },
@@ -255,8 +315,10 @@
       t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up); t.addEventListener('pointerleave', () => clearTimeout(ht));
       t.addEventListener('contextmenu', e => e.preventDefault());
       t.addEventListener('focus', () => { if (t.matches(':focus-visible')) api.tip(k, true); });
-      t.addEventListener('blur', () => { if (tipK === k) api.tip(k, false); });
+      // desktop's plain tooltip goes when focus leaves; the phone's rich one stays until you act, tap elsewhere or press Escape
+      t.addEventListener('blur', e => { if (!isMob && tipK === k && !(e.relatedTarget && tip.contains(e.relatedTarget))) api.tip(k, false); });
     });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && tipK >= 0 && !wishing) api.tip(tipK, false); });
     screen.addEventListener('pointerdown', e => { if (tipK >= 0 && isMob && !e.target.closest('.pn-tip') && !e.target.closest('.pn-tb')) api.tip(tipK, false); });
     setHL(0);
     return api;

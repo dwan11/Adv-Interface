@@ -305,3 +305,14 @@ body[data-set="shy"]{--pn-actbg:#E7EAFD;--pn-actfg:#3A44B8}
 [data-set="harvest"] .pn-tip.rich{padding-left:24px}
 [data-set="shy"] .pn-tip.rich{padding-left:28px}
 .pn-tip.rich .pn-caret{display:none}
+
+/* ---- rich tooltip endings that match each design ---- */
+.pn-petals{display:none}
+[data-set="bloom"] .pn-mob .pn-petals{display:block;position:absolute;left:var(--tx,0px);top:calc(var(--dir)*var(--off,26px) - var(--th,28px)/2 + 12px);width:0;height:0;z-index:-1;pointer-events:none}
+.pn-petals i{position:absolute;left:-14px;top:-58px;width:28px;height:58px;border-radius:50% 50% 46% 46%/62% 62% 38% 38%;background:linear-gradient(180deg,#F2A7B5,#F7C59F);transform-origin:50% 100%;transform:rotate(var(--a)) scaleY(0);transition:transform .25s ease-in}
+[data-set="bloom"] .pn-nav.ton .pn-petals i{transform:rotate(var(--a)) scaleY(1);transition:transform .6s cubic-bezier(.2,1.4,.4,1) calc(.15s + var(--n)*.05s)}
+[data-set="shy"] .pn-tip.rich .pn-body,[data-set="shy"] .pn-tip.rich .pn-act{opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s}
+[data-set="shy"] .pn-tip.rich.typed .pn-body{opacity:1;transform:none}
+[data-set="shy"] .pn-tip.rich.typed .pn-act{opacity:1;transform:none;transition-delay:.12s}
+[data-set="shy"] .pn-tip.rich b s{opacity:.45}
+.pn-nav.wished .pn-petals{opacity:0;transition:opacity .2s}

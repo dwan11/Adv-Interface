@@ -156,6 +156,15 @@
     </svg>`;
   const SPARKS = [[-125, -55, 16, 0], [112, -82, 12, .3], [-98, 52, 11, .5], [122, 36, 15, .15], [-42, -112, 10, .4], [58, -118, 14, .6]]
     .map(([x, y, s, d]) => `<span class="spark" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;margin:${-s / 2}px 0 0 ${-s / 2}px;animation-delay:${.35 + d}s"></span>`).join('');
+  // the same reward, for other parts of the page (the pill bar's rich tooltip uses it)
+  window.harvestReward = (parent, x, y, scale = 1) => {
+    const r = document.createElement('div');
+    r.className = 'reward'; r.setAttribute('aria-hidden', 'true');
+    r.innerHTML = `<span class="rays"></span><span class="glow"></span>${SPARKS}<div class="pot">${POT}</div>`;
+    r.style.left = x; r.style.top = y; if (scale !== 1) r.style.transform = `scale(${scale})`;
+    parent.appendChild(r);
+    return new Promise(res => { setTimeout(() => r.classList.add('out'), 2800); setTimeout(() => { r.remove(); res(); }, 3300); });
+  };
   function cook(api, close) {
     if (api.busy) return;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return close();
