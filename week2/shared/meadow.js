@@ -76,7 +76,7 @@
 
   document.title = `${DATA.name} · Week 2`;
   document.getElementById('app').innerHTML = `
-    <header><a class="back" href="../../" aria-label="All projects">←</a><h1>${DATA.name}</h1><span class="tone">${DATA.tone}</span></header>
+    <header><a class="back" href="../../#week2" aria-label="Back to Week 2">←</a><h1>${DATA.name}</h1><span class="tone">${DATA.tone}</span></header>
     <div class="grid">
       ${card('dot', 'Badge · no content', ['None','Badge'], '', badgeW('dot','grid','Rooms') + (SET==='firefly'?'<span class="halo" style="--r:140px"></span>':''), DATA.dot)}
       ${card('count', 'Badge · content', ['None','Badge'], '', badgeW('count','mail','Mail') + (SET==='bloom'?'<button class="chip" aria-label="Seed: drag onto the grass"><span class="seed"></span></button>':''), DATA.count)}

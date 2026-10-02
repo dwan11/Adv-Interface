@@ -79,7 +79,7 @@
   const RING = '<span class="ring" aria-hidden="true"><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="36"/></svg></span>';
   document.title = 'Harvest · Week 2';
   $('#app').innerHTML = DEFS + `
-    <header><a class="back" href="../../" aria-label="All projects">←</a><h1>Harvest</h1><span class="tone">Quirky</span></header>
+    <header><a class="back" href="../../#week2" aria-label="Back to Week 2">←</a><h1>Harvest</h1><span class="tone">Quirky</span></header>
     <div class="grid">
       ${card('dot', 'Badge · no content', ['None', 'Badge'], `<div class="bw loop">${RING}<button class="bag-a" aria-label="Groceries">${bag('loop')}</button><span class="dot-badge" aria-hidden="true"></span></div>`, 'groceries arrive', 'double-click')}
       ${card('count', 'Badge · content', ['None', 'Badge'], SHELF, 'shake a bag', 'hold')}

@@ -12,6 +12,7 @@ Badges and tooltips in three tones: Playful, Intimate and Quirky. Each set has a
 | Dandelion | Playful | [week2/dandelion](week2/dandelion) |
 | Firefly | Intimate | [week2/firefly](week2/firefly) |
 | Harvest | Quirky | [week2/harvest](week2/harvest) |
+| Shy Icon | Quirky | [week2/shy](week2/shy) |
 
 Shared engine: [week2/shared](week2/shared).
 
