@@ -8,7 +8,7 @@
   const grid = document.querySelector('.grid');
   if (!CONCEPT || !grid) return;
   const COUNT = { bloom: 3, dandelion: 5, firefly: 2, harvest: 12, shy: 3 }[SET];
-  const LABEL = ['Home', 'Links', 'Info', 'Notifications'];
+  const LABEL = ['Home', 'Links', 'Info', 'Notifications', 'Water the garden'];
   const MOTION = { spring: 'springs over and squashes', liquid: 'stretches like liquid', island: 'grows into the note', hop: 'hops and rings', shy: 'hesitates, then commits' }[CONCEPT];
   const ICON = [
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M10 16h4"/></svg>',
@@ -16,6 +16,22 @@
     '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>',
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7.5 2 7.5H4S6 15 6 9z"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/></svg>'
   ];
+  // each design draws its icons its own way: Bloom curly, Shy straight, the rest restyle the base lines in CSS (dotted, hairline, chunky)
+  const CURLY = [
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 10.6 C5.8 13.4 6.1 16.6 6.6 19.3 C10 19.8 14 19.8 17.4 19.3 C17.9 16.6 18.2 13.4 17.8 10.6 C16.2 9 14.2 7.2 12 5 C9.8 7.2 7.8 9 6.2 10.6 Z"/><path d="M4.4 11.6 C3.8 11 4 10.2 4.8 10.4 M19.6 11.6 C20.2 11 20 10.2 19.2 10.4"/><path d="M10.2 15.8 C11.4 16.7 12.8 16.7 13.9 15.6"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 13.6 C8.9 12.1 9.2 9.7 10.8 8.3 L13.2 6.1 C14.8 4.7 17.4 4.9 18.7 6.5 C20 8.1 19.8 10.5 18.2 11.8 L17 12.9"/><path d="M13.6 10.4 C15.1 11.9 14.8 14.3 13.2 15.7 L10.8 17.9 C9.2 19.3 6.6 19.1 5.3 17.5 C4 15.9 4.2 13.5 5.8 12.2 L7 11.1"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6 C16.8 3.4 20.6 7.2 20.4 12 C20.2 16.8 16.6 20.5 12 20.4 C7.2 20.3 3.5 16.6 3.6 12 C3.7 7.8 6.8 4.6 10.6 3.8"/><path d="M12.3 11 C11.7 13 12.5 15.2 11.8 16.9"/><path d="M12 7.6 h.01"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 15.6 C7 12.8 6.2 9.8 7.8 7.5 C9.6 5 14.4 5 16.2 7.5 C17.8 9.8 17 12.8 17.6 15.6 C18.1 16.5 19.2 16.7 19.5 17.1 C14.5 17.8 9.5 17.8 4.5 17.1 C4.8 16.7 5.9 16.5 6.4 15.6 Z"/><path d="M10.2 19.6 C11.2 21 12.8 21 13.8 19.6"/><path d="M12 5.2 C11.3 4.1 12.2 3 13.2 3.7"/></svg>'
+  ];
+  const STRAIGHT = [
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10 V20 H18 V10"/><path d="M3.5 11.5 L12 4 L20.5 11.5"/><path d="M10 20 V15 H14 V20"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 7 L13.5 4.5 L19.5 10.5 L17 13"/><path d="M13 17 L10.5 19.5 L4.5 13.5 L7 11"/><path d="M9.5 14.5 L14.5 9.5"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4 H20 V20 H4 Z"/><path d="M12 10.5 V17"/><path d="M12 7 V8.4"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16 V10 L8.5 5.5 H15.5 L18 10 V16 L20 18 H4 Z"/><path d="M10 20.5 H14"/></svg>'
+  ];
+  const WATER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.5 H14 V18 A1.5 1.5 0 0 1 12.5 19.5 H6 A1.5 1.5 0 0 1 4.5 18 Z"/><path d="M14 12.5 L19.5 8.5"/><path d="M18 7.5 L20.5 9.5"/><path d="M6.5 10.5 C6.5 6.8 12 6.8 12 10.5"/></svg>';
+  const ICONS = SET === 'bloom' ? CURLY : SET === 'shy' ? STRAIGHT : ICON;
+  const TABS = kind => SET === 'harvest' && kind === 'desk' ? [...ICONS, WATER] : ICONS;
   const CURSOR = '<svg viewBox="0 0 16 22" aria-hidden="true"><path d="M1 1 L1 17 L5.5 13 L8.5 20 L11 19 L8 12 L14 12 Z" fill="#18181B" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>';
   const RICH = { bloom: ['Got it', `${COUNT} notes have bloomed.`], dandelion: ['Make a wish', `${COUNT} seeds, ready to send.`], firefly: ['keep it close', `${COUNT} notes, just for you.`],
     harvest: ['Harvest', `${COUNT} things are ready to pick.`], shy: ['Show me', `um… ${COUNT} new notes?`] }[SET];
@@ -54,11 +70,11 @@
     </defs></svg>`);
 
   const PETALS = '<span class="pn-petals">' + [-78, -52, -26, 0, 26, 52, 78].map((a, n) => `<i style="--a:${a}deg;--n:${n}"></i>`).join('') + '</span>';
-  const bar = kind => `<div class="pn-nav" data-c="${CONCEPT}" role="tablist" aria-label="App navigation (${kind === 'desk' ? 'desktop' : 'phone'})">
+  const bar = kind => `<div class="pn-nav" data-c="${CONCEPT}" style="--n:${TABS(kind).length}" role="tablist" aria-label="App navigation (${kind === 'desk' ? 'desktop' : 'phone'})">
       <span class="pn-bg"></span>
       <span class="pn-hl"><span class="pn-h1">${H1ART}</span></span>
       <span class="pn-rip"></span><span class="pn-rip"></span>
-      <span class="pn-tabs">${ICON.map((s, k) => `<button class="pn-tb${k ? '' : ' on'}" data-k="${k}" style="--k:${k}" role="tab" aria-selected="${!k}" aria-label="${LABEL[k]}">${s}</button>`).join('')}</span>
+      <span class="pn-tabs">${TABS(kind).map((s, k) => `<button class="pn-tb${k ? '' : ' on'}" data-k="${k}" style="--k:${k}" role="tab" aria-selected="${!k}" aria-label="${LABEL[k]}">${s}</button>`).join('')}</span>
       <span class="pn-bd"><i class="d2"></i><i class="d1"></i></span>
       <span class="pn-pets">${[0, 60, 120, 180, 240, 300].map(a => `<i style="--a:${a}deg"></i>`).join('')}</span>
       <span class="pn-badge" aria-hidden="true">${BADGEART}<span class="pn-n">${COUNT}</span><span class="pn-odo">${wheels}</span></span>
@@ -319,6 +335,27 @@
       t.addEventListener('blur', e => { if (!isMob && tipK === k && !(e.relatedTarget && tip.contains(e.relatedTarget))) api.tip(k, false); });
     });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && tipK >= 0 && !wishing) api.tip(tipK, false); });
+    // Harvest, desktop: the cursor becomes the gardener; near the watering-can button the can tips and water pours
+    if (SET === 'harvest' && !isMob && window.harvestGardener && tabs[4]) {
+      screen.insertAdjacentHTML('beforeend', window.harvestGardener);
+      const g = screen.querySelector('.gardener'), wt = tabs[4]; let lastDrop = 0, gi;
+      screen.classList.add('pn-gz');
+      const place = (x, y) => { g.style.transform = `translate(${x}px,${y}px)`; };
+      const pour = (x, y) => { const now = performance.now(); if (now - lastDrop < 110) return; lastDrop = now;
+        const d = document.createElement('span'); d.className = 'drop'; d.style.left = (x + 26) + 'px'; d.style.top = (y - 2) + 'px'; screen.appendChild(d); setTimeout(() => d.remove(), 650); };
+      screen.addEventListener('mousemove', e => {
+        if (auto) return; const r = screen.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; place(x, y); g.classList.add('in');
+        const w = wt.getBoundingClientRect(), near = Math.hypot(e.clientX - (w.left + w.width / 2), e.clientY - (w.top + w.height / 2)) < 70;
+        g.classList.toggle('water', near); wt.classList.toggle('pn-pour', near); if (near) pour(x, y);
+      });
+      screen.addEventListener('mouseleave', () => { g.classList.remove('in', 'water'); wt.classList.remove('pn-pour'); });
+      api.gardenDemo = on => {
+        clearInterval(gi);
+        if (!on) { g.classList.remove('in', 'water'); wt.classList.remove('pn-pour'); return; }
+        const r = screen.getBoundingClientRect(), w = wt.getBoundingClientRect(), x = w.left - r.left + w.width / 2 - 26, y = w.top - r.top + w.height / 2 - 14;
+        ptr.style.opacity = 0; place(x, y); g.classList.add('in', 'water'); wt.classList.add('pn-pour'); gi = setInterval(() => pour(x, y), 120);
+      };
+    }
     screen.addEventListener('pointerdown', e => { if (tipK >= 0 && isMob && !e.target.closest('.pn-tip') && !e.target.closest('.pn-tb')) api.tip(tipK, false); });
     setHL(0);
     return api;
@@ -352,8 +389,15 @@
     at(8250 + slow, () => all(b => { b.tap(); b.go(3); }));
     at(9300 + slow, () => all(b => b.point(0)));
     at(9650 + slow, () => all(b => { b.tap(); b.go(0); }));
-    at(10500 + slow, () => all(b => b.point(0, true)));
-    at(11300 + slow, demo);
+    if (SET === 'harvest') {
+      at(10300, () => all(b => { if (b.gardenDemo) b.point(4); }));
+      at(10700, () => all(b => { if (b.gardenDemo) { b.gardenDemo(true); b.tip(4, true); } }));
+      at(12600, () => all(b => { if (b.gardenDemo) { b.gardenDemo(false); b.tip(4, false); } b.point(0, true); }));
+      at(13300, demo);
+    } else {
+      at(10500 + slow, () => all(b => b.point(0, true)));
+      at(11300 + slow, demo);
+    }
   }
   // a click, tap or key press ends the demo and hands the bar to you; a new note always turns up a few
   // seconds after the badge is gone; leave it alone for a while and the demo plays again
@@ -365,7 +409,7 @@
   function takeOver() {
     if (!auto) { nudge(); return; }
     auto = false; stopAll();
-    all(b => { b.hidePtr(); b.el.classList.remove('ton', 'toff'); b.hold(false); });
+    all(b => { b.hidePtr(); b.el.classList.remove('ton', 'toff'); b.hold(false); if (b.gardenDemo) b.gardenDemo(false); });
     bars.forEach(noteLater); nudge();
   }
   const watch = new MutationObserver(() => { if (!auto) bars.forEach(noteLater); });

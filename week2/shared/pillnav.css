@@ -43,7 +43,7 @@ body[data-set="shy"]{--pn-screen:#EEF0FB;--pn-pill:#FFFFFF;--pn-hl:#E7EAFD;--pn-
 
 /* ---------- the bar ---------- */
 .pn-nav{position:absolute;left:50%;width:var(--W0);height:var(--H0);margin-left:calc(var(--W0)/-2);z-index:5;
-  --W0:calc(4*var(--T) + 3*var(--G) + 2*var(--P));--H0:calc(var(--T) + 2*var(--P));--belly:calc(var(--P) + var(--T)/2);
+  --W0:calc(var(--n,4)*var(--T) + (var(--n,4) - 1)*var(--G) + 2*var(--P));--H0:calc(var(--T) + 2*var(--P));--belly:calc(var(--P) + var(--T)/2);
   --bellx:calc(var(--P) + 3*(var(--T) + var(--G)) + var(--T)/2)}
 .pn-desk .pn-nav{--T:40px;--G:8px;--P:8px;top:16px;--dir:1}
 .pn-mob .pn-nav{--T:32px;--G:6px;--P:6px;bottom:22px;--dir:-1}
@@ -316,3 +316,37 @@ body[data-set="shy"]{--pn-actbg:#E7EAFD;--pn-actfg:#3A44B8}
 [data-set="shy"] .pn-tip.rich.typed .pn-act{opacity:1;transform:none;transition-delay:.12s}
 [data-set="shy"] .pn-tip.rich b s{opacity:.45}
 .pn-nav.wished .pn-petals{opacity:0;transition:opacity .2s}
+
+/* =====================================================================
+   Each design's own icon line, and its own active / inactive colouring
+   ===================================================================== */
+/* Bloom · curly lines (drawn in the script); sage when resting, deep green with a petal-pink fill when active */
+body[data-set="bloom"]{--pn-icon:#93A68A;--pn-on:#2C4A24}
+[data-set="bloom"] .pn-tb svg{stroke-width:1.7}
+[data-set="bloom"] .pn-tb svg path:first-child{fill:transparent;transition:fill .35s}
+[data-set="bloom"] .pn-tb.on svg path:first-child{fill:#F6C9D1}
+[data-set="bloom"] .pn-tb[data-k="1"] svg path{fill:none!important}
+/* Dandelion · dotted lines, like seed trails; the dots join into a solid line when active */
+body[data-set="dandelion"]{--pn-icon:#93A5AF;--pn-on:#1D2A33}
+[data-set="dandelion"] .pn-tb svg{stroke-width:2.1;stroke-dasharray:0 3.1;transition:stroke .3s,stroke-dasharray .55s ease,stroke-width .3s}
+[data-set="dandelion"] .pn-tb.on svg{stroke-width:1.8;stroke-dasharray:64 0}
+/* Firefly · hairlines, dim until they light up */
+body[data-set="firefly"]{--pn-icon:#56656F}
+[data-set="firefly"] .pn-tb svg{stroke-width:1.15}
+[data-set="firefly"] .pn-tb.on svg{stroke-width:1.5}
+/* Harvest · chunky strokes; active is outlined dark and filled kraft */
+body[data-set="harvest"]{--pn-icon:#A88A66;--pn-on:#3A2A1A}
+[data-set="harvest"] .pn-tb svg{stroke-width:2.5}
+[data-set="harvest"] .pn-tb svg :is(path:first-child,circle){fill:transparent;transition:fill .3s}
+[data-set="harvest"] .pn-tb.on svg :is(path:first-child,circle){fill:#E2B77E}
+[data-set="harvest"] .pn-tb[data-k="1"] svg path{fill:none!important}
+/* Shy · straight lines and sharp corners */
+body[data-set="shy"]{--pn-icon:#9EA2BE}
+[data-set="shy"] .pn-tb svg{stroke-linecap:square;stroke-linejoin:miter;stroke-width:1.7}
+
+/* Harvest desktop · the watering can tips toward the bar when the gardener comes near */
+[data-set="harvest"] .pn-tb[data-k="4"] svg{transform-origin:40% 70%;transition:rotate .25s,stroke .25s,fill .3s}
+[data-set="harvest"] .pn-tb.pn-pour svg{rotate:-22deg;stroke:#4F7FA8}
+@media (hover:hover) and (pointer:fine){[data-set="harvest"] .pn-screen.pn-gz:hover,[data-set="harvest"] .pn-screen.pn-gz:hover *{cursor:none}}
+.pn-screen .gardener{z-index:9}
+.pn-screen .drop{z-index:8}

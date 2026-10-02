@@ -70,6 +70,8 @@
       <g class="can"><rect x="27" y="27" width="9" height="8" rx="1.5" fill="#8FA9B8"/><path d="M36 29 L41 25" stroke="#8FA9B8" stroke-width="2" stroke-linecap="round"/><path d="M28.5 27 Q31.5 23 34.5 27" stroke="#8FA9B8" stroke-width="1.4" fill="none"/></g>
     </svg></span>`;
 
+  window.harvestGardener = GARDENER;   // the gardener cursor, shared with the pill bar
+
   /* ---------- page ---------- */
   const card = (key, label, states, inner, tin, tout) => `<article class="card" data-k="${key}">
     <div class="lab">${label}</div>
