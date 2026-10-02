@@ -175,7 +175,7 @@
       let ht, long = false, ht2;
       t.addEventListener('click', e => { takeOver(); if (long) { long = false; return; } api.tip(k, false); api.go(k); });
       if (!isMob) {
-        t.addEventListener('mouseenter', () => { takeOver(); clearTimeout(ht2); ht2 = setTimeout(() => api.tip(k, true), 250); });
+        t.addEventListener('mouseenter', () => { if (auto) return; clearTimeout(ht2); ht2 = setTimeout(() => api.tip(k, true), 250); });
         t.addEventListener('mouseleave', () => { clearTimeout(ht2); if (tipK === k) api.tip(k, false); });
       }
       t.addEventListener('pointerdown', e => { if (!isMob && e.pointerType === 'mouse') return; takeOver(); long = false; clearTimeout(ht); ht = setTimeout(() => { long = true; api.tip(k, true); }, 450); });
@@ -216,14 +216,23 @@
     at(9300 + slow, () => all(b => b.point(0, true)));
     at(9900 + slow, demo);
   }
-  // the first touch ends the demo; after that a new note turns up a few seconds after you clear one
+  // a click, tap or key press ends the demo and hands the bar to you; a new note always turns up a few
+  // seconds after the badge is gone; leave it alone for a while and the demo plays again
+  const IDLE = 12000;
+  let idle;
+  const nudge = () => { clearTimeout(idle); if (!auto && !RM) idle = setTimeout(() => { bars.forEach(b => { clearTimeout(b.pending); b.pending = null; }); demo(); }, IDLE); };
+  const noteLater = b => { if (auto || b.pending || b.el.classList.contains('b-on') || b.el.classList.contains('isl-on')) return;
+    b.pending = setTimeout(() => { b.pending = null; if (!auto) b.notify(); }, 4000); };
   function takeOver() {
-    if (!auto) return; auto = false; stopAll();
-    all(b => { b.hidePtr(); b.el.classList.remove('ton', 'toff'); });
+    if (!auto) { nudge(); return; }
+    auto = false; stopAll();
+    all(b => { b.hidePtr(); b.el.classList.remove('ton', 'toff'); b.hold(false); });
+    bars.forEach(noteLater); nudge();
   }
-  const watch = new MutationObserver(() => { if (auto) return; bars.forEach(b => { if (!b.el.classList.contains('b-on') && !b.el.classList.contains('isl-on') && !b.pending) {
-    b.pending = setTimeout(() => { b.pending = null; if (!auto) b.notify(); }, 6000); } }); });
+  const watch = new MutationObserver(() => { if (!auto) bars.forEach(noteLater); });
   bars.forEach(b => watch.observe(b.el, { attributes: true, attributeFilter: ['class'] }));
-  card.querySelector('.pn-play').addEventListener('click', () => { bars.forEach(b => { clearTimeout(b.pending); b.pending = null; }); demo(); });
+  ['pointerdown', 'keydown'].forEach(ev => card.addEventListener(ev, () => { if (!auto) nudge(); }));
+  card.querySelector('.pn-stage').addEventListener('mousemove', () => { if (!auto) nudge(); });
+  card.querySelector('.pn-play').addEventListener('click', () => { clearTimeout(idle); bars.forEach(b => { clearTimeout(b.pending); b.pending = null; }); demo(); });
   if (RM) { all(b => b.still()); sync(); } else demo();
 })();
