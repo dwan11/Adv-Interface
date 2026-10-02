@@ -14,6 +14,7 @@ Badges and tooltips in three tones: Playful, Intimate and Quirky. Each set has a
 | Harvest | Quirky | [week2/harvest](week2/harvest) |
 | Shy Icon | Quirky | [week2/shy](week2/shy) |
 | Motion Study | All five, motion-led | [week2/motion](week2/motion) |
+| Pill Nav | Four motion concepts for a tab bar | [week2/nav](week2/nav) |
 | Five Tones | Playful, Futuristic, Elegant, Raw, Nostalgic | [week2/tones](week2/tones) |
 
 Shared engine: [week2/shared](week2/shared).
