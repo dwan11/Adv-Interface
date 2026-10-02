@@ -29,9 +29,20 @@
     margin: 0 0 10px; letter-spacing: -0.01em;
   }
   header p { margin: 0; color: var(--muted); max-width: 60ch; }
+  .tabs {
+    display: flex; gap: 4px; margin-top: 40px; border-bottom: 1px solid var(--line);
+  }
+  .tabs button {
+    appearance: none; background: none; border: 0; cursor: pointer;
+    padding: 10px 16px; margin-bottom: -1px; color: var(--muted);
+    font: 500 .95rem Inter, sans-serif; border-bottom: 2px solid transparent;
+  }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px 6px 0 0; }
   h2 {
     font: 600 1.4rem/1.2 Fraunces, Georgia, serif;
-    margin: 56px 0 6px; display: flex; align-items: baseline; gap: 12px;
+    margin: 32px 0 6px; display: flex; align-items: baseline; gap: 12px;
   }
   h2 span { font: 500 .8rem Inter, sans-serif; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
   .grid {
@@ -69,11 +80,23 @@
 <main class="wrap">
   <header>
     <h1>Adv Interface</h1>
-    <p>Coursework for Advanced Interface. Each project is a custom progress loader. Click a card to open the live demo.</p>
+    <p>Coursework for Advanced Interface. Click a card to open the live demo.</p>
   </header>
 
-  <h2>Week 1 <span>Loaders · 6 projects</span></h2>
-  <div class="grid" id="week1"></div>
+  <nav class="tabs" role="tablist" aria-label="Weeks">
+    <button role="tab" id="tab-week1" aria-controls="week1-panel" aria-selected="true">Week 1</button>
+    <button role="tab" id="tab-week2" aria-controls="week2-panel" aria-selected="false" tabindex="-1">Week 2</button>
+  </nav>
+
+  <section id="week1-panel" role="tabpanel" aria-labelledby="tab-week1">
+    <h2>Week 1 <span>Loaders · 6 projects</span></h2>
+    <div class="grid" id="week1"></div>
+  </section>
+
+  <section id="week2-panel" role="tabpanel" aria-labelledby="tab-week2" hidden>
+    <h2>Week 2 <span>Badges &amp; Tooltips · 3 sets</span></h2>
+    <div class="grid" id="week2"></div>
+  </section>
 </main>
 
 <script>
@@ -92,9 +115,16 @@
       desc: "An art deco constellation. A gold line links all 16 stars of Pisces." },
   ];
 
-  const grid = document.getElementById("week1");
-  for (const p of week1) {
-    const url = `week1/${p.dir}/`;
+  const week2 = [
+    { dir: "bloom", name: "Bloom", desc: "Playful" },
+    { dir: "dandelion", name: "Dandelion", desc: "Playful" },
+    { dir: "firefly", name: "Firefly", desc: "Intimate" },
+  ];
+
+  function render(id, week, list) {
+  const grid = document.getElementById(id);
+  for (const p of list) {
+    const url = `${week}/${p.dir}/`;
     const card = document.createElement("article");
     card.className = "card";
     card.innerHTML = `
@@ -106,11 +136,36 @@
         <p>${p.desc}</p>
         <div class="links">
           <a href="${url}">Open demo →</a>
-          <a href="https://github.com/dwan11/Adv-Interface/tree/main/week1/${p.dir}">Code</a>
+          <a href="https://github.com/dwan11/Adv-Interface/tree/main/${week}/${p.dir}">Code</a>
         </div>
       </div>`;
     grid.appendChild(card);
   }
+  }
+  render("week2", "week2", week2);
+  render("week1", "week1", week1);
+
+  // Tabs: one week visible at a time; the URL hash (#week2) keeps the choice linkable.
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  function show(week, focus = false) {
+    for (const t of tabs) {
+      const on = t.id === `tab-${week}`;
+      t.setAttribute("aria-selected", on);
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+      if (on && focus) t.focus();
+    }
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener("click", () => { const w = t.id.slice(4); show(w); history.replaceState(null, "", `#${w}`); });
+    t.addEventListener("keydown", (e) => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; n.click(); n.focus(); }
+    });
+  });
+  const fromHash = () => show(tabs.some((t) => t.id === `tab-${location.hash.slice(1)}`) ? location.hash.slice(1) : "week1");
+  addEventListener("hashchange", fromHash);
+  fromHash();
 </script>
 </body>
 </html>

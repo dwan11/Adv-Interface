@@ -2,6 +2,18 @@
 
 Coursework for Advanced Interface.
 
+## Week 2: Badges & Tooltips
+
+One meadow system, three tones. Each set has a badge (no content / content) and a tooltip (plain / rich), driven by interactions other than click and hover.
+
+| Set | Tone | Folder |
+|---|---|---|
+| Bloom | Playful | [week2/bloom](week2/bloom) |
+| Dandelion | Playful | [week2/dandelion](week2/dandelion) |
+| Firefly | Intimate | [week2/firefly](week2/firefly) |
+
+Shared engine: [week2/shared](week2/shared).
+
 ## Week 1: Loaders
 
 | Project | Folder |
