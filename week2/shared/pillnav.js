@@ -17,8 +17,11 @@
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7.5 2 7.5H4S6 15 6 9z"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/></svg>'
   ];
   const CURSOR = '<svg viewBox="0 0 16 22" aria-hidden="true"><path d="M1 1 L1 17 L5.5 13 L8.5 20 L11 19 L8 12 L14 12 Z" fill="#18181B" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+  const RICH = { bloom: ['Got it', `${COUNT} notes have bloomed.`], dandelion: ['Make a wish', `${COUNT} seeds, ready to send.`], firefly: ['keep it close', `${COUNT} notes, just for you.`],
+    harvest: ['Harvest', `${COUNT} things are ready to pick.`], shy: ['Show me', `um… ${COUNT} new notes?`] }[SET];
+  const BODY = ['Back to where you started.', 'Everything you’ve saved.', 'How this place works.', RICH[1]];
   const ISL = {
-    desk: `${ICON[3]}<span><b>${COUNT}</b> notes, just for you</span>`,
+    desk: `${ICON[3]}<span>a note, just for you</span>`,
     mob: `${ICON[3]}<span><b>${COUNT}</b> notes<small>just for you</small></span>`
   };
   const wheels = String(COUNT).split('').map(() => `<span class="pn-wh">${[...Array(10)].map((_, d) => `<span>${d}</span>`).join('')}</span>`).join('');
@@ -77,6 +80,55 @@
     <div class="trig"><span><i>switch</i>tap a tab</span><span><i>badge</i>a note arrives · open the bell</span><span><i>tooltip</i>hover · long-press</span></div>`;
   grid.prepend(card);
 
+  /* ---------- Dandelion: things turn into seeds and the wind takes them ---------- */
+  const rnd = (a, b) => a + Math.random() * (b - a), clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v, easeOut = u => 1 - Math.pow(1 - u, 3);
+  let SEED;
+  const seedSprite = () => SEED || (SEED = (() => {
+    const cv = document.createElement('canvas'), k = 3; cv.width = 40 * k; cv.height = 52 * k;
+    const c = cv.getContext('2d'); c.scale(k, k); c.translate(20, 16); c.lineCap = 'round';
+    c.strokeStyle = 'rgba(142,156,164,.95)'; c.lineWidth = .55;
+    for (let n = 0; n < 26; n++) {
+      const a = Math.PI * (1.04 + n / 25 * .92), L = 11 + Math.sin(n * 2.3) * 2.5, x = Math.cos(a) * L, y = Math.sin(a) * L * .78;
+      c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(x * .5, y * .62, x, y); c.stroke();
+      c.fillStyle = 'rgba(142,156,164,.9)'; c.beginPath(); c.arc(x, y, .55, 0, 7); c.fill();
+    }
+    c.lineWidth = .7; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 17); c.stroke();
+    c.fillStyle = '#5D6A71'; c.beginPath(); c.ellipse(0, 20.5, 1.3, 3.2, 0, 0, 7); c.fill();
+    return cv; })());
+  function windSeeds(list) {
+    const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio || 1), img = seedSprite();
+    cv.className = 'pn-fx'; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; document.body.appendChild(cv);
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const end = Math.max(...list.map(p => p.go + p.life)), t0 = performance.now();
+    return new Promise(res => {
+      const frame = now => {
+        const t = now - t0; ctx.clearRect(0, 0, innerWidth, innerHeight);
+        for (const p of list) {
+          const f = clamp01((t - p.form) / 240); if (!f) continue;
+          let x = p.x, y = p.y, rot = p.tilt * .3 + Math.sin(t / 260 + p.ph) * 4, a = f;
+          const u = clamp01((t - p.go) / p.life);
+          if (u > 0) { const g = Math.pow(u, 1.35); x += p.dx * g + Math.sin(u * 9 + p.ph) * 12 * u; y += p.dy * g + Math.sin(u * 6 + p.ph) * 5;
+            rot = p.tilt + Math.sin(u * 11 + p.ph) * 18; a *= u > .62 ? 1 - (u - .62) / .38 : 1; }
+          const sc = p.s * (.35 + .65 * easeOut(f));
+          ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(rot * Math.PI / 180); ctx.scale(sc, sc); ctx.drawImage(img, -20, -16, 40, 52); ctx.restore();
+        }
+        if (t < end) requestAnimationFrame(frame); else { cv.remove(); res(); }
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+  // a card: seeds fill its shape, then a gust lifts them away from the right edge first
+  const cardToSeeds = R => { const gap = 17, cols = Math.max(3, Math.round(R.width / gap)), rows = Math.max(2, Math.round(R.height / gap)), out = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) out.push({ x: R.left + (c + .5) / cols * R.width + rnd(-4, 4), y: R.top + (r + .5) / rows * R.height + rnd(-4, 4) - 8,
+      s: rnd(.45, .75), form: rnd(60, 420), go: 560 + (1 - c / Math.max(1, cols - 1)) * 600 + rnd(0, 280), life: rnd(1700, 2500), dx: rnd(200, 460), dy: -rnd(110, 300), tilt: rnd(-8, 26), ph: rnd(0, 6.28) });
+    return windSeeds(out); };
+  // the puff: its seeds let go one by one and drift off
+  const puffToSeeds = R => { const cx = R.left + R.width / 2, cy = R.top + R.height / 2, n = 12, out = [];
+    for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, rr = R.width * .38;
+      out.push({ x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr - 6, s: rnd(.32, .5), form: 0, go: rnd(0, 380), life: rnd(1500, 2300), dx: rnd(120, 300), dy: -rnd(70, 200), tilt: rnd(-10, 30), ph: rnd(0, 6.28) }); }
+    return windSeeds(out); };
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   /* ---------- timers live in one list so the demo can be stopped cleanly ---------- */
   let timers = [];
   const later = (f, ms) => setTimeout(f, ms);            // a bar's own follow-up steps: always finish
@@ -90,7 +142,8 @@
     const tipwrap = el.querySelector('.pn-tipwrap'), tip = el.querySelector('.pn-tip'), txt = el.querySelector('.pn-txt'), screen = el.closest('.pn-screen');
     const m = () => { const s = getComputedStyle(el); return { T: parseFloat(s.getPropertyValue('--T')), G: parseFloat(s.getPropertyValue('--G')), P: parseFloat(s.getPropertyValue('--P')) }; };
     const pos = k => { const { T, G, P } = m(); return P + k * (T + G); };
-    let i = 0, tipK = -1, typing = [];
+    const isMob = !!el.closest('.pn-mob');
+    let i = 0, tipK = -1, typing = [], wishing = false;
     const setHL = (k, instant) => {
       const { T } = m();
       if (c === 'island') { el.style.setProperty('--l', pos(k) + 'px'); el.style.setProperty('--w', T + 'px'); }
@@ -139,7 +192,10 @@
       },
       clear() {
         if (!el.classList.contains('b-on')) return;
-        if (c === 'liquid') { el.classList.remove('b-on', 'ping'); restart(el, 'unping'); }
+        if (c === 'liquid') {
+          if (SET === 'dandelion' && !REDUCED) { const art = badge.querySelector('.pn-art'); if (art) puffToSeeds(art.getBoundingClientRect()); badge.style.transition = 'none'; }
+          el.classList.remove('b-on', 'ping'); restart(el, 'unping'); void badge.offsetWidth; badge.style.transition = '';
+        }
         else if (c === 'spring') { el.querySelectorAll('.pn-wh').forEach(w => w.style.setProperty('--d', 0)); later(() => { el.classList.remove('b-on'); sync(); }, 350); }
         else el.classList.remove('b-on');
         sync();
@@ -147,13 +203,19 @@
       tip(k, v) {
         typing.forEach(clearTimeout); typing = [];
         if (!v) { if (tipK < 0) return; tipK = -1; el.classList.remove('ton'); if (c === 'liquid') { restart(el, 'toff'); later(() => el.classList.remove('toff'), 450); } return; }
+        if (wishing) return;
         const { T } = m(), label = LABEL[k];
         tipK = k; el.style.setProperty('--tipx', pos(k) + T / 2 + 'px');
-        txt.textContent = label; tipwrap.style.setProperty('--tx', '0px');
-        const w = tip.offsetWidth, sr = screen.getBoundingClientRect(), nr = el.getBoundingClientRect();
+        tip.classList.toggle('rich', isMob);
+        if (isMob) txt.innerHTML = `<b>${label}</b><span class="pn-body">${BODY[k]}</span><button class="pn-act" type="button">${RICH[0]}</button>`;
+        else txt.textContent = label;
+        tipwrap.style.setProperty('--tx', '0px'); tipwrap.style.removeProperty('--th');
+        const w = tip.offsetWidth, h = tip.offsetHeight, sr = screen.getBoundingClientRect(), nr = el.getBoundingClientRect();
         const cx = nr.left - sr.left + pos(k) + T / 2, left = cx - w / 2, clamped = Math.max(8, Math.min(sr.width - 8 - w, left));
         tipwrap.style.setProperty('--tx', (clamped - left) + 'px'); tipwrap.style.setProperty('--tw', w + 'px');
-        if (c === 'shy') {  // types its own name, slips, corrects itself
+        tipwrap.style.setProperty('--th', h + 'px'); tipwrap.style.setProperty('--off', (h / 2 + (SET === 'dandelion' ? 32 : 12)) + 'px');
+        if (isMob) { const act = txt.querySelector('.pn-act'); act.addEventListener('click', e => { e.stopPropagation(); takeOver(); api.act(); }); }
+        if (c === 'shy' && !isMob) {  // types its own name, slips, corrects itself
           const slip = label.length > 3 ? label.slice(0, -2) + label.slice(-1) + label.slice(-2, -1) : label;
           txt.textContent = ''; let t = 0;
           [...slip].forEach(ch => typing.push(setTimeout(() => txt.insertAdjacentText('beforeend', ch), t += 70)));
@@ -165,12 +227,22 @@
         }
         el.classList.remove('toff'); el.classList.add('ton');
       },
+      act() {
+        if (tipK < 0 || wishing) return; const k = tipK;
+        if (SET === 'dandelion' && !REDUCED) {
+          wishing = true; el.classList.add('wished');
+          const R = tip.getBoundingClientRect(), fades = [tip, el.querySelector('.pn-tg')].map(n => n.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: 'blur(3px)' }], { duration: 480, easing: 'ease-in', fill: 'forwards' }));
+          cardToSeeds(R).then(() => { tipK = -1; el.classList.remove('ton', 'wished'); later(() => { fades.forEach(f => f.cancel()); wishing = false; }, 400); });
+        } else api.tip(k, false);
+      },
+      pointAct() { const b = tip.querySelector('.pn-act'); if (!b) return; const r = b.getBoundingClientRect(), nr = el.getBoundingClientRect();
+        ptr.style.setProperty('--px', r.left - nr.left + r.width / 2 + 'px'); ptr.style.setProperty('--py', r.top - nr.top + r.height / 2 + 'px'); ptr.style.opacity = 1; },
+      isMob,
       still() { api.reset(); el.classList.add('b-on'); if (c === 'liquid') el.classList.add('ping');
         if (c === 'spring') { const w = [...el.querySelectorAll('.pn-wh')], d = String(COUNT).split(''); w.forEach((x, n) => x.style.setProperty('--d', d[n])); } }
     };
 
     /* ---------- your own hands on it ---------- */
-    const isMob = !!el.closest('.pn-mob');
     tabs.forEach((t, k) => {
       let ht, long = false, ht2;
       t.addEventListener('click', e => { takeOver(); if (long) { long = false; return; } api.tip(k, false); api.go(k); });
@@ -179,12 +251,13 @@
         t.addEventListener('mouseleave', () => { clearTimeout(ht2); if (tipK === k) api.tip(k, false); });
       }
       t.addEventListener('pointerdown', e => { if (!isMob && e.pointerType === 'mouse') return; takeOver(); long = false; clearTimeout(ht); ht = setTimeout(() => { long = true; api.tip(k, true); }, 450); });
-      const up = () => { clearTimeout(ht); if (long) setTimeout(() => api.tip(k, false), 700); };
+      const up = () => { clearTimeout(ht); if (long && !isMob) setTimeout(() => api.tip(k, false), 700); };
       t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up); t.addEventListener('pointerleave', () => clearTimeout(ht));
       t.addEventListener('contextmenu', e => e.preventDefault());
       t.addEventListener('focus', () => { if (t.matches(':focus-visible')) api.tip(k, true); });
       t.addEventListener('blur', () => { if (tipK === k) api.tip(k, false); });
     });
+    screen.addEventListener('pointerdown', e => { if (tipK >= 0 && isMob && !e.target.closest('.pn-tip') && !e.target.closest('.pn-tb')) api.tip(tipK, false); });
     setHL(0);
     return api;
   }
@@ -209,12 +282,16 @@
     at(2900, () => all(b => b.notify()));
     at(4700 + slow, () => all(b => { b.point(3); b.hold(true); }));
     at(5050 + slow, () => all(b => b.tip(3, true)));
-    at(6800 + slow, () => all(b => { b.tip(3, false); b.hold(false); }));
-    at(7100 + slow, () => all(b => { b.tap(); b.go(3); }));
-    at(8100 + slow, () => all(b => b.point(0)));
-    at(8450 + slow, () => all(b => { b.tap(); b.go(0); }));
-    at(9300 + slow, () => all(b => b.point(0, true)));
-    at(9900 + slow, demo);
+    at(5600 + slow, () => all(b => b.hold(false)));
+    // phone: reach for the rich tooltip's action and press it; desktop: the plain tooltip just goes
+    at(6300 + slow, () => all(b => b.isMob && b.pointAct()));
+    at(6750 + slow, () => all(b => { if (b.isMob) { b.tap(); b.act(); } else b.tip(3, false); }));
+    at(7900 + slow, () => all(b => { b.point(3); }));
+    at(8250 + slow, () => all(b => { b.tap(); b.go(3); }));
+    at(9300 + slow, () => all(b => b.point(0)));
+    at(9650 + slow, () => all(b => { b.tap(); b.go(0); }));
+    at(10500 + slow, () => all(b => b.point(0, true)));
+    at(11300 + slow, demo);
   }
   // a click, tap or key press ends the demo and hands the bar to you; a new note always turns up a few
   // seconds after the badge is gone; leave it alone for a while and the demo plays again
