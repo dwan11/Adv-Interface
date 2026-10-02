@@ -92,6 +92,7 @@
       c, w, a: w.querySelector('.anchor'), stage: c.querySelector('.stage'),
       on: () => w.classList.contains(cls),
       set(v) {
+        if (!v && api.busy) return;   // a closing animation is playing; it closes itself when done
         const was = api.on();
         if (v && !was && cls === 'on') { w.classList.add('pre'); void w.offsetWidth; w.classList.remove('pre'); }
         w.classList.toggle(cls, v);
@@ -124,10 +125,96 @@
     api.a.addEventListener('mouseleave', () => { api.a.classList.remove('part'); if (!rich) api.set(false); });
     if (rich) { api.w.addEventListener('mouseenter', () => clearTimeout(ct)); api.w.addEventListener('mouseleave', () => { clearTimeout(ct); ct = setTimeout(() => api.set(false), 500); }); }
   }
-  function outsideClose(api) {
+  function outsideClose(api, onAct) {
     document.addEventListener('pointerdown', e => { if (api.on() && !api.w.contains(e.target)) api.set(false); });
     ESC.push(() => api.set(false));
-    api.w.querySelector('.act').addEventListener('click', () => api.set(false));
+    api.w.querySelector('.act').addEventListener('click', () => (onAct ? onAct() : api.set(false)));
+  }
+
+  /* ---------- action exits: the rich tooltip leaves in character ---------- */
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  // run fn(), then close the tooltip and put everything back once the pop has faded
+  function exitThen(api, anims, cleanup) {
+    Promise.all(anims.map(a => a.finished.catch(() => {}))).then(() => {
+      api.busy = false; api.set(false);
+      setTimeout(cleanup, 650);
+    });
+  }
+
+  // Dandelion · "Make a wish": the card breaks into pieces, each piece becomes a seed and drifts off on the wind
+  const WISP = '<svg viewBox="0 0 20 26" aria-hidden="true">' +
+    [...Array(9)].map((_, i) => { const a = Math.PI * (1.1 + i * 0.1), x = (10 + Math.cos(a) * 9).toFixed(1), y = (11 + Math.sin(a) * 9).toFixed(1); return `<line x1="10" y1="11" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r=".8"/>`; }).join('') +
+    '<line x1="10" y1="11" x2="10" y2="21"/><ellipse cx="10" cy="22.5" rx="1.3" ry="2"/></svg>';
+  function blowAway(api) {
+    if (api.busy) return;
+    if (REDUCED) return api.set(false);
+    api.busy = true;
+    const tip = api.w.querySelector('.tip'), hang = api.w.querySelector('.hang');
+    const W = tip.offsetWidth, H = tip.offsetHeight, L = tip.offsetLeft, T = tip.offsetTop;
+    const cols = 7, rows = 4, cw = W / cols, rh = H / rows, made = [], anims = [];
+    hang.classList.add('blown');
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const cx = (c + .5) * cw, cy = (r + .5) * rh;
+      const dx = rnd(150, 380) + c * 14, dy = -rnd(70, 230) - (rows - r) * 12, rot = rnd(-70, 70), phase = rnd(0, 6.28);
+      const delay = (cols - 1 - c) * 55 + rnd(0, 140);   // the wind peels it from the right edge first
+      const p = tip.cloneNode(true);
+      p.removeAttribute('role'); p.removeAttribute('aria-label'); p.setAttribute('aria-hidden', 'true'); p.classList.add('shard');
+      p.style.cssText = `left:${L}px;top:${T}px;width:${W}px;height:${H}px;transform-origin:${cx}px ${cy}px;clip-path:inset(${r * rh - .5}px ${W - (c + 1) * cw - .5}px ${H - (r + 1) * rh - .5}px ${c * cw - .5}px)`;
+      hang.appendChild(p); made.push(p);
+      anims.push(p.animate([
+        { transform: 'none', opacity: 1 },
+        { transform: `translate(${dx * .06}px,${-6}px) rotate(${rot * .1}deg)`, opacity: 1, offset: .14 },
+        { transform: `translate(${dx * .4}px,${dy * .35}px) rotate(${rot * .6}deg) scale(.55)`, opacity: .9, offset: .55 },
+        { transform: `translate(${dx * .6}px,${dy * .55}px) rotate(${rot}deg) scale(.12)`, opacity: 0 }
+      ], { duration: 1250, delay, easing: 'cubic-bezier(.35,.1,.4,1)', fill: 'both' }));
+      // the seed that the piece turns into, carried further on with a flutter
+      const s = document.createElement('span');
+      s.className = 'wisp'; s.innerHTML = WISP; s.style.cssText = `left:${L + cx}px;top:${T + cy}px`;
+      hang.appendChild(s); made.push(s);
+      const frames = [...Array(9)].map((_, k) => {
+        const t = k / 8, x = dx * (.45 + 1.25 * t) + Math.sin(t * 9 + phase) * 16, y = dy * (.4 + 1.1 * t) - t * 50;
+        return { transform: `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${(Math.sin(t * 6 + phase) * 22).toFixed(1)}deg) scale(${(.6 + t * .3).toFixed(2)})`, opacity: t < .18 ? t / .18 : t > .68 ? (1 - t) / .32 : 1 };
+      });
+      anims.push(s.animate(frames, { duration: rnd(1800, 2500), delay: delay + 520, easing: 'linear', fill: 'both' }));
+    }
+    exitThen(api, anims, () => { made.forEach(n => n.remove()); hang.classList.remove('blown'); });
+  }
+
+  // Firefly · "keep it close": a swarm lands on the note, then scatters and carries its light away
+  function swarm(api) {
+    if (api.busy) return;
+    if (REDUCED) return api.set(false);
+    api.busy = true;
+    const tip = api.w.querySelector('.tip'), hang = api.w.querySelector('.hang'), R = tip.getBoundingClientRect();
+    const layer = document.createElement('div'); layer.className = 'swarm'; document.body.appendChild(layer);
+    const N = innerWidth < 600 ? 80 : 180, ccx = R.left + R.width / 2, ccy = R.top + R.height / 2, OUT = 2900, anims = [];
+    hang.classList.add('swarmed');
+    for (let i = 0; i < N; i++) {
+      const f = document.createElement('span'); f.className = 'sw';
+      f.style.animationDelay = `-${rnd(0, 1.4).toFixed(2)}s`; layer.appendChild(f);
+      const a = rnd(0, 6.28), d = rnd(260, 780), sx = ccx + Math.cos(a) * d, sy = ccy + Math.sin(a) * d;
+      const tx = rnd(R.left + 6, R.right - 6), ty = rnd(R.top + 6, R.bottom - 6);
+      const mx = (sx + tx) / 2 + rnd(-140, 140), my = (sy + ty) / 2 + rnd(-140, 140);
+      const b = rnd(0, 6.28), e = rnd(320, 900), ox = tx + Math.cos(b) * e, oy = ty + Math.sin(b) * e - 90;
+      const qx = (tx + ox) / 2 + rnd(-120, 120), qy = (ty + oy) / 2 + rnd(-120, 120);
+      // fly in on a curve and settle on the note
+      f.animate([
+        { transform: `translate(${sx}px,${sy}px) scale(.5)`, opacity: 0 },
+        { transform: `translate(${mx}px,${my}px) scale(.8)`, opacity: 1, offset: .55 },
+        { transform: `translate(${tx}px,${ty}px) scale(1)`, opacity: 1 }
+      ], { duration: rnd(900, 1600), delay: rnd(0, 1100), easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'both' });
+      // then scatter in every direction
+      anims.push(f.animate([
+        { transform: `translate(${tx}px,${ty}px) scale(1)`, opacity: 1 },
+        { transform: `translate(${qx}px,${qy}px) scale(.85)`, opacity: .95, offset: .5 },
+        { transform: `translate(${ox}px,${oy}px) scale(.4)`, opacity: 0 }
+      ], { duration: rnd(1300, 2200), delay: OUT + rnd(0, 600), easing: 'cubic-bezier(.45,0,.7,.6)', fill: 'forwards' }));
+    }
+    // the note warms under them, then leaves with their light
+    tip.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.28)' }], { duration: 1500, delay: 800, fill: 'forwards', easing: 'ease-out' });
+    anims.push(tip.animate([{ opacity: 1, filter: 'brightness(1.28) blur(0)' }, { opacity: 0, filter: 'brightness(1.9) blur(6px)' }], { duration: 1400, delay: OUT + 150, fill: 'forwards', easing: 'ease-in' }));
+    exitThen(api, anims, () => { layer.remove(); hang.classList.remove('swarmed'); tip.getAnimations().forEach(x => x.cancel()); });
   }
 
   /* ================= BLOOM ================= */
@@ -226,7 +313,7 @@
     pl.a.addEventListener('focus', () => { if (pl.a.matches(':focus-visible')) pl.set(true); }); pl.a.addEventListener('blur', () => pl.set(false));
 
     // rich · in: hold, then release (a seed floats down) · out: swipe the card away
-    const rc = ctl('rich'); outsideClose(rc); hoverTip(rc, true);
+    const rc = ctl('rich'); outsideClose(rc, () => blowAway(rc)); hoverTip(rc, true);
     const h = hold(rc, 600, () => { rc.ready = true; });
     rc.a.addEventListener('pointerdown', e => { rc.ready = false; rc.a.setPointerCapture(e.pointerId); h.start(); });
     rc.a.addEventListener('pointerup', () => { h.stop(); if (rc.ready) rc.set(true); });
@@ -283,7 +370,7 @@
     pl.a.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') pl.set(!pl.on()); });
     pl.a.addEventListener('focus', () => { if (pl.a.matches(':focus-visible')) pl.set(true); }); pl.a.addEventListener('blur', () => pl.set(false));
 
-    const rc = ctl('rich'), frc = firefly(rc); outsideClose(rc); let ct;
+    const rc = ctl('rich'), frc = firefly(rc); outsideClose(rc, () => swarm(rc)); let ct;
     rc.a.addEventListener('mouseenter', () => { clearTimeout(ct); frc.land(true); rc.set(true); });
     rc.a.addEventListener('mouseleave', () => frc.land(false));
     rc.w.addEventListener('mouseenter', () => clearTimeout(ct));

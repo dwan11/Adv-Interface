@@ -19,11 +19,11 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 /* items falling into the bag (badge · no content, looping) */
 .it{opacity:0;transform-box:fill-box;transform-origin:50% 50%}
 .bw.on .inbag .it{animation:fall 2.4s cubic-bezier(.45,0,.75,.6) infinite;animation-delay:calc(var(--i) * .6s)}
-@keyframes fall{0%{transform:translate(var(--x),-46px) rotate(-35deg);opacity:0}12%{opacity:1}50%{transform:translate(var(--x),52px) rotate(25deg);opacity:1}54%,100%{transform:translate(var(--x),52px) rotate(25deg);opacity:0}}
+@keyframes fall{0%{transform:translate(var(--x),-62px) rotate(-35deg);opacity:0}12%{opacity:1}50%{transform:translate(var(--x),46px) rotate(25deg);opacity:1}54%,100%{transform:translate(var(--x),46px) rotate(25deg);opacity:0}}
 
 /* items flying out into a number (badge · content) */
 .bw.go .burst .it{animation:fly 1.05s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i) * .09s)}
-@keyframes fly{0%{transform:translate(var(--x),46px) rotate(0) scale(1);opacity:0}12%{opacity:1}55%{transform:translate(var(--mx),var(--my)) rotate(160deg) scale(.85);opacity:1}100%{transform:translate(118px,-6px) rotate(320deg) scale(.15);opacity:0}}
+@keyframes fly{0%{transform:translate(var(--x),36px) rotate(0) scale(1);opacity:0}12%{opacity:1}55%{transform:translate(var(--mx),var(--my)) rotate(160deg) scale(.85);opacity:1}100%{transform:translate(111px,-15px) rotate(320deg) scale(.15);opacity:0}}
 .num-badge{position:absolute;top:-14px;right:-14px;min-width:34px;height:34px;padding:0 8px;border-radius:17px;background:var(--tomato);color:#fff;font:700 16px/34px var(--body);text-align:center;box-shadow:0 3px 0 rgba(58,42,26,.25);transform:scale(0);transition:transform .2s ease-in;pointer-events:none}
 .bw.on .num-badge{transform:none;transition:transform .5s cubic-bezier(.2,1.6,.4,1) .85s}
 .bw.on.bump .num-badge{animation:pop .45s cubic-bezier(.2,1.6,.4,1) .85s}
@@ -73,4 +73,4 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 @keyframes drip{to{transform:translateY(34px);opacity:0}}
 @media (hover:hover) and (pointer:fine){[data-set="harvest"] .stage.gz,[data-set="harvest"] .stage.gz *{cursor:none}}
 @media (hover:none){.gardener{display:none}}
-@media (prefers-reduced-motion:reduce){.bw.on .inbag .it{animation:none;opacity:1;transform:translate(var(--x),20px)}}
+@media (prefers-reduced-motion:reduce){.bw.on .inbag .it{animation:none;opacity:1;transform:translate(var(--x),14px)}}

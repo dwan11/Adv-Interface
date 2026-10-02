@@ -13,9 +13,9 @@
     <symbol id="g-broc" viewBox="0 0 24 24"><path d="M10 13.5 L14 13.5 L13.2 22 L10.8 22 Z" fill="#9CC07A"/><g fill="#4F8A3C"><circle cx="8.5" cy="10" r="4"/><circle cx="15.5" cy="10" r="4"/><circle cx="12" cy="7" r="4.4"/></g><g fill="#5E9C46"><circle cx="11.5" cy="11.5" r="3.6"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16" cy="7" r="2.2"/></g></symbol>
   </defs></svg>`;
   const ITEMS = ['g-carrot', 'g-straw', 'g-banana', 'g-broc'];
-  const X = ['44px', '62px', '52px', '70px'];
-  const MID = [['30px','-30px'],['70px','-46px'],['40px','-56px'],['92px','-30px']];
-  const item = (id, i, extra = '') => `<g class="it" style="--i:${i};--x:${X[i]};--mx:${MID[i][0]};--my:${MID[i][1]}${extra}"><use href="#${id}" x="0" y="0" width="22" height="22"/></g>`;
+  const X = ['30px', '64px', '46px', '58px'];
+  const MID = [['14px','-42px'],['72px','-62px'],['34px','-74px'],['96px','-40px']];
+  const item = (id, i, extra = '') => `<g class="it" style="--i:${i};--x:${X[i]};--mx:${MID[i][0]};--my:${MID[i][1]}${extra}"><use href="#${id}" x="0" y="0" width="36" height="36"/></g>`;
   function bag(kind) {
     const group = kind === 'loop' ? `<g class="inbag">${ITEMS.map((id, i) => item(id, i)).join('')}</g>` : `<g class="burst">${ITEMS.map((id, i) => item(id, i)).join('')}</g>`;
     return `<svg class="bag" viewBox="0 0 132 154" aria-hidden="true">
