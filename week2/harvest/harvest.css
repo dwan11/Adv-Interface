@@ -87,3 +87,30 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 .shelf .bw.go .burst .it{animation-name:flyIcon}
 @keyframes flyIcon{0%{transform:translate(var(--x),28px) rotate(0) scale(1);opacity:0}12%{opacity:1}55%{transform:translate(var(--mx),var(--my)) rotate(160deg) scale(.85);opacity:1}100%{transform:translate(98px,-21px) rotate(320deg) scale(.12);opacity:0}}
 .app-name{font:500 12px/1.2 var(--body);color:var(--ink);letter-spacing:.01em;white-space:nowrap}
+
+/* ---------- rich tooltip reward: a pot of cooked carrots with shine behind it ---------- */
+.carry{position:relative}
+.carry.cooked .note{animation:noteOut .3s ease-in forwards}
+.carry.cooked::after{opacity:0;transition:opacity .3s}
+@keyframes noteOut{to{transform:scale(.5);opacity:0}}
+.reward{position:absolute;left:50%;width:0;height:0;pointer-events:none;z-index:3}
+.reward .rays{position:absolute;left:-175px;top:-175px;width:350px;height:350px;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,200,80,.8) 0deg 8deg,rgba(255,200,80,0) 8deg 22.5deg);
+  -webkit-mask:radial-gradient(circle,#000 16%,rgba(0,0,0,.55) 42%,transparent 70%);mask:radial-gradient(circle,#000 16%,rgba(0,0,0,.55) 42%,transparent 70%);
+  opacity:0;animation:shineIn .5s ease-out .15s forwards,spin 9s linear infinite}
+.reward .glow{position:absolute;left:-115px;top:-115px;width:230px;height:230px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,250,220,1) 0,rgba(255,220,130,.85) 26%,rgba(255,175,70,.3) 52%,rgba(255,175,70,0) 70%);
+  opacity:0;animation:shineIn .4s ease-out .1s forwards,throb 1.3s ease-in-out .6s infinite alternate}
+@keyframes shineIn{from{opacity:0;scale:.35}to{opacity:1;scale:1}}
+@keyframes spin{to{rotate:360deg}}
+@keyframes throb{from{scale:1}to{scale:1.12}}
+.reward .pot{position:absolute;left:-78px;top:-74px;width:156px;scale:0;animation:potIn .65s cubic-bezier(.2,1.6,.4,1) .2s forwards}
+.reward .pot svg{display:block;width:156px;height:auto;overflow:visible}
+@keyframes potIn{from{scale:0;rotate:-14deg}to{scale:1;rotate:0deg}}
+.reward .steam path{fill:none;stroke:rgba(255,255,255,.9);stroke-width:3;stroke-linecap:round;opacity:0;animation:steam 1.7s ease-out infinite}
+.reward .steam path:nth-child(2){animation-delay:.5s} .reward .steam path:nth-child(3){animation-delay:1s}
+@keyframes steam{0%{opacity:0;transform:translateY(8px)}30%{opacity:.9}100%{opacity:0;transform:translateY(-16px)}}
+.reward .spark{position:absolute;background:#FFF6CF;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);filter:drop-shadow(0 0 4px #FFD46A);scale:0;animation:glint .8s ease-in-out infinite alternate}
+@keyframes glint{from{scale:0;rotate:0deg}to{scale:1;rotate:45deg}}
+.reward.out{animation:rewardOut .45s ease-in forwards}
+@keyframes rewardOut{to{opacity:0;scale:.6}}

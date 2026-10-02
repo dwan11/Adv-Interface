@@ -138,13 +138,45 @@
     lastX = e.clientX;
   });
 
+  /* rich tooltip · "Harvest": the note turns into a pot of cooked carrots, with reward rays shining behind it */
+  const slice = ([x, y, r, rot]) => `<g transform="translate(${x} ${y}) rotate(${rot})"><ellipse rx="${r}" ry="${r * .62}" fill="#D9601C"/><ellipse cy="-1" rx="${r * .9}" ry="${r * .54}" fill="#EE8436"/><ellipse cy="-1" rx="${r * .55}" ry="${r * .32}" fill="#F6A65A"/><ellipse cy="-1" rx="${r * .2}" ry="${r * .12}" fill="#FCCB86"/><ellipse cx="${-r * .28}" cy="${-r * .3}" rx="${r * .42}" ry="${r * .14}" fill="rgba(255,255,255,.4)"/></g>`;
+  const SLICES = [[34,44,10,-8],[50,46,11,6],[68,47,11,-4],[86,46,11,8],[104,44,10,-6],[42,36,10,10],[58,37,11,-12],[76,36,11,6],[94,37,10,-10],[50,28,10,-4],[67,27,11,8],[84,28,10,-8],[60,19,10,4],[76,19,10,-6],[68,12,9,0]];
+  const POT = `<svg viewBox="0 0 140 124" aria-hidden="true">
+      <ellipse cx="70" cy="118" rx="50" ry="5" fill="rgba(58,42,26,.22)"/>
+      <g class="steam"><path d="M48 6 q-6 -7 0 -14 q6 -7 0 -14"/><path d="M70 0 q-6 -7 0 -14 q6 -7 0 -14"/><path d="M92 6 q-6 -7 0 -14 q6 -7 0 -14"/></g>
+      <rect x="2" y="52" width="17" height="11" rx="5" fill="#24575B"/><rect x="121" y="52" width="17" height="11" rx="5" fill="#24575B"/>
+      <path d="M14 44 A56 12 0 0 1 126 44 Z" fill="#1F4E52"/>
+      <ellipse cx="70" cy="45" rx="52" ry="10" fill="#B4541E"/>
+      ${SLICES.map(slice).join('')}
+      <g fill="#4F8A3C"><path d="M45 31 l5 -3 l1 3 z"/><path d="M80 22 l4 -4 l2 3 z"/><path d="M97 40 l5 -1 l-1 3 z"/><path d="M63 40 l4 -3 l1 3 z"/><path d="M70 6 q-5 -6 -1 -9 q3 4 1 9z"/></g>
+      <path d="M14 44 Q14 104 40 110 H100 Q126 104 126 44 A56 12 0 0 1 14 44 Z" fill="#2E6E73"/>
+      <path d="M14 44 A56 12 0 0 0 126 44" stroke="#4A9A9E" stroke-width="5" fill="none"/>
+      <path d="M30 62 Q32 88 44 100" stroke="rgba(255,255,255,.3)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M108 62 Q108 82 100 96" stroke="rgba(0,0,0,.14)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </svg>`;
+  const SPARKS = [[-125, -55, 16, 0], [112, -82, 12, .3], [-98, 52, 11, .5], [122, 36, 15, .15], [-42, -112, 10, .4], [58, -118, 14, .6]]
+    .map(([x, y, s, d]) => `<span class="spark" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;margin:${-s / 2}px 0 0 ${-s / 2}px;animation-delay:${.35 + d}s"></span>`).join('');
+  function cook(api, close) {
+    if (api.busy) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return close();
+    api.busy = true;
+    const note = api.w.querySelector('.note'), carry = api.w.querySelector('.carry');
+    const r = document.createElement('div');
+    r.className = 'reward'; r.setAttribute('aria-hidden', 'true');
+    r.innerHTML = `<span class="rays"></span><span class="glow"></span>${SPARKS}<div class="pot">${POT}</div>`;
+    r.style.top = (note.offsetTop + note.offsetHeight / 2) + 'px';
+    carry.appendChild(r); carry.classList.add('cooked');
+    setTimeout(() => r.classList.add('out'), 2800);
+    setTimeout(() => { api.busy = false; close(); setTimeout(() => { r.remove(); carry.classList.remove('cooked'); }, 700); }, 3250);
+  }
+
   /* tooltips — cursor is a gardener; hover the carrot, or circle it, and it grows up carrying the info */
   function garden(api, rich) {
     const g = api.stage.querySelector('.gardener'), carrot = api.w.querySelector('.carrot');
     api.stage.classList.add('gz');
     let acc = 0, lastA = null, lastT = 0, ct, lastDrop = 0;
     const open = () => { clearTimeout(ct); api.w.classList.remove('circling'); carrot.style.removeProperty('--rise'); api.set(true); };
-    const close = () => { acc = 0; api.w.classList.remove('circling'); carrot.style.removeProperty('--rise'); api.set(false); };
+    const close = () => { if (api.busy) return; acc = 0; api.w.classList.remove('circling'); carrot.style.removeProperty('--rise'); api.set(false); };
     api.stage.addEventListener('pointermove', e => {
       const r = api.stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
       if (e.pointerType === 'mouse') { g.style.transform = `translate(${x}px,${y}px)`; g.classList.add('in'); }
@@ -173,7 +205,7 @@
     api.a.addEventListener('focus', () => { if (api.a.matches(':focus-visible')) open(); });
     if (!rich) api.a.addEventListener('blur', close);
     if (rich) {
-      api.w.querySelector('.act').addEventListener('click', close);
+      api.w.querySelector('.act').addEventListener('click', () => cook(api, close));
       document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
       document.addEventListener('pointerdown', e => { if (api.on() && !api.w.contains(e.target) && e.pointerType !== 'mouse') close(); });
     }
