@@ -20,6 +20,8 @@
     return `<svg class="grass" viewBox="0 0 56 56" aria-hidden="true"><g class="gl">${B.filter(b=>b[0]<28).map(blade).join('')}</g><g class="gr">${B.filter(b=>b[0]>=28).map(blade).join('')}</g></svg>`;
   }
   const anchor = (g, label) => `<button class="anchor" aria-label="${label}">${grass()}<span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[g]}</svg></span></button>`;
+  const bare = (g, label) => `<button class="anchor bare" aria-label="${label}"><span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[g]}</svg></span></button>`;
+  const tAnchor = (g, l) => SET === 'firefly' ? bare(g, l) : anchor(g, l);
   const RING = '<span class="ring" aria-hidden="true"><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="36"/></svg></span>';
 
   function flower(big) {
@@ -53,8 +55,8 @@
     firefly: { tone: 'Intimate', name: 'Firefly',
       dot:   { in: 'be still', out: 'come close' },
       count: { in: 'wait', out: 'hold (cup)' },
-      plain: { in: 'come near', out: 'move away', text: 'keep this for later' },
-      rich:  { in: 'linger', out: 'walk away', title: 'a note, just for you', body: 'Only you can see it.', act: 'keep it close' } }
+      plain: { in: 'firefly lands', out: 'flies off', text: 'keep this for later' },
+      rich:  { in: 'firefly lands', out: 'flies off', title: 'a note, just for you', body: 'Only you can see it.', act: 'keep it close' } }
   }[SET];
 
   const STAGE = { bloom: { tip: 'up' }, dandelion: { tip: 'down' }, firefly: { tip: 'down' } }[SET];
@@ -68,8 +70,8 @@
       <div class="trig"><span><i>in</i>${d.in}</span><span><i>out</i>${d.out}</span></div>
     </article>`;
   }
-  const tipPlain = d => `<div class="tw plain">${RING}${anchor('archive','Archive')}<div class="pop"><div class="hang"><span class="stem"></span><div class="tip plain" role="tooltip">${d.text}</div></div></div></div>`;
-  const tipRich = d => `<div class="tw rich">${RING}${anchor('help','Help')}<div class="pop"><div class="hang">${SET==='bloom'?`<div class="petal-wrap" aria-hidden="true">${[-78,-52,-26,0,26,52,78].map((a,i)=>`<span style="--a:${a}deg;--i:${i}"></span>`).join('')}</div>`:''}<span class="stem"></span>${SET==='dandelion'?CHUTE:''}<div class="tip rich" role="dialog" aria-label="${d.title}"><b>${d.title}</b><p>${d.body}</p><button class="act">${d.act}</button></div></div></div></div>`;
+  const tipPlain = d => `<div class="tw plain">${RING}${tAnchor('archive','Archive')}<div class="pop"><div class="hang"><span class="stem"></span><div class="tip plain" role="tooltip">${d.text}</div></div></div></div>`;
+  const tipRich = d => `<div class="tw rich">${RING}${tAnchor('help','Help')}<div class="pop"><div class="hang">${SET==='bloom'?`<div class="petal-wrap" aria-hidden="true">${[-78,-52,-26,0,26,52,78].map((a,i)=>`<span style="--a:${a}deg;--i:${i}"></span>`).join('')}</div>`:''}<span class="stem"></span>${SET==='dandelion'?CHUTE:''}<div class="tip rich" role="dialog" aria-label="${d.title}"><b>${d.title}</b><p>${d.body}</p><button class="act">${d.act}</button></div></div></div></div>`;
   const badgeW = (key, g, label) => `<div class="bw">${RING}${anchor(g,label)}<span class="badge ${key}" aria-hidden="true">${badgeSVG(key==='count')}</span></div>`;
 
   document.title = `${DATA.name} · Week 2`;
@@ -78,8 +80,8 @@
     <div class="grid">
       ${card('dot', 'Badge · no content', ['None','Badge'], '', badgeW('dot','grid','Rooms') + (SET==='firefly'?'<span class="halo" style="--r:140px"></span>':''), DATA.dot)}
       ${card('count', 'Badge · content', ['None','Badge'], '', badgeW('count','mail','Mail') + (SET==='bloom'?'<button class="chip" aria-label="Seed: drag onto the grass"><span class="seed"></span></button>':''), DATA.count)}
-      ${card('plain', 'Tooltip · plain', ['Default','Open'], STAGE.tip, tipPlain(DATA.plain) + (SET==='firefly'?'<span class="halo" style="--r:240px"></span>':''), DATA.plain)}
-      ${card('rich', 'Tooltip · rich', ['Default','Open'], STAGE.tip, tipRich(DATA.rich), DATA.rich)}
+      ${card('plain', 'Tooltip · plain', ['Default','Open'], STAGE.tip, tipPlain(DATA.plain) + (SET==='firefly'?'<span class="ff" aria-hidden="true"></span>':''), DATA.plain)}
+      ${card('rich', 'Tooltip · rich', ['Default','Open'], STAGE.tip, tipRich(DATA.rich) + (SET==='firefly'?'<span class="ff" aria-hidden="true"></span>':''), DATA.rich)}
     </div>`;
 
   /* ---------- state plumbing ---------- */
@@ -252,24 +254,34 @@
     cnt.a.addEventListener('pointerup', () => h.stop()); cnt.a.addEventListener('pointercancel', () => h.stop());
     cnt.a.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); n = 0; cnt.set(false); paused = performance.now() + 3000; } });
 
-    // plain · in: come near (the closer, the brighter) · out: move away
-    const pl = ctl('plain'); const R = 120;
-    pl.stage.addEventListener('pointermove', e => {
-      const d = dist(pl.a, e.clientX, e.clientY);
-      if (d < R) { pl.w.style.setProperty('--near', Math.max(.15, Math.min(1, (R - d) / (R - 40))).toFixed(2)); pl.set(true); } else pl.set(false);
-    });
-    pl.stage.addEventListener('pointerleave', () => pl.set(false));
-    pl.a.addEventListener('focus', () => { pl.w.style.setProperty('--near', 1); pl.set(true); }); pl.a.addEventListener('blur', () => pl.set(false));
+    // tooltips · the cursor becomes a small firefly; when it lands on the icon, a note opens
+    function firefly(api) {
+      const ff = api.stage.querySelector('.ff'); let tx = 0, ty = 0, x = 0, y = 0, raf = null;
+      api.stage.classList.add('ffzone');
+      const tick = () => { x += (tx - x) * .22; y += (ty - y) * .22; ff.style.transform = `translate(${x}px,${y}px)`; raf = Math.abs(tx - x) + Math.abs(ty - y) > .3 ? requestAnimationFrame(tick) : null; };
+      api.stage.addEventListener('pointermove', e => {
+        if (e.pointerType !== 'mouse') return;
+        const r = api.stage.getBoundingClientRect(), wob = Math.sin(performance.now() / 160) * 2;
+        tx = e.clientX - r.left; ty = e.clientY - r.top + wob;
+        if (!ff.classList.contains('in')) { x = tx; y = ty; ff.classList.add('in'); }
+        if (!raf) raf = requestAnimationFrame(tick);
+      });
+      api.stage.addEventListener('pointerleave', () => ff.classList.remove('in'));
+      const land = v => { ff.classList.toggle('land', v); api.a.classList.toggle('lit', v || api.on()); };
+      return { land };
+    }
+    const pl = ctl('plain'), fpl = firefly(pl);
+    pl.a.addEventListener('mouseenter', () => { fpl.land(true); pl.set(true); });
+    pl.a.addEventListener('mouseleave', () => { fpl.land(false); pl.set(false); });
+    pl.a.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') pl.set(!pl.on()); });
+    pl.a.addEventListener('focus', () => { if (pl.a.matches(':focus-visible')) pl.set(true); }); pl.a.addEventListener('blur', () => pl.set(false));
 
-    // rich · in: linger, still and close, for 1s · out: walk away
-    const rc = ctl('rich'); outsideClose(rc); let lt, lp = null;
-    document.addEventListener('pointermove', e => {
-      const d = dist(rc.a, e.clientX, e.clientY);
-      if (rc.on()) { if (d > 230) rc.set(false); return; }
-      if (d < 90) {
-        if (!lp || Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 6) { lp = { x: e.clientX, y: e.clientY }; clearTimeout(lt); rc.w.classList.remove('holding'); void rc.w.offsetWidth; rc.w.style.setProperty('--hold', '1s'); rc.w.classList.add('holding'); lt = setTimeout(() => { rc.w.classList.remove('holding'); rc.set(true); }, 1000); }
-      } else { lp = null; clearTimeout(lt); rc.w.classList.remove('holding'); }
-    });
+    const rc = ctl('rich'), frc = firefly(rc); outsideClose(rc); let ct;
+    rc.a.addEventListener('mouseenter', () => { clearTimeout(ct); frc.land(true); rc.set(true); });
+    rc.a.addEventListener('mouseleave', () => frc.land(false));
+    rc.w.addEventListener('mouseenter', () => clearTimeout(ct));
+    rc.w.addEventListener('mouseleave', () => { clearTimeout(ct); ct = setTimeout(() => rc.set(false), 500); });
+    rc.a.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') rc.set(!rc.on()); });
     rc.a.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); rc.set(!rc.on()); } });
   }
 })();
