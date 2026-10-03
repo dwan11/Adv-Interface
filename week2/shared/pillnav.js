@@ -9,7 +9,7 @@
   if (!CONCEPT || !grid) return;
   const COUNT = { bloom: 3, dandelion: 5, firefly: 2, harvest: 12, shy: 3 }[SET];
   const LABEL = ['Home', 'Links', 'Info', 'Notifications', 'Water the garden'];
-  const MOTION = { spring: 'springs over and squashes', liquid: 'stretches like liquid', island: 'grows into the note', hop: 'hops and rings', shy: 'hesitates, then commits' }[CONCEPT];
+  const MOTION = { spring: 'glides under a glass lens', liquid: 'stretches like liquid', island: 'grows into the note', hop: 'hops and rings', shy: 'hesitates, then commits' }[CONCEPT];
   const ICON = [
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M10 16h4"/></svg>',
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',

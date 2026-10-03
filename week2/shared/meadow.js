@@ -42,7 +42,7 @@
 
   /* ---------- content per tone (components, states, triggers only) ---------- */
   const DATA = {
-    bloom: { tone: 'Playful', name: 'Bloom',
+    bloom: { tone: 'Zen', name: 'Bloom',
       dot:   { in: 'wait', out: 'double-click' },
       count: { in: 'drag a seed in', out: 'drag down' },
       plain: { in: 'hover · or hold', out: 'leave', text: 'Tuck this away' },

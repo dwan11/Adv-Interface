@@ -1,0 +1,92 @@
+/* Bloom · Zen
+   Loaded after the shared styles; only Bloom changes.
+   - Ground: raked sand (fine horizontal lines on warm stone).
+   - Surfaces are glass: the pill bar and tooltips are see-through, frosted, with a hairline rim.
+   - The active tab sits under a clear lens that magnifies what is beneath it ×1.18 (sand lines and icon).
+   - Motion is unhurried: slow eases, no overshoot, no squash. */
+
+body[data-set="bloom"]{
+  --bg:#ECEBE4;--ink:#2F3A2C;--line:rgba(47,58,44,.12);--glyph:#3C4A37;--shadow:rgba(60,50,30,.12);--acc:#5E7255;
+  --sand:#E9E7E0;--rake:rgba(110,100,80,.07);--mag:1.18;
+  --glass:rgba(255,255,255,.42);--glass-rim:rgba(255,255,255,.75);--glass-shadow:0 8px 24px rgba(60,50,30,.10);
+  --calm:cubic-bezier(.45,0,.2,1);
+  /* pill bar theme */
+  --pn-screen:var(--sand);--pn-pill:rgba(255,255,255,.28);--pn-icon:#7E8A78;--pn-on:#2F3A2C;
+  --pn-tipbg:rgba(255,255,255,.5);--pn-tiptext:#2F3A2C;--pn-feed:rgba(255,255,255,.4);--pn-chrome:#DAD8CF;
+  --pn-actbg:rgba(47,58,44,.07);--pn-actfg:#2F3A2C}
+[data-set="bloom"] .tone{background:transparent;color:var(--ink);border:1px solid var(--line)}
+
+/* ---------- raked sand ---------- */
+[data-set="bloom"] .pn-screen{background:repeating-linear-gradient(180deg,transparent 0 15px,var(--rake) 15px 16px),var(--sand)}
+/* specimen: the rake fades into a quiet clearing around the icon */
+[data-set="bloom"] .card:not(.pn-card) .stage{background:
+  radial-gradient(ellipse 46% 60% at 50% var(--cy,50%),var(--sand) 30%,rgba(233,231,224,0) 75%),
+  repeating-linear-gradient(180deg,transparent 0 15px,var(--rake) 15px 16px),var(--sand)}
+[data-set="bloom"] .card:not(.pn-card) .stage.up{--cy:72%}
+[data-set="bloom"] .card:not(.pn-card) .stage{border-block:1px solid var(--line)}
+[data-set="bloom"] .pn-feed i{box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+
+/* ---------- glass pill bar ---------- */
+[data-set="bloom"] .pn-bg{background:var(--pn-pill);-webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15);
+  box-shadow:inset 0 0 0 1px var(--glass-rim),inset 0 1px 0 rgba(255,255,255,.9),var(--glass-shadow)}
+
+/* the lens: a clear disc that shows the sand beneath, magnified (the line pattern is redrawn ×1.18 around the lens centre, --yc) */
+[data-set="bloom"] .pn-desk .pn-nav{--yc:40px}   /* bar top 16 + pad 4 + half tab 20 */
+[data-set="bloom"] .pn-mob .pn-nav{--yc:784px}   /* 844 − bottom 30 − bar 60 + pad 6 + half tab 24 */
+[data-set="bloom"] .pn-h1{overflow:hidden;
+  background:
+    radial-gradient(circle at 34% 28%,rgba(255,255,255,.7),rgba(255,255,255,0) 46%),
+    linear-gradient(180deg,transparent calc(15px * var(--mag)),rgba(110,100,80,.12) 0) 0 calc(var(--T)/2 - var(--yc) * var(--mag)) / 100% calc(16px * var(--mag)),
+    var(--sand);
+  box-shadow:inset 0 0 0 1px var(--glass-rim),inset 0 2px 3px rgba(255,255,255,.9),inset 0 -3px 7px rgba(60,50,30,.14),0 3px 10px rgba(60,50,30,.12);
+  transition:transform .85s var(--calm)}
+[data-set="bloom"] .pn-h1 .pn-art{display:none}
+[data-set="bloom"] .pn-nav.moving .pn-h1{animation:none}
+[data-set="bloom"] .pn-tb svg{transition:transform .85s var(--calm),stroke .5s}
+[data-set="bloom"] .pn-tb.on svg{transform:scale(var(--mag))}
+[data-set="bloom"] .pn-tb.pn-pop svg{animation:none}
+[data-set="bloom"] .pn-tb.on svg path:first-child{fill:rgba(242,167,181,.35)}
+
+/* badge: the flower opens slowly */
+[data-set="bloom"] .pn-badge{transform:scale(0) rotate(-60deg);transition:transform .5s ease-in,opacity .3s}
+[data-set="bloom"] .pn-nav.b-on .pn-badge{transform:none;transition:transform 1.1s var(--calm),opacity .4s}
+[data-set="bloom"] .pn-nav.b-on .pn-pets i{animation-duration:1.4s}
+
+/* glass tooltips, hairline stem, calm rise */
+[data-set="bloom"] .pn-tip{border:1px solid var(--glass-rim);-webkit-backdrop-filter:blur(10px) saturate(1.15);backdrop-filter:blur(10px) saturate(1.15);box-shadow:var(--glass-shadow);line-height:22px}
+[data-set="bloom"] .pn-tip.rich{line-height:1.35}
+[data-set="bloom"] .pn-nav[data-c="spring"] .pn-tip{transform:translateY(calc(var(--dir)*(var(--off,26px) - 6px)));transition:transform .4s ease-in,opacity .3s}
+[data-set="bloom"] .pn-nav[data-c="spring"].ton .pn-tip{transform:translateY(calc(var(--dir)*var(--off,26px)));transition:transform .8s var(--calm),opacity .6s}
+[data-set="bloom"] .pn-stem{width:1px;left:-.5px;background:rgba(47,58,44,.35)}
+[data-set="bloom"] .pn-act{box-shadow:inset 0 0 0 1px rgba(47,58,44,.2)}
+[data-set="bloom"] .pn-petals{opacity:.75}
+[data-set="bloom"] .pn-nav.ton .pn-petals i{transition:transform 1s var(--calm) calc(.2s + var(--n)*.07s)}
+
+/* ---------- specimen cards ---------- */
+[data-set="bloom"] .grass .bl{animation-duration:calc(var(--d,3s) * 2)}
+[data-set="bloom"] .bw.on .petals{transition:transform 1.2s var(--calm) .3s}
+[data-set="bloom"] .bw.on .badge.bump .petals{animation:none}
+
+/* the lens over the icon: appears on hover, focus or touch, and magnifies the glyph */
+[data-set="bloom"] .anchor::before{content:"";position:absolute;left:50%;top:20px;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.65),rgba(255,255,255,.12) 50%,rgba(255,255,255,.05));
+  -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
+  box-shadow:inset 0 0 0 1px var(--glass-rim),inset 0 -3px 7px rgba(60,50,30,.12),0 3px 10px rgba(60,50,30,.12);
+  opacity:0;transform:scale(.85);transition:opacity .6s,transform .8s var(--calm)}
+[data-set="bloom"] .anchor .glyph{z-index:2;transition:transform .8s var(--calm),color .6s}
+[data-set="bloom"] .anchor:is(:hover,:focus-visible,.part)::before{opacity:1;transform:none}
+[data-set="bloom"] .anchor:is(:hover,:focus-visible,.part) .glyph,
+[data-set="bloom"] .tw .anchor:hover .glyph{transform:translateX(-50%) scale(var(--mag))}
+
+/* glass tooltips */
+[data-set="bloom"] .stem{width:1px;background:rgba(47,58,44,.35);transition:transform .6s var(--calm)}
+[data-set="bloom"] .tip.plain{background:var(--glass);color:var(--ink);border:1px solid var(--glass-rim);-webkit-backdrop-filter:blur(10px) saturate(1.15);backdrop-filter:blur(10px) saturate(1.15);box-shadow:var(--glass-shadow);
+  transform:translateY(6px);opacity:0;transition:transform .4s ease-in,opacity .3s}
+[data-set="bloom"] .tw.show .tip.plain{transform:none;opacity:1;transition:transform .8s var(--calm) .15s,opacity .6s .15s}
+[data-set="bloom"] .tip.rich{background:var(--glass);color:var(--ink);border:1px solid var(--glass-rim);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);box-shadow:var(--glass-shadow);
+  transform:translateY(8px);opacity:0;transition:transform .4s ease-in,opacity .3s}
+[data-set="bloom"] .tw.show .tip.rich{transform:none;opacity:1;transition:transform .9s var(--calm) .25s,opacity .7s .25s}
+[data-set="bloom"] .act{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(47,58,44,.25)}
+[data-set="bloom"] .act:hover{background:rgba(47,58,44,.06)}
+[data-set="bloom"] .petal-wrap{opacity:.75}
+[data-set="bloom"] .tw.show .petal-wrap span{transition:transform 1.1s var(--calm) calc(.2s + var(--i)*.08s)}
