@@ -46,9 +46,18 @@
   const GRASS = '<svg class="pn-art" viewBox="0 0 40 22" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
     [[6,14,-2,'#5E8C45',2.8,-.4],[11,20,-3,'#3F6B30',2.4,-1.2],[16,16,1,'#6E9A4B',3.1,-2],[21,21,-1,'#355E2B',2.7,-.8],[26,17,2,'#5E8C45',3.3,-1.6],[31,19,2,'#3F6B30',2.9,-.2],[35,13,3,'#6E9A4B',2.6,-2.4]]
       .map(([x,h,dx,c,d,dl]) => `<path style="--d:${d}s;--dl:${dl}s" fill="${c}" d="M${x-1.6} 22 Q${x+dx*.25} ${22-h*.6} ${x+dx} ${22-h} Q${x+dx*.25+1.1} ${22-h*.55} ${x+1.6} 22Z"/>`).join('') + '</svg>';
+  // Bloom's lotus: one petal gradient (cream base to pink tip) and a pearl pin at the centre, shared by every lotus on the page
+  const LOTUS_DEFS = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>' +
+    '<linearGradient id="bl-petal" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF4E2"/><stop offset=".55" stop-color="#F9D3DC"/><stop offset="1" stop-color="#EE9DB6"/></linearGradient>' +
+    '<radialGradient id="bl-pin" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F1E6D2"/><stop offset="1" stop-color="#C2A97F"/></radialGradient></defs></svg>';
+  if (SET === 'bloom' && !document.getElementById('bl-petal')) document.body.insertAdjacentHTML('afterbegin', LOTUS_DEFS);
+  // a pointed lotus petal, base at the centre, tip pointing up (length L, half-width W)
+  const lotusPetal = (L, W, a, cls) => `<path class="${cls}" transform="rotate(${a})" d="M0 0 C${W} ${-L * .3} ${W * .7} ${-L * .75} 0 ${-L} C${-W * .7} ${-L * .75} ${-W} ${-L * .3} 0 0Z"/>`;
+  const lotus = (L, W, cls = 'petal') => [0, 45, 90, 135, 180, 225, 270, 315].map(a => lotusPetal(L, W, a, cls)).join('') +
+    [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map(a => lotusPetal(L * .72, W * .8, a, cls + ' in')).join('');
   const FLOWER = '<svg class="pn-art" viewBox="-17 -17 34 34" aria-hidden="true">' +
-    [0,72,144,216,288].map(a => `<ellipse cx="0" cy="-8.6" rx="5.4" ry="8" transform="rotate(${a})" fill="#F2A7B5"/>`).join('') +
-    `<circle r="9.6" fill="#F3C847"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#1F2A1C">${COUNT}</text></svg>`;
+    lotus(16.4, 5.4, 'lp') +
+    `<circle r="9.4" fill="url(#bl-pin)" stroke="#C2A97F" stroke-width=".5"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#1F2A1C">${COUNT}</text></svg>`;
   const PUFF = '<svg class="pn-art" viewBox="-18 -18 36 36" aria-hidden="true"><g class="sds">' +
     [...Array(16)].map((_,n) => { const a = n / 16 * Math.PI * 2, x = (Math.cos(a) * 15).toFixed(1), y = (Math.sin(a) * 15).toFixed(1); return `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="#8E9CA4" stroke-width=".8"/><circle cx="${x}" cy="${y}" r="1.1" fill="#5D6A71"/>`; }).join('') +
     `</g><circle r="10" fill="#fff" stroke="#8E9CA4" stroke-width=".8"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#1D2A33">${COUNT}</text></svg>`;
