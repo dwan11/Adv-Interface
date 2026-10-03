@@ -51,12 +51,12 @@
     '<linearGradient id="bl-petal" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF4E2"/><stop offset=".55" stop-color="#F9D3DC"/><stop offset="1" stop-color="#EE9DB6"/></linearGradient>' +
     '<radialGradient id="bl-pin" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F1E6D2"/><stop offset="1" stop-color="#C2A97F"/></radialGradient></defs></svg>';
   if (SET === 'bloom' && !document.getElementById('bl-petal')) document.body.insertAdjacentHTML('afterbegin', LOTUS_DEFS);
-  // a pointed lotus petal, base at the centre, tip pointing up (length L, half-width W)
-  const lotusPetal = (L, W, a, cls) => `<path class="${cls}" transform="rotate(${a})" d="M0 0 C${W} ${-L * .3} ${W * .7} ${-L * .75} 0 ${-L} C${-W * .7} ${-L * .75} ${-W} ${-L * .3} 0 0Z"/>`;
+  // a rounded lotus petal, base at the centre, soft round tip pointing up (length L, half-width W)
+  const lotusPetal = (L, W, a, cls) => `<path class="${cls}" transform="rotate(${a})" d="M0 0 C${W * 1.15} ${-L * .22} ${W * 1.2} ${-L} 0 ${-L} C${-W * 1.2} ${-L} ${-W * 1.15} ${-L * .22} 0 0Z"/>`;
   const lotus = (L, W, cls = 'petal') => [0, 45, 90, 135, 180, 225, 270, 315].map(a => lotusPetal(L, W, a, cls)).join('') +
     [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map(a => lotusPetal(L * .72, W * .8, a, cls + ' in')).join('');
   const FLOWER = '<svg class="pn-art" viewBox="-17 -17 34 34" aria-hidden="true">' +
-    lotus(16.4, 5.4, 'lp') +
+    lotus(16.2, 5.8, 'lp') +
     `<circle r="9.4" fill="url(#bl-pin)" stroke="#C2A97F" stroke-width=".5"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#1F2A1C">${COUNT}</text></svg>`;
   const PUFF = '<svg class="pn-art" viewBox="-18 -18 36 36" aria-hidden="true"><g class="sds">' +
     [...Array(16)].map((_,n) => { const a = n / 16 * Math.PI * 2, x = (Math.cos(a) * 15).toFixed(1), y = (Math.sin(a) * 15).toFixed(1); return `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="#8E9CA4" stroke-width=".8"/><circle cx="${x}" cy="${y}" r="1.1" fill="#5D6A71"/>`; }).join('') +

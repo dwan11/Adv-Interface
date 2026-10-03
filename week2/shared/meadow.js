@@ -29,13 +29,13 @@
     '<linearGradient id="bl-petal" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF4E2"/><stop offset=".55" stop-color="#F9D3DC"/><stop offset="1" stop-color="#EE9DB6"/></linearGradient>' +
     '<radialGradient id="bl-pin" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F1E6D2"/><stop offset="1" stop-color="#C2A97F"/></radialGradient></defs></svg>';
   if (SET === 'bloom' && !document.getElementById('bl-petal')) document.body.insertAdjacentHTML('afterbegin', LOTUS_DEFS);
-  // a pointed lotus petal, base at the centre, tip pointing up (length L, half-width W)
-  const lotusPetal = (L, W, a, cls) => `<path class="${cls}" transform="rotate(${a})" d="M0 0 C${W} ${-L * .3} ${W * .7} ${-L * .75} 0 ${-L} C${-W * .7} ${-L * .75} ${-W} ${-L * .3} 0 0Z"/>`;
+  // a rounded lotus petal, base at the centre, soft round tip pointing up (length L, half-width W)
+  const lotusPetal = (L, W, a, cls) => `<path class="${cls}" transform="rotate(${a})" d="M0 0 C${W * 1.15} ${-L * .22} ${W * 1.2} ${-L} 0 ${-L} C${-W * 1.2} ${-L} ${-W * 1.15} ${-L * .22} 0 0Z"/>`;
   const lotus = (L, W, cls = 'petal') => [0, 45, 90, 135, 180, 225, 270, 315].map(a => lotusPetal(L, W, a, cls)).join('') +
     [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map(a => lotusPetal(L * .72, W * .8, a, cls + ' in')).join('');
   function flower(big) {
     const cx = big ? 45 : 40, cy = big ? 6 : 9;
-    const p = big ? lotus(12.6, 4.4) : lotus(6.4, 2.3);
+    const p = big ? lotus(12.4, 4.6) : lotus(6.2, 2.5);
     return `<svg viewBox="0 -14 72 70" aria-hidden="true"><path class="bstem" d="M44 56 Q${cx-3} 28 ${cx} ${cy+4}"/><g transform="translate(${cx} ${cy})"><g class="petals">${p}<circle class="pollen" r="${big?7.2:1.9}"/>${big?'<text class="num" y=".5">2</text>':''}</g></g></svg>`;
   }
   function puff(big) {
