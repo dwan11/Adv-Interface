@@ -25,18 +25,18 @@
   const RING = '<span class="ring" aria-hidden="true"><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="36"/></svg></span>';
 
   function flower(big) {
-    const cx = big ? 55 : 52, cy = big ? -2 : 2, rx = big ? 4.6 : 3.2, ry = big ? 7.8 : 5.4, off = big ? -8 : -5.2;
+    const cx = big ? 45 : 40, cy = big ? 6 : 9, rx = big ? 4 : 2.2, ry = big ? 6.2 : 3.4, off = big ? -6.4 : -3.4;
     const p = [0,72,144,216,288].map(a => `<ellipse class="petal" cx="0" cy="${off}" rx="${rx}" ry="${ry}" transform="rotate(${a})"/>`).join('');
-    return `<svg viewBox="0 -14 72 70" aria-hidden="true"><path class="bstem" d="M44 56 Q${cx-3} 28 ${cx} ${cy+4}"/><g transform="translate(${cx} ${cy})"><g class="petals">${p}<circle class="pollen" r="${big?8.4:2.7}"/>${big?'<text class="num" y=".5">2</text>':''}</g></g></svg>`;
+    return `<svg viewBox="0 -14 72 70" aria-hidden="true"><path class="bstem" d="M44 56 Q${cx-3} 28 ${cx} ${cy+4}"/><g transform="translate(${cx} ${cy})"><g class="petals">${p}<circle class="pollen" r="${big?7.4:2.2}"/>${big?'<text class="num" y=".5">2</text>':''}</g></g></svg>`;
   }
   function puff(big) {
-    const cx = big ? 55 : 52, cy = big ? -2 : 2, R = big ? 13 : 9;
+    const cx = big ? 45 : 40, cy = big ? 6 : 9, R = big ? 11.5 : 6;
     const seeds = [...Array(14)].map((_, i) => {
       const a = i / 14 * Math.PI * 2, x = (Math.cos(a) * R).toFixed(2), y = (Math.sin(a) * R).toFixed(2);
       const dx = (30 + ((i * 37) % 50)) + 'px', dy = (-25 - ((i * 53) % 45)) + 'px';
       return `<g class="sd" style="--dx:${dx};--dy:${dy};--i:${i}"><line x1="0" y1="0" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r="1.2"/></g>`;
     }).join('');
-    return `<svg viewBox="0 -14 72 70" aria-hidden="true"><path class="bstem" d="M44 56 Q${cx-3} 28 ${cx} ${cy+R-2}"/><g transform="translate(${cx} ${cy})">${seeds}<circle class="pcore" r="2.4"/>${big?'<circle class="pface" r="7.6"/><text class="num" y=".4">3</text>':''}</g></svg>`;
+    return `<svg viewBox="0 -14 72 70" aria-hidden="true"><path class="bstem" d="M44 56 Q${cx-3} 28 ${cx} ${cy+R-2}"/><g transform="translate(${cx} ${cy})">${seeds}<circle class="pcore" r="2.4"/>${big?'<circle class="pface" r="7.8"/><text class="num" y=".4">3</text>':''}</g></svg>`;
   }
   const CHUTE = `<svg class="chute" viewBox="0 0 64 32" aria-hidden="true">${[...Array(11)].map((_, i) => { const a = Math.PI * (1.08 + i * 0.084), x = (32 + Math.cos(a) * 28).toFixed(1), y = (30 + Math.sin(a) * 26).toFixed(1); return `<line x1="32" y1="30" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r="1.1"/>`; }).join('')}<line x1="32" y1="30" x2="32" y2="34"/></svg>`;
 

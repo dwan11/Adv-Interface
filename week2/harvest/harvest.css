@@ -1,12 +1,12 @@
 /* Harvest · Quirky — grocery bag badges, carrot-in-soil tooltips, gardener cursor */
 body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--acc:#E8772E;--kraft:#C99A64;--soil:#6B4A2F;--tomato:#D9482B}
-[data-set="harvest"] .stage>.bw{transform:scale(1.2)}
-[data-set="harvest"] .stage>.tw{transform:none}
+/* true size: bags are app icons (72px on their own, 60px on the shelf), the carrot patch is a 56px anchor,
+   badges are 12px (dot) and 20px (count, 11px numerals), tooltips sit 8px above the carrot */
 
 /* ---------- bag anchor ---------- */
-.bag-a{all:unset;box-sizing:border-box;position:relative;display:block;width:132px;height:154px;cursor:pointer;touch-action:none}
+.bag-a{all:unset;box-sizing:border-box;position:relative;display:block;width:72px;height:84px;cursor:pointer;touch-action:none}
 .bag-a:focus-visible{outline:2px solid var(--ink);outline-offset:6px;border-radius:12px}
-.bag{width:132px;height:154px;display:block;overflow:visible}
+.bag{width:72px;height:84px;display:block;overflow:visible}
 .bag .body{transform-box:fill-box;transform-origin:50% 100%}
 .bw.on .loop .bag .body{animation:thump .6s ease-out infinite}
 @keyframes thump{0%,40%{transform:none}55%{transform:scale(1.025,.975)}75%{transform:none}}
@@ -14,7 +14,7 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 @keyframes shake{20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(2deg)}}
 .bag{transform-origin:50% 95%}
 .bag-a:hover .bag{transform:translateY(-3px)}
-.bag-a::after{content:"";position:absolute;left:18px;right:18px;bottom:-4px;height:10px;border-radius:50%;background:rgba(58,42,26,.18);z-index:-1}
+.bag-a::after{content:"";position:absolute;left:10px;right:10px;bottom:-3px;height:6px;border-radius:50%;background:rgba(58,42,26,.18);z-index:-1}
 
 /* items falling into the bag (badge · no content, looping) */
 .it{opacity:0;transform-box:fill-box;transform-origin:50% 50%}
@@ -24,17 +24,17 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 /* items flying out into a number (badge · content) */
 .bw.go .burst .it{animation:fly 1.05s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i) * .09s)}
 @keyframes fly{0%{transform:translate(var(--x),28px) rotate(0) scale(1);opacity:0}12%{opacity:1}55%{transform:translate(var(--mx),var(--my)) rotate(160deg) scale(.85);opacity:1}100%{transform:translate(101px,-24px) rotate(320deg) scale(.12);opacity:0}}
-.num-badge{position:absolute;top:-14px;right:-14px;min-width:34px;height:34px;padding:0 8px;border-radius:17px;background:var(--tomato);color:#fff;font:700 16px/34px var(--body);text-align:center;box-shadow:0 3px 0 rgba(58,42,26,.25);transform:scale(0);transition:transform .2s ease-in;pointer-events:none}
+.num-badge{position:absolute;box-sizing:border-box;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;border:2px solid var(--bg);background:var(--tomato);color:#fff;font:700 11px/16px var(--body);text-align:center;box-shadow:0 3px 0 rgba(58,42,26,.25);transform:scale(0);transition:transform .2s ease-in;pointer-events:none}
 .bw.on .num-badge{transform:none;transition:transform .5s cubic-bezier(.2,1.6,.4,1) .85s}
 .bw.on.bump .num-badge{animation:pop .45s cubic-bezier(.2,1.6,.4,1) .85s}
 @keyframes pop{40%{transform:scale(1.35)}100%{transform:none}}
-.dot-badge{position:absolute;top:0;right:4px;width:16px;height:16px;border-radius:50%;background:var(--tomato);border:3px solid var(--bg);transform:scale(0);transition:transform .25s}
+.dot-badge{position:absolute;box-sizing:border-box;top:-2px;right:0;width:12px;height:12px;border-radius:50%;background:var(--tomato);border:2px solid var(--bg);transform:scale(0);transition:transform .25s}
 .bw.on .dot-badge{transform:none;transition:transform .45s cubic-bezier(.2,1.6,.4,1) .4s}
 
 /* ---------- carrot-in-soil anchor ---------- */
-.carrot-a{all:unset;box-sizing:border-box;position:relative;display:block;width:96px;height:96px;cursor:pointer;touch-action:none}
+.carrot-a{all:unset;box-sizing:border-box;position:relative;display:block;width:56px;height:56px;cursor:pointer;touch-action:none}
 .carrot-a:focus-visible{outline:2px solid var(--ink);outline-offset:6px;border-radius:12px}
-.patch{width:96px;height:96px;display:block;overflow:visible}
+.patch{width:56px;height:56px;display:block;overflow:visible}
 .carrot{transform:translateY(calc(16px - var(--rise,0) * 40px));transition:transform .25s ease-in}
 .tw.show .carrot{--rise:1;transition:transform .55s cubic-bezier(.2,1.5,.4,1)}
 .tw.circling .carrot{transition:transform .12s linear}
@@ -48,18 +48,18 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 @keyframes hop{from{transform:translateY(0)}to{transform:translateY(-3px)}}
 
 /* the carrot carries the information */
-[data-set="harvest"] .pop{bottom:calc(100% + 14px);top:auto;transform:translateX(-50%) scale(.3) translateY(30px);transform-origin:50% 100%;transition:opacity .2s,visibility .2s,transform .2s ease-in}
+[data-set="harvest"] .pop{bottom:calc(100% + 8px);top:auto;transform:translateX(-50%) scale(.3) translateY(30px);transform-origin:50% 100%;transition:opacity .2s,visibility .2s,transform .2s ease-in}
 [data-set="harvest"] .tw.show .pop{transform:translateX(-50%);transition:opacity .3s .3s,visibility .3s .3s,transform .6s cubic-bezier(.2,1.4,.4,1) .3s}
 [data-set="harvest"] .tw.show .carry{animation:carry 2.6s ease-in-out 1s infinite alternate}
 @keyframes carry{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg) translateY(-2px)}}
 .carry{transform-origin:50% 100%;display:flex;flex-direction:column;align-items:center}
-.carry::after{content:"";width:2px;height:14px;background:#5E8C45;border-radius:2px}
-.tag{position:relative;background:#F7EAD0;color:var(--ink);border:1.5px solid #B5844F;border-radius:6px 6px 6px 6px;padding:7px 14px 7px 24px;font:600 14px/1.2 var(--body);white-space:nowrap}
-.tag::before{content:"";position:absolute;left:8px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;border:1.5px solid #B5844F;background:var(--bg)}
-.note{background:#FFF7EA;color:var(--ink);border:1.5px solid #B5844F;border-radius:14px;padding:16px 18px 14px;width:min(236px,74vw);box-shadow:0 10px 22px rgba(58,42,26,.18)}
-.note b{display:block;font:400 italic 21px/1.15 var(--display)}
+.carry::after{content:"";width:2px;height:8px;background:#5E8C45;border-radius:2px}
+.tag{position:relative;background:#F7EAD0;color:var(--ink);border:1.5px solid #B5844F;border-radius:4px;padding:6px 12px 6px 22px;font:600 13px/20px var(--body);white-space:nowrap}
+.tag::before{content:"";position:absolute;left:7px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;border:1.5px solid #B5844F;background:var(--bg)}
+.note{background:#FFF7EA;color:var(--ink);border:1.5px solid #B5844F;border-radius:14px;padding:16px;width:min(240px,74vw);box-shadow:0 10px 22px rgba(58,42,26,.18)}
+.note b{display:block;font:400 italic 18px/1.2 var(--display)}
 .note p{margin:6px 0 12px;font-size:14px;line-height:1.45}
-.note .act{background:var(--acc);color:#fff;border-radius:999px;padding:6px 16px;font-weight:600;font-size:13px}
+.note .act{background:var(--acc);color:#fff;border-radius:999px;padding:0 16px;height:36px;line-height:36px;font-weight:600;font-size:14px}
 
 /* ---------- gardener cursor + water ---------- */
 .gardener{position:absolute;left:0;top:0;width:40px;height:44px;margin:-30px 0 0 -14px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:8}
@@ -76,14 +76,14 @@ body[data-set="harvest"]{--bg:#EFE4D2;--ink:#3A2A1A;--line:rgba(58,42,26,.16);--
 @media (prefers-reduced-motion:reduce){.bw.on .inbag .it{animation:none;opacity:1;transform:translate(var(--x),-4px)}}
 
 /* ---------- badge · content as a row of mobile app bags ---------- */
-.shelf{display:grid;grid-template-columns:repeat(4,minmax(0,92px));justify-content:center;align-items:end;column-gap:clamp(6px,3vw,28px);width:100%;padding:30px 12px 0}
+.shelf{display:grid;grid-template-columns:repeat(4,minmax(0,76px));justify-content:center;align-items:end;column-gap:clamp(6px,3vw,28px);width:100%;padding:30px 12px 0}
 .app{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0}
-.shelf .bw{width:min(78px,100%)}
+.shelf .bw{width:min(60px,100%)}
 .shelf .bag-a{width:100%;height:auto;aspect-ratio:132/154}
 .shelf .bag{width:100%;height:100%}
 .shelf .bag-a::after{left:12%;right:12%;bottom:-3px;height:6px}
 .shelf .ring{width:64px;height:64px;margin:-32px 0 0 -32px}
-.shelf .num-badge{top:-9px;right:-10px;min-width:24px;height:24px;padding:0 6px;border-radius:12px;font:700 12px/20px var(--body);border:2px solid var(--bg);box-shadow:0 2px 0 rgba(58,42,26,.2)}
+.shelf .num-badge{top:-6px;right:-7px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;font:700 11px/16px var(--body);border:2px solid var(--bg);box-shadow:0 2px 0 rgba(58,42,26,.2)}
 .shelf .bw.go .burst .it{animation-name:flyIcon}
 @keyframes flyIcon{0%{transform:translate(var(--x),28px) rotate(0) scale(1);opacity:0}12%{opacity:1}55%{transform:translate(var(--mx),var(--my)) rotate(160deg) scale(.85);opacity:1}100%{transform:translate(98px,-21px) rotate(320deg) scale(.12);opacity:0}}
 .app-name{font:500 12px/1.2 var(--body);color:var(--ink);letter-spacing:.01em;white-space:nowrap}

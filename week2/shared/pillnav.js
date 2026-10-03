@@ -47,11 +47,11 @@
     [[6,14,-2,'#5E8C45',2.8,-.4],[11,20,-3,'#3F6B30',2.4,-1.2],[16,16,1,'#6E9A4B',3.1,-2],[21,21,-1,'#355E2B',2.7,-.8],[26,17,2,'#5E8C45',3.3,-1.6],[31,19,2,'#3F6B30',2.9,-.2],[35,13,3,'#6E9A4B',2.6,-2.4]]
       .map(([x,h,dx,c,d,dl]) => `<path style="--d:${d}s;--dl:${dl}s" fill="${c}" d="M${x-1.6} 22 Q${x+dx*.25} ${22-h*.6} ${x+dx} ${22-h} Q${x+dx*.25+1.1} ${22-h*.55} ${x+1.6} 22Z"/>`).join('') + '</svg>';
   const FLOWER = '<svg class="pn-art" viewBox="-17 -17 34 34" aria-hidden="true">' +
-    [0,72,144,216,288].map((a,n) => `<ellipse cx="0" cy="-8" rx="5.6" ry="8.6" transform="rotate(${a})" fill="${n % 2 ? '#F7C59F' : '#F2A7B5'}"/>`).join('') +
-    `<circle r="8" fill="#F3C847"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#1F2A1C">${COUNT}</text></svg>`;
+    [0,72,144,216,288].map(a => `<ellipse cx="0" cy="-8.6" rx="5.4" ry="8" transform="rotate(${a})" fill="#F2A7B5"/>`).join('') +
+    `<circle r="9.6" fill="#F3C847"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#1F2A1C">${COUNT}</text></svg>`;
   const PUFF = '<svg class="pn-art" viewBox="-18 -18 36 36" aria-hidden="true"><g class="sds">' +
     [...Array(16)].map((_,n) => { const a = n / 16 * Math.PI * 2, x = (Math.cos(a) * 15).toFixed(1), y = (Math.sin(a) * 15).toFixed(1); return `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="#8E9CA4" stroke-width=".8"/><circle cx="${x}" cy="${y}" r="1.1" fill="#5D6A71"/>`; }).join('') +
-    `</g><circle r="8.5" fill="#fff" stroke="#8E9CA4" stroke-width=".8"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#1D2A33">${COUNT}</text></svg>`;
+    `</g><circle r="10" fill="#fff" stroke="#8E9CA4" stroke-width=".8"/><text y=".6" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#1D2A33">${COUNT}</text></svg>`;
   const CHUTE = '<svg class="pn-chute" viewBox="0 0 44 18" aria-hidden="true">' +
     [...Array(11)].map((_,n) => { const a = Math.PI * (1.08 + n * .084), x = (22 + Math.cos(a) * 20).toFixed(1), y = (18 + Math.sin(a) * 16).toFixed(1); return `<line x1="22" y1="18" x2="${x}" y2="${y}"/><circle cx="${x}" cy="${y}" r=".9"/>`; }).join('') + '</svg>';
   const SEARCH = '<svg class="pn-srch" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>';
@@ -61,7 +61,7 @@
   const fireflies = n => SET !== 'firefly' ? '' : [...Array(n)].map((_, k) => {
     const r = a => ((Math.sin(k * 12.9898 + a) * 43758.5453) % 1 + 1) % 1;
     return `<span class="pn-ffl" style="left:${(8 + r(1) * 84).toFixed(0)}%;top:${(30 + r(2) * 60).toFixed(0)}%;--d:${(5 + r(3) * 5).toFixed(1)}s;--dl:-${(r(4) * 4).toFixed(1)}s;--x1:${(r(5) * 40 - 20).toFixed(0)}px;--y1:${(r(6) * 30 - 15).toFixed(0)}px;--x2:${(r(7) * 40 - 20).toFixed(0)}px;--y2:${(r(8) * 30 - 15).toFixed(0)}px;--x3:${(r(9) * 40 - 20).toFixed(0)}px;--y3:${(r(10) * 30 - 15).toFixed(0)}px"></span>`; }).join('');
-  const ORBS = kind => SET !== 'firefly' ? '' : `<span class="pn-orbs" style="--sy:${kind === 'desk' ? .3 : .55}">${[[3.2, kind === 'desk' ? 125 : 70], [4.4, kind === 'desk' ? 105 : 58], [5.6, kind === 'desk' ? 140 : 76]].map(([d, rr], n) => `<span class="pn-orb" style="--d:${d}s;--r:${rr}px;animation-delay:-${n * 1.3}s"><i></i></span>`).join('')}</span>`;
+  const ORBS = kind => SET !== 'firefly' ? '' : `<span class="pn-orbs" style="--sy:${kind === 'desk' ? .3 : .42}">${[[3.2, kind === 'desk' ? 125 : 118], [4.4, kind === 'desk' ? 105 : 98], [5.6, kind === 'desk' ? 140 : 132]].map(([d, rr], n) => `<span class="pn-orb" style="--d:${d}s;--r:${rr}px;animation-delay:-${n * 1.3}s"><i></i></span>`).join('')}</span>`;
 
   if (!document.getElementById('pn-goo')) document.body.insertAdjacentHTML('afterbegin',
     `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -89,13 +89,16 @@
     <div class="lab">Navigation · pill bar · ${MOTION}</div>
     <div class="pn-row"><div class="seg" role="group" aria-label="Notification state"><button aria-pressed="true">None</button><button aria-pressed="false">Badge</button></div><button class="pn-play" type="button">Play demo</button></div>
     <div class="pn-stage">
-      <div class="pn-desk-wrap"><p class="pn-cap">Desktop · bar on top, tooltip below</p><div class="pn-desk"><div class="pn-bar"><i></i><i></i><i></i></div>
-        <div class="pn-screen"><div class="pn-feed">${'<i></i>'.repeat(6)}</div>${fireflies(5)}${bar('desk')}</div></div></div>
-      <div class="pn-mob-wrap"><p class="pn-cap">Phone · bar at bottom, tooltip above</p><div class="pn-mob"><div class="pn-screen"><span class="pn-notch"></span>
-        <div class="pn-feed">${'<i></i>'.repeat(6)}</div>${fireflies(4)}${bar('mob')}<span class="pn-homebar"></span></div></div></div>
+      <div class="pn-desk-wrap"><p class="pn-cap">Desktop · 1024 × 576 · bar on top, tooltip below</p><div class="pn-desk"><div class="pn-bar"><i></i><i></i><i></i></div>
+        <div class="pn-view"><div class="pn-screen"><div class="pn-feed">${'<i></i>'.repeat(6)}</div>${fireflies(5)}${bar('desk')}</div></div></div></div>
+      <div class="pn-mob-wrap"><p class="pn-cap">Phone · 390 × 844 · bar at bottom, tooltip above</p><div class="pn-mob"><div class="pn-view"><div class="pn-screen"><span class="pn-notch"></span>
+        <div class="pn-feed">${'<i></i>'.repeat(6)}</div>${fireflies(4)}${bar('mob')}<span class="pn-homebar"></span></div></div></div></div>
     </div>
     <div class="trig"><span><i>switch</i>tap a tab</span><span><i>badge</i>a note arrives · open the bell</span><span><i>tooltip</i>hover · long-press</span></div>`;
   grid.prepend(card);
+  // true scale: each screen keeps its real size (desktop 1024 wide, phone 390 wide) and is shrunk to fit its frame
+  const fit = () => card.querySelectorAll('.pn-view').forEach(v => { const sc = v.firstElementChild; v.style.setProperty('--k', v.clientWidth / sc.offsetWidth); });
+  new ResizeObserver(fit).observe(card); fit();
 
   /* ---------- Dandelion: things turn into seeds and the wind takes them ---------- */
   const rnd = (a, b) => a + Math.random() * (b - a), clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v, easeOut = u => 1 - Math.pow(1 - u, 3);
@@ -198,6 +201,7 @@
     const m = () => { const s = getComputedStyle(el); return { T: parseFloat(s.getPropertyValue('--T')), G: parseFloat(s.getPropertyValue('--G')), P: parseFloat(s.getPropertyValue('--P')) }; };
     const pos = k => { const { T, G, P } = m(); return P + k * (T + G); };
     const isMob = !!el.closest('.pn-mob');
+    const K = () => el.getBoundingClientRect().width / el.offsetWidth || 1;
     let i = 0, tipK = -1, typing = [], wishing = false;
     const setHL = (k, instant) => {
       const { T } = m();
@@ -265,10 +269,10 @@
         if (isMob) txt.innerHTML = `<b>${label}</b><span class="pn-body">${BODY[k]}</span><button class="pn-act" type="button">${RICH[0]}</button>`;
         else txt.textContent = label;
         tipwrap.style.setProperty('--tx', '0px'); tipwrap.style.removeProperty('--th');
-        const w = tip.offsetWidth, h = tip.offsetHeight, sr = screen.getBoundingClientRect(), nr = el.getBoundingClientRect();
-        const cx = nr.left - sr.left + pos(k) + T / 2, left = cx - w / 2, clamped = Math.max(8, Math.min(sr.width - 8 - w, left));
+        const w = tip.offsetWidth, h = tip.offsetHeight, sw = screen.offsetWidth;
+        const cx = el.offsetLeft + pos(k) + T / 2, left = cx - w / 2, clamped = Math.max(16, Math.min(sw - 16 - w, left));
         tipwrap.style.setProperty('--tx', (clamped - left) + 'px'); tipwrap.style.setProperty('--tw', w + 'px');
-        tipwrap.style.setProperty('--th', h + 'px'); tipwrap.style.setProperty('--off', (h / 2 + (SET === 'dandelion' ? 32 : 12)) + 'px');
+        tipwrap.style.setProperty('--th', h + 'px'); tipwrap.style.setProperty('--off', (h / 2 + (SET === 'dandelion' ? 30 : 8)) + 'px');
         if (isMob) { const act = txt.querySelector('.pn-act'); act.addEventListener('click', e => { e.stopPropagation(); takeOver(); api.act(); }); }
         if (isMob && SET === 'shy') {
           const b = txt.querySelector('b'), slip = label.length > 3 ? label.slice(0, -2) + label.slice(-1) + label.slice(-2, -1) : label; let t = 0;
@@ -305,14 +309,14 @@
         } else if (SET === 'harvest' && window.harvestReward) {   // the note turns into a pot of cooked carrots, rays shining behind
           wishing = true; el.classList.add('wished');
           const fade = tip.animate([{ opacity: 1, scale: '1' }, { opacity: 0, scale: '.5' }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
-          window.harvestReward(tipwrap, tx + 'px', dir * off + 'px', isMob ? .5 : .62).then(() => finish([fade]));
+          window.harvestReward(tipwrap, tx + 'px', dir * off + 'px', isMob ? .9 : .8).then(() => finish([fade]));
         } else if (SET === 'firefly') {     // the fireflies come for the note and carry it off
           wishing = true; el.classList.add('wished');
           const sw = swarmOnto(tip); sw.done.then(() => finish(sw.anims));
         } else { api.tip(k, false); if (k === 3) api.clear(); }
       },
-      pointAct() { const b = tip.querySelector('.pn-act'); if (!b) return; const r = b.getBoundingClientRect(), nr = el.getBoundingClientRect();
-        ptr.style.setProperty('--px', r.left - nr.left + r.width / 2 + 'px'); ptr.style.setProperty('--py', r.top - nr.top + r.height / 2 + 'px'); ptr.style.opacity = 1; },
+      pointAct() { const b = tip.querySelector('.pn-act'); if (!b) return; const r = b.getBoundingClientRect(), nr = el.getBoundingClientRect(), s = K();
+        ptr.style.setProperty('--px', (r.left - nr.left + r.width / 2) / s + 'px'); ptr.style.setProperty('--py', (r.top - nr.top + r.height / 2) / s + 'px'); ptr.style.opacity = 1; },
       isMob,
       still() { api.reset(); el.classList.add('b-on'); if (c === 'liquid') el.classList.add('ping');
         if (c === 'spring') { const w = [...el.querySelectorAll('.pn-wh')], d = String(COUNT).split(''); w.forEach((x, n) => x.style.setProperty('--d', d[n])); } }
@@ -344,7 +348,7 @@
       const pour = (x, y) => { const now = performance.now(); if (now - lastDrop < 110) return; lastDrop = now;
         const d = document.createElement('span'); d.className = 'drop'; d.style.left = (x + 26) + 'px'; d.style.top = (y - 2) + 'px'; screen.appendChild(d); setTimeout(() => d.remove(), 650); };
       screen.addEventListener('mousemove', e => {
-        if (auto) return; const r = screen.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; place(x, y); g.classList.add('in');
+        if (auto) return; const r = screen.getBoundingClientRect(), s = K(), x = (e.clientX - r.left) / s, y = (e.clientY - r.top) / s; place(x, y); g.classList.add('in');
         const w = wt.getBoundingClientRect(), near = Math.hypot(e.clientX - (w.left + w.width / 2), e.clientY - (w.top + w.height / 2)) < 70;
         g.classList.toggle('water', near); wt.classList.toggle('pn-pour', near); if (near) pour(x, y);
       });
@@ -352,7 +356,7 @@
       api.gardenDemo = on => {
         clearInterval(gi);
         if (!on) { g.classList.remove('in', 'water'); wt.classList.remove('pn-pour'); return; }
-        const r = screen.getBoundingClientRect(), w = wt.getBoundingClientRect(), x = w.left - r.left + w.width / 2 - 26, y = w.top - r.top + w.height / 2 - 14;
+        const r = screen.getBoundingClientRect(), w = wt.getBoundingClientRect(), s = K(), x = (w.left - r.left + w.width / 2) / s - 26, y = (w.top - r.top + w.height / 2) / s - 14;
         ptr.style.opacity = 0; place(x, y); g.classList.add('in', 'water'); wt.classList.add('pn-pour'); gi = setInterval(() => pour(x, y), 120);
       };
     }
