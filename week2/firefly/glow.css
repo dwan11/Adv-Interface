@@ -1,0 +1,54 @@
+/* Firefly · Intimate light
+   Loaded after the shared styles; only Firefly changes.
+   A dark room lit from one side: soft shafts of blue-white and blush light at the horizon,
+   mirrored on a glossy floor below, with a little film grain. The bar, badges and notes
+   are reflected in that floor (-webkit-box-reflect; browsers without it simply show no reflection). */
+
+body[data-set="firefly"]{
+  --room:#06080F;--shaft:rgba(214,228,255,.9);--blush:rgba(246,214,236,.85);
+  --pn-screen:var(--room);--pn-pill:rgba(18,24,38,.55);--pn-feed:rgba(255,255,255,.035);--pn-chrome:#05070C;
+  --mirror:linear-gradient(transparent 35%,rgba(0,0,0,.42));
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(120,150,220,.10),transparent 70%),linear-gradient(180deg,#0B0F1A 0%,#090C15 60%,#0C0E16 100%) fixed}
+/* film grain over the whole page */
+body[data-set="firefly"]::after{content:"";position:fixed;inset:-50%;z-index:100;pointer-events:none;background:var(--grain);opacity:.09;mix-blend-mode:screen;animation:ff-grain .9s steps(4) infinite}
+@keyframes ff-grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(1%,3%)}}
+
+/* ---------- the room inside each device ---------- */
+/* light through the openings, standing on the horizon (~42% down) */
+[data-set="firefly"] .pn-screen::before{content:"";position:absolute;left:0;right:0;top:20%;height:23%;pointer-events:none;z-index:0;
+  background:linear-gradient(90deg,transparent 0 17%,var(--shaft) 18% 20%,transparent 21.5% 26%,var(--shaft) 27% 28.5%,transparent 30% 35%,
+    var(--blush) 36% 46%,transparent 48% 53%,var(--shaft) 54% 55.5%,transparent 57% 62%,var(--blush) 63% 66%,transparent 67.5% 100%);
+  filter:blur(16px);opacity:.5;-webkit-mask:linear-gradient(180deg,transparent,#000 45%,#000 90%,transparent);mask:linear-gradient(180deg,transparent,#000 45%,#000 90%,transparent);
+  animation:ff-breathe 7s ease-in-out infinite alternate}
+@keyframes ff-breathe{from{opacity:.38}to{opacity:.55}}
+/* its mirror image on the glossy floor, long and fading, plus a cool ambient bloom */
+[data-set="firefly"] .pn-screen{background:
+  linear-gradient(180deg,rgba(6,8,15,.6) 43%,rgba(6,8,15,.95) 85%),
+  linear-gradient(90deg,transparent 0 16%,rgba(214,228,255,.16) 19%,transparent 23% 25%,rgba(214,228,255,.16) 28%,transparent 31% 34%,
+    rgba(246,214,236,.2) 41%,transparent 49% 52%,rgba(214,228,255,.14) 55%,transparent 58% 61%,rgba(246,214,236,.13) 64.5%,transparent 68% 100%) 0 43% / 100% 50% no-repeat,
+  radial-gradient(ellipse 55% 22% at 45% 42%,rgba(170,195,255,.20),transparent 70%),
+  var(--room)}
+/* grain on the screen too, so it reads like the photograph */
+[data-set="firefly"] .pn-screen::after{content:"";position:absolute;inset:0;z-index:30;pointer-events:none;background:var(--grain);background-size:240px;opacity:.12;mix-blend-mode:screen}
+[data-set="firefly"] .pn-feed{z-index:1}
+[data-set="firefly"] .pn-feed i{box-shadow:inset 0 0 0 1px rgba(214,228,255,.06)}
+
+/* ---------- the bar: dark glass catching the light, mirrored below ---------- */
+[data-set="firefly"] .pn-bg{-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2);
+  box-shadow:inset 0 0 0 1px rgba(214,228,255,.10),inset 0 1px 0 rgba(230,236,255,.22),0 0 40px rgba(170,195,255,.10),0 10px 26px rgba(0,0,0,.45)}
+[data-set="firefly"] :is(.pn-bg,.pn-hl,.pn-tabs,.pn-isl){-webkit-box-reflect:below 4px var(--mirror)}
+[data-set="firefly"] .pn-desk .pn-tip{-webkit-box-reflect:below 6px var(--mirror)}
+
+/* ---------- specimen cards: a pool of cool light, reflections on a dark floor ---------- */
+[data-set="firefly"] .card:not(.pn-card) .stage{isolation:isolate;background:radial-gradient(ellipse 34% 42% at 50% 30%,rgba(170,195,255,.09),transparent 72%)}
+[data-set="firefly"] .card:not(.pn-card) .stage::before{content:"";position:absolute;inset:4% 18% 50%;z-index:-1;pointer-events:none;filter:blur(18px);opacity:.16;
+  background:linear-gradient(90deg,transparent 0 6%,var(--shaft) 12%,transparent 18% 26%,var(--blush) 36% 52%,transparent 62% 74%,var(--shaft) 82%,transparent 90%);
+  -webkit-mask:linear-gradient(180deg,transparent,#000 40%,#000 70%,transparent);mask:linear-gradient(180deg,transparent,#000 40%,#000 70%,transparent)}
+[data-set="firefly"] .stage>.bw{-webkit-box-reflect:below 6px var(--mirror)}
+[data-set="firefly"] .tip{-webkit-box-reflect:below 8px var(--mirror)}
+[data-set="firefly"] .tip.plain{box-shadow:0 0 34px rgba(247,217,139,.30),0 0 60px rgba(214,228,255,.10),0 6px 14px rgba(0,0,0,.4)}
+
+@media (prefers-reduced-motion:reduce){body[data-set="firefly"]::after,[data-set="firefly"] .pn-screen::before{animation:none}}
+/* the note's reveal clip leaves room below for its reflection */
+[data-set="firefly"] .tw.show .tip{clip-path:inset(-30px -40px -180% -40px)}
