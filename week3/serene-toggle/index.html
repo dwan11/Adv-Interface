@@ -92,6 +92,14 @@
 #home-search-demo .home-button { width:128px; }
 #home-search-demo .is-search .home-button { width:54px; }
 </style>
+<style>
+#home-search-demo .toggle-track { overflow:hidden; }
+#home-search-demo .home-button { overflow:hidden; }
+#home-search-demo .home-button > svg { position:absolute; left:16px; top:14.5px; }
+#home-search-demo .home-word,#home-search-demo .is-search .home-word { position:absolute; left:48px; top:50%; transform:translateY(-50%); filter:none; max-width:48px; width:48px; transition:opacity 200ms ease; }
+#home-search-demo .is-search.is-erasing .home-word { transform:translateY(-50%); }
+#home-search-demo button:focus-visible { outline-offset:-3px; }
+</style>
 <script>
 (() => {
  const root=document.getElementById('home-search-demo');
