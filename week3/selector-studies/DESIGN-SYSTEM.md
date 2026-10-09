@@ -37,3 +37,7 @@ Open State review to inspect hover, press, focus, disabled, and simulated save f
 ## Reference principle
 
 [Inspora’s soft glass workspace picker](https://www.inspora.design/posts/soft-glass-workspace-picker) uses a distinct selected surface while keeping its label stable. We borrow that relationship, rather than its exact rendering. [Refero](https://refero.design/search) provided public product previews; detailed screen inspection required sign-in.
+
+## Motion skill refinement
+
+Selection motion uses reversible CSS transitions. Console caps compress into their sockets while labels scale subtly around a fixed vertical center; no one-shot label keyframes restart during rapid input. Glass labels float without animating letter spacing. Label washes use transform and opacity rather than animated clipping. Indicators engage after the console mechanism seats and release immediately when deselected. Restoring saved state and reduced-motion mode skip movement.

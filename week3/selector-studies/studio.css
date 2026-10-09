@@ -99,23 +99,6 @@ summary:before{content:'+'}details[open]>summary:before{content:'−'}
 @media(max-width:350px){main{padding:24px 14px}.content{padding:20px}.text{font-size:13px}.set-caption h1{font-size:26px}.component-specs dl{grid-template-columns:64px 1fr}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 @media(forced-colors:active){.device{background:Canvas;color:CanvasText}.row:has(input:checked) .text{color:Highlight}.row:has(input:checked) .text:before{border:1px solid Highlight}.row:has(input:focus-visible){outline:2px solid Highlight}.row input{position:static;opacity:1;width:24px;height:24px;flex:0 0 24px}.graphic{display:none!important}.row input:disabled{opacity:1}.switch-state{color:CanvasText}}
-/* Visible, reversible material choreography; state remains immediate. */
-.tide{--motion:480ms}
-.tide .check .water{transition-duration:440ms}
-.tide .check-path{transition-duration:280ms;transition-delay:90ms}
-.tide .radio .core{transition-duration:380ms}
-.tide .radio .ripple-ring{transition-duration:420ms}
-.tide .row:not(.switch-row) .text:before{opacity:0;transform:none;clip-path:inset(0 100% 0 0 round 5px);background:linear-gradient(115deg,#a5bb8566,#d3dfbbaa 60%,#c1d4a777);transition:clip-path 560ms cubic-bezier(.2,.8,.25,1),opacity 200ms}
-.tide .row:not(.switch-row):has(input:checked) .text:before{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 5px)}
-.console .switch.mechanical .knob{transition-duration:420ms}
-.console .cap{transition-duration:340ms}
-.console .dial-cap{transition-duration:380ms}
-.console .row:has(input:checked) .cap{transform:translateY(2px)}
-.console .row:has(input:checked) .dial-cap{transform:translateY(2px) scale(.96)}
-.console .row:not(.switch-row) .text:before{opacity:0;transform:translateX(-7px) translateY(-2px) scaleX(.92);transform-origin:left;transition:transform 440ms cubic-bezier(.2,.9,.3,1),opacity 260ms;box-shadow:inset 0 1px #d3d5a133,0 2px 2px #12210c66}
-.console .row:not(.switch-row):has(input:checked) .text:before{opacity:1;transform:translateX(0) translateY(0) scaleX(1)}
-.console .row:not(.switch-row) .text:after{transition-duration:240ms;transition-delay:120ms}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 /* Tone-specific movement: buoyancy versus a mechanical detent. */
 .tide{--motion:620ms;--ease:cubic-bezier(.16,.85,.25,1)}
 .tide .knob{transition:transform 620ms var(--ease),border-radius 620ms var(--ease),box-shadow 620ms var(--ease)}
@@ -123,8 +106,8 @@ summary:before{content:'+'}details[open]>summary:before{content:'−'}
 .tide .check .water{transition:transform 560ms var(--ease)}
 .tide .check-path{transition:stroke-dashoffset 340ms var(--ease) 150ms}
 .tide .radio .core{transition:transform 520ms cubic-bezier(.18,1.35,.3,1)}
-.tide .row:not(.switch-row) .label-text{display:inline-block;transform:translateY(0);transition:transform 620ms var(--ease),letter-spacing 620ms var(--ease);letter-spacing:0}
-.tide .row:not(.switch-row):has(input:checked) .label-text{transform:translateY(-2px);letter-spacing:.12px}
+.tide .row:not(.switch-row) .label-text{display:inline-block;transform:translateY(0);transition:transform 620ms var(--ease);letter-spacing:0}
+.tide .row:not(.switch-row):has(input:checked) .label-text{transform:translateY(-2px);letter-spacing:0}
 .tide .row:not(.switch-row) .text:before{clip-path:inset(0 100% 0 0 round 45% 5px 5px 45%);transform:translateY(2px);transition:clip-path 720ms var(--ease),transform 620ms var(--ease),opacity 320ms}
 .tide .row:not(.switch-row):has(input:checked) .text:before{clip-path:inset(0 0 0 0 round 5px);transform:translateY(0)}
 /* A retained circular wave expands once the selection engages. */
@@ -147,21 +130,34 @@ summary:before{content:'+'}details[open]>summary:before{content:'−'}
 .console .row:has(input[type=radio]) .dial-cap{transform:scale(1)}
 .console .row:has(input[type=radio]:checked) .dial-cap{transform:scale(.96)}
 .console .row:has(input[type=radio]) .label-text{transform:translateY(0)}
-.console .row:has(input[type=radio]:checked) .label-text{transform:translateY(0);animation:radio-label-latch 180ms cubic-bezier(.65,0,.15,1)}
+.console .row:has(input[type=radio]:checked) .label-text{transform:translateY(0);animation:none}
 .console .row:has(input[type=radio]:checked) .text:before{transform:translateY(0)}
 .console .row:has(input[type=radio]) .text{display:flex;align-items:center;min-height:36px}
 .console .row:not(:has(input:disabled)):has(input[type=radio]):active .dial-cap,
 .console[data-preview=pressed] .row:has(input[type=radio]) .dial-cap{transform:scale(.93)}
-@keyframes radio-label-latch{0%{transform:translateY(0)}45%{transform:translateY(2px)}100%{transform:translateY(0)}}
+
 /* Checkbox faces settle at the socket center, like the radio faces. */
 .console .row:has(input[data-kind=check]) .cap{transform:scale(1)}
 .console .row:has(input[data-kind=check]:checked) .cap{transform:scale(.97)}
 .console .row:has(input[data-kind=check]) .label-text{transform:translateY(0)}
-.console .row:has(input[data-kind=check]:checked) .label-text{transform:translateY(0);animation:radio-label-latch 180ms cubic-bezier(.65,0,.15,1)}
+.console .row:has(input[data-kind=check]:checked) .label-text{transform:translateY(0);animation:none}
 .console .row:has(input[data-kind=check]:checked) .text:before{transform:translateY(0)}
 .console .row:has(input[data-kind=check]) .text{display:flex;align-items:center;min-height:36px}
 .console .row:not(:has(input:disabled)):has(input[data-kind=check]):active .cap,
 .console[data-preview=pressed] .row:has(input[data-kind=check]) .cap{transform:scale(.93)}
 body[data-set] main{max-width:560px}
 body[data-set] #prototype{grid-template-columns:minmax(0,1fr)}
+/* Motion skill refinement: reversible transforms, fixed anchors, depth cues.
+   Asymmetric easing gives glass a soft release and console a firm detent. */
+.tide .row:not(.switch-row) .text:before{clip-path:none;transform:scaleX(.88) translateY(2px);transform-origin:left center;opacity:0;transition:transform 680ms cubic-bezier(.16,.85,.25,1),opacity 320ms}
+.tide .row:not(.switch-row):has(input:checked) .text:before{clip-path:none;transform:scaleX(1) translateY(0);opacity:1}
+.console .row:not(.switch-row) .label-text{transform-origin:left center;transition:transform 180ms cubic-bezier(.2,.85,.3,1)}
+.console .row:not(.switch-row):has(input:checked) .label-text{transform:scale(.985);animation:none}
+.console .row:not(.switch-row) .text:before{transform:scale(.975);transform-origin:left center;transition:transform 180ms cubic-bezier(.2,.85,.3,1),opacity 110ms}
+.console .row:not(.switch-row):has(input:checked) .text:before{transform:scale(1)}
+.console .row:not(:has(input:checked)) .contact,
+.console .row:not(:has(input:checked)) .center-ring,
+.console .row:not(:has(input:checked)) .text:after{transition-delay:0ms}
+.tide .row:not(:has(input:checked)) .check-path{transition-delay:0ms;transition-duration:160ms}
+.restoring *, .restoring *:before, .restoring *:after{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
