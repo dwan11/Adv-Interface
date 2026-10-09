@@ -160,4 +160,17 @@ body[data-set] #prototype{grid-template-columns:minmax(0,1fr)}
 .console .row:not(:has(input:checked)) .text:after{transition-delay:0ms}
 .tide .row:not(:has(input:checked)) .check-path{transition-delay:0ms;transition-duration:160ms}
 .restoring *, .restoring *:before, .restoring *:after{animation:none!important;transition:none!important}
+/* Glass radios retain a shared center through every selected state. */
+.tide .row:has(input[type=radio]) .text{display:flex;align-items:center;min-height:36px}
+.tide .row:has(input[type=radio]) .label-text,
+.tide .row:has(input[type=radio]:checked) .label-text{transform:translateY(0)}
+.tide .radio:after{left:50%;top:50%;transform:translate(-50%,-50%) scale(.6)}
+.tide .row:has(input:checked) .radio:after{transform:translate(-50%,-50%) scale(1.55)}
+/* The console plate eases into its seat; the hardware retains its firm detent. */
+.console .row:has(input[type=radio]) .text:before{transform:scale(.99);transition:transform 360ms cubic-bezier(.22,.75,.25,1),opacity 300ms cubic-bezier(.22,.75,.25,1)}
+.console .row:has(input[type=radio]:checked) .text:before{transform:scale(1)}
+.console .row:has(input[type=radio]) .text{transition:color 300ms cubic-bezier(.22,.75,.25,1)}
+.console .row:has(input[type=radio]) .label-text{transition:transform 320ms cubic-bezier(.22,.75,.25,1)}
+.console .row:has(input[type=radio]) .text:after{transition:opacity 240ms 70ms}
+.console .row:has(input[type=radio]:not(:checked)) .text:after{transition-delay:0ms}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
