@@ -41,3 +41,7 @@ Open State review to inspect hover, press, focus, disabled, and simulated save f
 ## Motion skill refinement
 
 Selection motion uses reversible CSS transitions. Console caps compress into their sockets while labels scale subtly around a fixed vertical center; no one-shot label keyframes restart during rapid input. Glass labels float without animating letter spacing. Label washes use transform and opacity rather than animated clipping. Indicators engage after the console mechanism seats and release immediately when deselected. Restoring saved state and reduced-motion mode skip movement.
+
+## Night Console — matte hardware revision
+
+The current console follows the supplied physical-control reference: warm gray textured housing, ivory molded faces, raised rotary grips and recessed orange lamps. The switch is a two-position rotary control with an explicit On/Off label. Checkboxes retain square pushbutton geometry and a visible check. Mutually exclusive radio faces turn their grips and become orange. All controls share a 96px mounting column and upper-left light; shadows fall down and right. See the prototype specifications for current dimensions and timing.
