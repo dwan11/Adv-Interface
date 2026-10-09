@@ -31,3 +31,36 @@
 .console .switch-state{font-size:11px}
 @media(max-width:350px){.console .content{padding:20px}}
 @media(prefers-reduced-motion:reduce){.console *,.console *:before,.console *:after{transition:none!important;animation:none!important}}
+/* Three physical tempos: approach, detent, and illuminated confirmation. */
+.console .row{--face-scale:1;--grip-angle:-40deg;--turn-time:320ms;--turn-ease:cubic-bezier(.25,.75,.25,1)}
+.console .switch-row{--grip-angle:-45deg}
+.console .row:has(input:checked){--face-scale:.97;--grip-angle:40deg;--turn-time:560ms;--turn-ease:cubic-bezier(.18,1.28,.32,1)}
+.console .switch-row:has(input:checked){--face-scale:1;--grip-angle:45deg}
+.console .row .graphic.mechanical :is(.cap,.dial-cap,.knob){transform:scale(var(--face-scale));transition:transform 260ms cubic-bezier(.18,1.3,.3,1),box-shadow 240ms;transform-origin:center}
+.console .row .graphic.mechanical :is(.grip,.dial-grip){transform:translate(-50%,-50%) rotate(var(--grip-angle));transition:transform var(--turn-time) var(--turn-ease),box-shadow 300ms}
+.console .row:not(:has(input:checked)) .cap .check-path{transition:stroke-dashoffset 110ms ease-out}
+.console .row:has(input:checked) .cap .check-path{transition:stroke-dashoffset 230ms cubic-bezier(.2,.8,.2,1) 90ms}
+.console .row .graphic.mechanical>.contact:after{content:'';position:absolute;inset:-4px;border:1px solid #df7b33;border-radius:50%;opacity:0;transform:scale(.65);transition:transform 420ms cubic-bezier(.2,.8,.2,1),opacity 180ms}
+.console .row:has(input:checked) .graphic.mechanical>.contact:after{transform:scale(1.25);opacity:.35;transition-delay:180ms}
+.console .row .graphic.mechanical>.contact{transition:background 130ms,box-shadow 220ms}
+.console .row:has(input:checked) .graphic.mechanical>.contact{transition-delay:160ms}
+.console .row:not(.switch-row) .text:before{transform:scaleX(.94);transform-origin:left center;transition:transform 400ms cubic-bezier(.2,.8,.2,1),opacity 240ms;opacity:0}
+.console .row:not(.switch-row):has(input:checked) .text:before{transform:scaleX(1);opacity:1;transition-duration:520ms,320ms;transition-delay:70ms}
+.console .row:not(.switch-row) .label-text{transform:scale(1);transition:transform 280ms cubic-bezier(.2,.8,.2,1)}
+.console .row:not(.switch-row):has(input:checked) .label-text{transform:scale(.985);transition-duration:360ms}
+@media(hover:hover) and (pointer:fine){
+.console .row:not(:has(input:disabled)):hover{--face-scale:1.045;--grip-angle:-32deg;--turn-time:260ms}
+.console .switch-row:not(:has(input:disabled)):hover{--grip-angle:-37deg}
+.console .row:has(input:checked):hover{--face-scale:1.015;--grip-angle:44deg}
+.console .switch-row:has(input:checked):hover{--grip-angle:49deg}
+.console .row:not(:has(input:disabled)):hover .graphic.mechanical :is(.cap,.dial-cap,.knob){box-shadow:inset 1px 1px 2px #fff9,0 3px 2px #96918666,3px 8px 10px #6c665e55}
+}
+.console[data-preview=hover] .row{--face-scale:1.045;--grip-angle:-32deg}
+.console[data-preview=hover] .row:has(input:checked){--grip-angle:44deg}
+.console .row:not(:has(input:disabled)):is(:active,[data-press=true]),
+.console[data-preview=pressed] .row{--face-scale:.90;--turn-time:90ms}
+.console .row:not(:has(input:disabled)):is(:active,[data-press=true]) .graphic.mechanical :is(.cap,.dial-cap,.knob),
+.console[data-preview=pressed] .row .graphic.mechanical :is(.cap,.dial-cap,.knob){transform:scale(.90);transition-duration:85ms;box-shadow:inset 1px 1px 3px #827b6944,0 1px 2px #79716533}
+.console .row:not(:has(input:disabled)):is(:active,[data-press=true]) .label-text{transform:scale(.97);transition-duration:85ms}
+.console .row:has(input:disabled) .graphic.mechanical :is(.cap,.dial-cap,.knob,.grip,.dial-grip){transition:none}
+@media(prefers-reduced-motion:reduce){.console *,.console *:before,.console *:after{transition:none!important;animation:none!important}}
