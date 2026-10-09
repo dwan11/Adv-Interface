@@ -181,4 +181,12 @@ body[data-set] #prototype{grid-template-columns:minmax(0,1fr)}
 .tide .radio:after{content:none}
 .tide .radio .selection-wave{fill:none;stroke:#71865b;stroke-width:.8;opacity:0;transform-box:view-box;transform-origin:15px 15px;transform:scale(.6);transition:transform 700ms var(--ease),opacity 700ms var(--ease)}
 .tide .row:has(input:checked) .selection-wave{transform:scale(1.28);opacity:.2}
+/* Center the circular thumb within the track's 74 × 36 inner box.
+   Travel and lighting use separate layers so rotation cannot shift the center. */
+.tide .switch .knob{left:3px;top:50%;border-radius:50%;transform:translateY(-50%);background:#b6c59e;box-shadow:0 2px 4px #33442344;transition:transform 620ms var(--ease)}
+.tide .row:has(input:checked) .switch .knob{border-radius:50%;transform:translate(38px,-50%);box-shadow:0 2px 4px #33442344}
+.tide .switch .knob:before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 22%,#fffff3 0,#e5ebcf 32%,#b6c59e 65%,#728863 100%);box-shadow:inset 1px 2px 3px #fff8;transform:rotate(-35deg);transition:transform 620ms var(--ease)}
+.tide .switch .knob:after{transform:rotate(-35deg);transition:transform 620ms var(--ease)}
+.tide .row:has(input:checked) .switch .knob:before,
+.tide .row:has(input:checked) .switch .knob:after{transform:rotate(145deg)}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
