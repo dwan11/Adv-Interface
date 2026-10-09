@@ -4,6 +4,8 @@ Coursework for Advanced Interface.
 
 ## Week 3: Pixel Salon
 
+Tone: **Playful**.
+
 | Component | Folder |
 |---|---|
 | Salon Timer | [week3/salon-timer](week3/salon-timer) |
