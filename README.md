@@ -2,6 +2,16 @@
 
 Coursework for Advanced Interface.
 
+## Week 3: Pixel Salon
+
+| Component | Folder |
+|---|---|
+| Salon Timer | [week3/salon-timer](week3/salon-timer) |
+| Salon Checklist | [week3/salon-checklist](week3/salon-checklist) |
+| Sliding Pearl | [week3/sliding-pearl](week3/sliding-pearl) |
+
+Open [Week 3](https://dwan11.github.io/Adv-Interface/#week3). Each demo supports touch, keyboard, reduced motion, and local state storage.
+
 ## Week 2: Badges & Tooltips
 
 Badges and tooltips in four tones: Zen, Playful, Intimate and Quirky. Each set has a badge (no content / content) and a tooltip (plain / rich), Tooltips open on hover (as the brief asks), with extra gestures on top.

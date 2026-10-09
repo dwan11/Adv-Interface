@@ -1,0 +1,157 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Salon checklist · Adv Interface</title><style>:root{color-scheme:light dark}*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;background:light-dark(#faf0f5,#211a23)}body>main{width:min(736px,100%)}.cursor-interaction,input,button,label{cursor:pointer}button:focus-visible{outline:2px solid light-dark(#487aa1,#bddfff);outline-offset:5px}</style><script>(()=>{const key='adv-interface-salon-checkbox';let state=null;try{state=JSON.parse(localStorage.getItem(key))}catch{}window.openai={widgetState:state,setWidgetState(next){this.widgetState=next;try{localStorage.setItem(key,JSON.stringify(next))}catch{}return Promise.resolve()}}})();</script></head><body><main><div id="salon-checkbox" class="viz-dotted-background">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+#salon-checkbox{padding:64px 24px;color-scheme:light dark;--ink:light-dark(#694456,#e9cedb);--edge:light-dark(#c99caf,#835a72);--surface:light-dark(#fff5f6,#2d232b);font-family:'VT323',monospace;color:var(--ink)}
+#salon-checkbox *{box-sizing:border-box}
+#salon-checkbox .paper{position:relative;isolation:isolate;max-width:328px;margin:auto;padding:27px 24px;transform:rotate(-4deg);filter:drop-shadow(0 3px 0 light-dark(#cdaabb66,#130b1855)) drop-shadow(0 10px 15px #55374714)}
+#salon-checkbox .paper::before,#salon-checkbox .paper::after{content:"";position:absolute;inset:0;z-index:-1;clip-path:polygon(14px 0,62% 0,62% 3px,68% 3px,68% 0,calc(100% - 13px) 0,calc(100% - 13px) 4px,calc(100% - 5px) 4px,calc(100% - 5px) 12px,100% 12px,100% calc(100% - 15px),calc(100% - 5px) calc(100% - 15px),calc(100% - 5px) calc(100% - 6px),calc(100% - 15px) calc(100% - 6px),calc(100% - 15px) 100%,31% 100%,31% calc(100% - 3px),25% calc(100% - 3px),25% 100%,12px 100%,12px calc(100% - 4px),4px calc(100% - 4px),4px calc(100% - 12px),0 calc(100% - 12px),0 13px,5px 13px,5px 5px,14px 5px);background:var(--edge)}
+#salon-checkbox .paper::after{inset:2px;background:radial-gradient(circle,light-dark(#aa6a8010,#dbadc812) 1px,transparent 1px) 0 0/4px 4px,linear-gradient(145deg,light-dark(#fffdfa,#342a32),var(--surface));box-shadow:inset 0 -4px 0 light-dark(#dcb8c82a,#08041033)}
+#salon-checkbox label{display:flex;align-items:center;gap:17px;position:relative;min-height:48px;font-size:25px;line-height:1.1}
+#salon-checkbox input{position:absolute;left:0;top:0;width:48px;height:48px;margin:0;opacity:0;z-index:3}
+#salon-checkbox .box{position:relative;width:44px;height:44px;flex:0 0 44px;--cut:polygon(8px 0,36px 0,36px 4px,40px 4px,40px 8px,44px 8px,44px 36px,40px 36px,40px 40px,36px 40px,36px 44px,8px 44px,8px 40px,4px 40px,4px 36px,0 36px,0 8px,4px 8px,4px 4px,8px 4px);clip-path:var(--cut);background:var(--edge);transition:background .3s}
+#salon-checkbox .well{position:absolute;inset:3px;clip-path:polygon(5px 0,33px 0,33px 3px,38px 3px,38px 33px,33px 33px,33px 38px,5px 38px,5px 35px,0 35px,0 5px,5px 5px);background:light-dark(#f0dce5,#493040);box-shadow:inset 0 4px 5px light-dark(#a56d8b25,#00000040),inset 0 -3px 0 light-dark(#d2a1b73d,#170b202f);transition:background .3s}
+#salon-checkbox .tick{position:absolute;left:9px;top:19px;width:4px;height:4px;color:light-dark(#577eac,#d5eaff);background:currentColor;box-shadow:4px 4px 0 currentColor,8px 8px 0 currentColor,12px 4px 0 currentColor,16px 0 0 currentColor,20px -4px 0 currentColor;opacity:0;transform:translateY(3px) scale(.75);transition:opacity .16s,transform .32s cubic-bezier(.2,.8,.2,1)}
+#salon-checkbox input:checked~.box{background:light-dark(#7fa4cc,#7799bd)}#salon-checkbox input:checked~.box .well{background:light-dark(#d7e9fb,#314c67)}#salon-checkbox input:checked~.box .tick{opacity:1;transform:translateY(0) scale(1)}
+#salon-checkbox input:focus-visible~.box{outline:3px solid light-dark(#698fc0,#b9d6ff);outline-offset:4px;clip-path:none}
+#salon-checkbox .text{position:relative;color:var(--ink);transition:color .3s}
+#salon-checkbox .text::after{content:"";position:absolute;top:50%;left:-2px;height:2px;width:calc(100% + 4px);z-index:1;pointer-events:none;background:currentColor;transform:translateY(-1px) scaleX(0);transform-origin:left;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+#salon-checkbox input:checked~.text{color:light-dark(#577eac,#a8c8ec)}
+#salon-checkbox input:checked~.text::after{transform:translateY(-1px) scaleX(1)}
+#salon-checkbox .spark{position:absolute;width:3px;height:3px;background:#ed9cc4;box-shadow:0 -3px 0 #ed9cc4,0 3px 0 #ed9cc4,3px 0 0 #ed9cc4,-3px 0 0 #f2dc9b;right:10px;top:0;opacity:0;pointer-events:none}
+#salon-checkbox label[data-pop="true"] .spark{animation:checkbox-spark .7s steps(4,end) both}
+#salon-checkbox .checklist{display:grid;gap:22px}
+#salon-checkbox label[data-motion="check"]{animation:ticket-pop .5s cubic-bezier(.22,.75,.25,1) both}
+#salon-checkbox label[data-motion="check"] .box{animation:box-pop .5s cubic-bezier(.22,.75,.25,1) both}
+#salon-checkbox label[data-motion="check"] .tick{animation:tick-pop .5s both}
+#salon-checkbox label[data-motion="uncheck"]{animation:ticket-release .42s cubic-bezier(.22,.75,.25,1) both}
+#salon-checkbox label[data-motion="uncheck"] .box{animation:box-release .42s both}
+#salon-checkbox label[data-motion="uncheck"] .tick{animation:tick-release .25s both}
+@keyframes ticket-pop{0%{transform:translateY(0)}22%{transform:translateY(2px)}48%{transform:translateY(-8px)}76%{transform:translateY(2px)}100%{transform:translateY(0)}}
+@keyframes box-pop{0%{transform:scale(1)}22%{transform:scale(1.06,.92)}48%{transform:scale(1.12)}76%{transform:scale(.97,1.03)}100%{transform:scale(1)}}
+@keyframes tick-pop{0%,15%{opacity:0;transform:translateY(7px) scale(.55)}48%{opacity:1;transform:translateY(-2px) scale(1.16)}76%{transform:translateY(1px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ticket-release{0%{transform:translateY(0)}32%{transform:translateY(4px)}66%{transform:translateY(-2px)}100%{transform:translateY(0)}}
+@keyframes box-release{0%{transform:scale(1)}32%{transform:scale(1.04,.92)}66%{transform:scale(.98,1.02)}100%{transform:scale(1)}}
+@keyframes tick-release{0%{opacity:1;transform:translateY(0) scale(1)}45%{opacity:.6;transform:translateY(-4px) scale(1.12)}100%{opacity:0;transform:translateY(-7px) scale(.65)}}
+@keyframes checkbox-spark{0%{opacity:0;transform:scale(.4)}35%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:translateY(-6px) scale(.6)}}
+@media(prefers-reduced-motion:reduce){#salon-checkbox *{transition:none!important;animation:none!important}}
+#salon-checkbox .well{overflow:hidden}
+#salon-checkbox input:checked~.box .well{background:light-dark(#f0dce5,#493040)}
+#salon-checkbox .well::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,light-dark(#e2f3ff,#88b6df) 0 22%,light-dark(#b9dbfa,#527fa9) 22% 68%,light-dark(#9ac3ed,#3b638a) 68%);box-shadow:inset 3px 3px 0 light-dark(#f4fbff,#a4caed),inset -4px -4px 0 light-dark(#7ba6d4,#244866),inset -7px -7px 0 light-dark(#9ac1e9,#3b6489);clip-path:inset(50%);transition:clip-path .72s cubic-bezier(.22,.6,.3,1)}
+#salon-checkbox input:checked~.box .well::after{clip-path:inset(0)}
+#salon-checkbox .box{background:var(--edge)}
+#salon-checkbox input:checked~.box{background:linear-gradient(135deg,light-dark(#d7ecff,#9ac2e5) 0 45%,light-dark(#638cb8,#25496b) 55%);transition:background .4s .3s}
+#salon-checkbox .tick{z-index:2;color:light-dark(#446b97,#eef8ff);filter:drop-shadow(0 2px 0 light-dark(#e4f3ff99,#1b3a5977))}
+@media(prefers-reduced-motion:reduce){#salon-checkbox .well::after{transition:none}}
+#salon-checkbox .box{--cut:polygon(10px 0,30px 0,30px 2px,36px 2px,36px 5px,40px 5px,40px 10px,44px 10px,44px 29px,42px 29px,42px 36px,38px 36px,38px 40px,31px 40px,31px 44px,12px 44px,12px 42px,6px 42px,6px 37px,2px 37px,2px 31px,0 31px,0 12px,3px 12px,3px 6px,7px 6px,7px 2px,10px 2px)}
+#salon-checkbox .well{clip-path:polygon(7px 0,26px 0,26px 2px,32px 2px,32px 5px,35px 5px,35px 9px,38px 9px,38px 26px,36px 26px,36px 32px,32px 32px,32px 35px,26px 35px,26px 38px,9px 38px,9px 36px,4px 36px,4px 31px,1px 31px,1px 26px,0 26px,0 10px,3px 10px,3px 5px,6px 5px,6px 2px,7px 2px)}
+#salon-checkbox .well::after{clip-path:polygon(20% 0,66% 0,66% 5%,84% 5%,84% 13%,94% 13%,94% 24%,100% 24%,100% 68%,95% 68%,95% 85%,85% 85%,85% 94%,68% 94%,68% 100%,25% 100%,25% 95%,10% 95%,10% 83%,3% 83%,3% 67%,0 67%,0 25%,7% 25%,7% 13%,16% 13%,16% 5%,20% 5%);transform:scale(0);transform-origin:50% 50%;transition:transform .78s cubic-bezier(.22,.6,.3,1);background:linear-gradient(135deg,light-dark(#e2f3ff,#88b6df),light-dark(#b9dbfa,#527fa9) 55%,light-dark(#9ac3ed,#3b638a))}
+#salon-checkbox input:checked~.box .well::after{clip-path:polygon(20% 0,66% 0,66% 5%,84% 5%,84% 13%,94% 13%,94% 24%,100% 24%,100% 68%,95% 68%,95% 85%,85% 85%,85% 94%,68% 94%,68% 100%,25% 100%,25% 95%,10% 95%,10% 83%,3% 83%,3% 67%,0 67%,0 25%,7% 25%,7% 13%,16% 13%,16% 5%,20% 5%);transform:scale(1.08)}
+#salon-checkbox .well{box-shadow:none}
+#salon-checkbox .well::after{background:light-dark(#c3def8,#314c67);box-shadow:none}
+#salon-checkbox input:checked~.box{background:light-dark(#7fa4cc,#7799bd)}
+#salon-checkbox .tick{filter:none}
+#salon-checkbox .paper{padding:26px 20px}
+#salon-checkbox .checklist{gap:12px}
+#salon-checkbox label{padding:8px 6px;min-height:60px;gap:16px;isolation:isolate;transition:translate .3s cubic-bezier(.2,.8,.2,1)}
+#salon-checkbox input{left:6px;top:6px}
+#salon-checkbox label::before{content:"";position:absolute;inset:0 -6px;z-index:-1;background:light-dark(#f3e0e9,#402d3b);clip-path:polygon(8px 0,75% 0,75% 2px,83% 2px,83% 0,calc(100% - 8px) 0,calc(100% - 8px) 4px,calc(100% - 3px) 4px,calc(100% - 3px) 9px,100% 9px,100% calc(100% - 10px),calc(100% - 4px) calc(100% - 10px),calc(100% - 4px) calc(100% - 4px),calc(100% - 10px) calc(100% - 4px),calc(100% - 10px) 100%,8px 100%,8px calc(100% - 3px),3px calc(100% - 3px),3px calc(100% - 9px),0 calc(100% - 9px),0 8px,4px 8px,4px 3px,8px 3px);opacity:0;transform:scale(.98);transition:opacity .24s,transform .3s}
+#salon-checkbox label:has(input:checked)::before{background:light-dark(#e4edf7,#2d3c4e)}
+#salon-checkbox label:focus-within::before{opacity:.65;transform:scale(1)}
+#salon-checkbox label:active{translate:0 1px}
+#salon-checkbox .box{transition:background .3s,translate .3s cubic-bezier(.2,.8,.2,1),rotate .3s}
+#salon-checkbox .text{transition:color .3s,translate .3s cubic-bezier(.2,.8,.2,1)}
+#salon-checkbox .spark{right:5px;top:11px}
+@media(hover:hover) and (pointer:fine){
+#salon-checkbox label:hover{translate:2px -2px}
+#salon-checkbox label:hover::before{opacity:.7;transform:scale(1)}
+#salon-checkbox label:hover .box{translate:0 -1px;rotate:-3deg}
+#salon-checkbox label:hover .text{translate:2px 0}
+#salon-checkbox label:hover .spark{animation:checkbox-spark .65s steps(4,end) both}
+#salon-checkbox label:has(input:checked):hover .box{rotate:2deg}
+}
+@media(prefers-reduced-motion:reduce){#salon-checkbox label,#salon-checkbox label::before,#salon-checkbox .box,#salon-checkbox .text{transition:none;translate:none;rotate:none}}
+#salon-checkbox{position:relative;overflow:hidden;padding-top:90px;padding-bottom:100px}
+#salon-checkbox .confetti-layer{position:absolute;inset:0;pointer-events:none;z-index:10}
+#salon-checkbox .confetti-bit{position:absolute;width:5px;height:5px;background:var(--confetti);image-rendering:pixelated}
+#salon-checkbox .confetti-bit:nth-child(3n){width:4px;height:8px}
+#salon-checkbox .confetti-bit:nth-child(7n){clip-path:polygon(33% 0,66% 0,66% 33%,100% 33%,100% 66%,66% 66%,66% 100%,33% 100%,33% 66%,0 66%,0 33%,33% 33%);width:9px;height:9px}
+#salon-checkbox .box,#salon-checkbox input:checked~.box{background:transparent}
+#salon-checkbox .box::before{content:"";position:absolute;inset:0;background:var(--edge);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,10px 3px,10px 5px,9px 5px,9px 8px,6px 8px,6px 13px,3px 13px,3px 29px,4px 29px,4px 34px,7px 34px,7px 39px,12px 39px,12px 41px,29px 41px,29px 38px,35px 38px,35px 35px,39px 35px,39px 29px,41px 29px,41px 12px,38px 12px,38px 8px,35px 8px,35px 5px,29px 5px,29px 3px,10px 3px);transition:background .45s}
+#salon-checkbox input:checked~.box::before{background:light-dark(#7fa4cc,#7799bd)}
+#salon-checkbox .well,#salon-checkbox input:checked~.box .well{background:transparent;box-shadow:none}
+#salon-checkbox .well::after{transform:none;clip-path:inset(100% 0 0);background:light-dark(#c3def8,#314c67);transition:clip-path .8s cubic-bezier(.22,.6,.3,1);box-shadow:none}
+#salon-checkbox input:checked~.box .well::after{transform:none;clip-path:inset(0)}
+@media(prefers-reduced-motion:reduce){#salon-checkbox .well::after,#salon-checkbox .box::before{transition:none}}
+#salon-checkbox .celebration-star{position:absolute;width:12px;height:12px;background:var(--confetti);clip-path:polygon(33% 0,66% 0,66% 25%,75% 25%,75% 33%,100% 33%,100% 66%,75% 66%,75% 75%,66% 75%,66% 100%,33% 100%,33% 75%,25% 75%,25% 66%,0 66%,0 33%,25% 33%,25% 25%,33% 25%)}
+#salon-checkbox{isolation:isolate}
+#salon-checkbox .confetti-layer{z-index:0}
+#salon-checkbox .paper{z-index:1}
+#salon-checkbox .completion-progress{position:absolute;inset:0;pointer-events:none}
+#salon-checkbox .progress-star{position:absolute;width:15px;height:15px;background:light-dark(#d6c5ce,#645261);transition:background .4s;clip-path:polygon(33% 0,66% 0,66% 25%,75% 25%,75% 33%,100% 33%,100% 66%,75% 66%,75% 75%,66% 75%,66% 100%,33% 100%,33% 75%,25% 75%,25% 66%,0 66%,0 33%,25% 33%,25% 25%,33% 25%)}
+#salon-checkbox .progress-star[data-active="true"]{background:light-dark(#ea8ebd,#ed9fc9)}
+#salon-checkbox .progress-star:nth-child(3n+2)[data-active="true"]{background:light-dark(#89b7e9,#98c5ef)}
+#salon-checkbox .progress-star:nth-child(3n)[data-active="true"]{background:light-dark(#dfc266,#f1d990)}
+#salon-checkbox .progress-star{width:12px;height:12px;animation:progress-float var(--star-period) ease-in-out infinite;animation-delay:var(--star-delay)}
+#salon-checkbox .progress-star:nth-child(3n+2){width:16px;height:16px}
+#salon-checkbox .progress-star[data-active="true"]{animation:progress-float var(--star-period) ease-in-out infinite,progress-twinkle 3.8s ease-in-out infinite;animation-delay:var(--star-delay),var(--star-delay)}
+@keyframes progress-float{0%,100%{translate:0 2px;rotate:-5deg}50%{translate:0 -4px;rotate:5deg}}
+@keyframes progress-twinkle{0%,65%,100%{scale:1;opacity:1}78%{scale:.8;opacity:.7}88%{scale:1.15;opacity:1}}
+@media(prefers-reduced-motion:reduce){#salon-checkbox .progress-star,#salon-checkbox .progress-star[data-active="true"]{animation:none}}
+#salon-checkbox .paper{padding:61px 20px 60px}
+#salon-checkbox .completion-progress{z-index:2}
+#salon-checkbox .box{zoom:.73}
+#salon-checkbox label{gap:12px;min-height:52px;font-size:25px}
+#salon-checkbox input{left:0;top:4px;width:44px;height:44px}
+#salon-checkbox .checklist{gap:10px}
+#salon-checkbox .paper::before{background:linear-gradient(135deg,light-dark(#c191a8,#9d6d8a),light-dark(#d2adbf,#765468) 45%,light-dark(#b2839c,#a27694));transition:background .4s}
+#salon-checkbox .pixel-edging{position:absolute;inset:0;pointer-events:none;z-index:3}
+#salon-checkbox .pixel-edging i{position:absolute;width:10px;height:3px;background:light-dark(#efd9e3,#ba8fa6);opacity:.55;transition:background .45s,opacity .45s}
+#salon-checkbox .pixel-edging i:nth-child(3n){width:5px;height:4px}
+#salon-checkbox .pixel-edging i:nth-child(4n){translate:0 2px}
+#salon-checkbox .pixel-edging i[data-side="1"],#salon-checkbox .pixel-edging i[data-side="3"]{width:3px;height:10px}
+#salon-checkbox .pixel-edging i[data-side="2"]{translate:0 -1px}
+#salon-checkbox .pixel-edging i[data-lit="true"]{background:light-dark(#8aafd5,#aacdf0);opacity:1}
+#salon-checkbox .pixel-edging i:nth-child(3n)[data-lit="true"]{background:light-dark(#e2bd6f,#edd48c)}
+#salon-checkbox .pixel-edging.shimmer i{animation:border-shimmer .7s ease-out both;animation-delay:calc(var(--chip-order)*28ms)}
+@keyframes border-shimmer{0%,100%{filter:brightness(1);scale:1}40%{filter:brightness(1.3);scale:1.15}}
+#salon-checkbox .paper::after{box-shadow:inset 2px 2px 0 light-dark(#fffdfb,#72526933),inset -2px -3px 0 light-dark(#dfbccb55,#130c1733)}
+@media(prefers-reduced-motion:reduce){#salon-checkbox .pixel-edging.shimmer i{animation:none}}
+</style>
+<div class="paper"><div class="checklist" role="group" aria-label="Salon checklist"><label class="cursor-interaction"><input type="checkbox" data-item="prep" aria-label="Wash & prep"><span class="box" aria-hidden="true"><span class="well"></span><span class="tick"></span></span><span class="text">Wash & prep</span><span class="spark" aria-hidden="true"></span></label>
+<label class="cursor-interaction"><input type="checkbox" data-item="treatment" aria-label="Apply treatment"><span class="box" aria-hidden="true"><span class="well"></span><span class="tick"></span></span><span class="text">Apply treatment</span><span class="spark" aria-hidden="true"></span></label>
+<label class="cursor-interaction"><input type="checkbox" data-item="style" aria-label="Finish & style"><span class="box" aria-hidden="true"><span class="well"></span><span class="tick"></span></span><span class="text">Finish & style</span><span class="spark" aria-hidden="true"></span></label></div></div>
+<script>
+(()=>{
+const root=document.getElementById('salon-checkbox'),inputs=[...root.querySelectorAll('input')],timers=new Map();let allDone=false;const confetti=document.createElement('div');confetti.className='confetti-layer';confetti.setAttribute('aria-hidden','true');root.append(confetti);
+const paper=root.querySelector('.paper'),progress=document.createElement('div');progress.className='completion-progress';progress.setAttribute('role','progressbar');progress.setAttribute('aria-label','Checklist completion');progress.setAttribute('aria-valuemin','0');progress.setAttribute('aria-valuemax','3');paper.append(progress);const edging=document.createElement('div');edging.className='pixel-edging';edging.setAttribute('aria-hidden','true');paper.append(edging);for(let i=0;i<24;i++){const chip=document.createElement('i');chip.style.setProperty('--chip-order',i);const side=Math.floor(i/6),pos=12+(i%6)*14;chip.dataset.side=String(side);if(side===0||side===2){chip.style.left=pos+'%';chip.style[side===0?'top':'bottom']='0px'}else{chip.style.top=pos+'%';chip.style[side===1?'right':'left']='0px'}edging.append(chip)}
+const stars=Array.from({length:12},(_,i)=>{const star=document.createElement('span');star.className='progress-star';star.setAttribute('aria-hidden','true');star.style.left=(9+(i%6)*15)+'%';star.style.top=i<6?'22px':'calc(100% - 38px)';star.style.setProperty('--star-delay',(-i*.43)+'s');star.style.setProperty('--star-period',(3.2+(i%4)*.35)+'s');progress.append(star);return star});
+function updateProgress(animate=false){const count=inputs.filter(i=>i.checked).length;progress.setAttribute('aria-valuenow',String(count));root.dataset.completion=String(count);edging.querySelectorAll('i').forEach((chip,i)=>chip.dataset.lit=String(i<count*8));if(animate){edging.classList.remove('shimmer');void edging.offsetWidth;edging.classList.add('shimmer')}stars.forEach((star,i)=>{const active=Math.floor((i%6)/2)<count,was=star.dataset.active==='true';star.dataset.active=String(active);if(animate&&active&&!was&&!matchMedia('(prefers-reduced-motion: reduce)').matches)star.animate([{transform:'scale(.7)'},{transform:'scale(1.3)',offset:.5},{transform:'scale(1)'}],{duration:450,delay:(i<6?0:90)+(i%2)*70,easing:'cubic-bezier(.2,.8,.2,1)'})})}
+
+function burst(){
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+confetti.replaceChildren();const paper=root.querySelector('.paper'),area=root.getBoundingClientRect(),card=paper.getBoundingClientRect();
+paper.animate([{transform:'rotate(-4deg) scale(1)'},{transform:'rotate(-4deg) translateY(3px) scale(.98)',offset:.18},{transform:'rotate(-3deg) translateY(-5px) scale(1.035)',offset:.48},{transform:'rotate(-4.5deg) scale(.995)',offset:.78},{transform:'rotate(-4deg) scale(1)'}],{duration:650,easing:'cubic-bezier(.2,.8,.2,1)'});
+const colors=['light-dark(#ec83b5,#ed9fc9)','light-dark(#79afe7,#98c5ef)','light-dark(#dfc266,#f1d990)','light-dark(#ad8bd7,#c6aeea)'];
+for(let i=0;i<88;i++){
+const bit=document.createElement('span');bit.className='confetti-bit';bit.style.setProperty('--confetti',colors[i%4]);const side=i%2?-1:1;
+const sx=(side<0?card.left+15:card.right-15)-area.left,sy=card.top-area.top+card.height*(.45+Math.random()*.4);bit.style.left=sx+'px';bit.style.top=sy+'px';confetti.append(bit);
+const dx=side*(18+Math.random()*Math.max(20,Math.min(100,side<0?sx-12:area.width-sx-12))),vy=-(90+Math.random()*170),gravity=440+Math.random()*120,duration=1400+Math.random()*600;
+const frames=Array.from({length:25},(_,j)=>{const t=j/24,seconds=t*duration/1000;return {transform:`translate(${Math.round(dx*(1-Math.exp(-3*t)))}px,${Math.round(vy*seconds+.5*gravity*seconds*seconds)}px) rotate(${Math.round((i%5-2)*t*360/90)*90}deg)`,opacity:t<.04?t/.04:t>.65?(1-t)/.35:1,offset:t}});
+bit.animate(frames,{duration,delay:90+(i>=56?230:0)+Math.random()*140,easing:'linear'}).finished.then(()=>bit.remove()).catch(()=>bit.remove());
+}
+}
+function restore(s){const saved=s?.modelContent;inputs.forEach(input=>{input.checked=saved?.salonChecklist?.[input.dataset.item]===true||(input.dataset.item==='prep'&&saved?.salonCheckboxChecked===true)});allDone=inputs.every(i=>i.checked);updateProgress()}
+restore(window.openai?.widgetState);
+inputs.forEach(input=>input.addEventListener('change',()=>{
+const row=input.closest('label');clearTimeout(timers.get(row));row.dataset.pop='false';row.dataset.motion='';
+void row.offsetWidth;row.dataset.motion=input.checked?'check':'uncheck';row.dataset.pop=String(input.checked);
+timers.set(row,setTimeout(()=>{row.dataset.pop='false';row.dataset.motion=''},750));
+const complete=inputs.every(i=>i.checked);if(complete&&!allDone)burst();allDone=complete;updateProgress(true);
+const salonChecklist=Object.fromEntries(inputs.map(item=>[item.dataset.item,item.checked]));
+if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{salonChecklist},privateContent:null}).catch(()=>{});
+}));
+window.addEventListener('openai:set_globals',e=>restore(e.detail?.globals?.widgetState));
+})();
+</script>
+</div>
+</main></body></html>

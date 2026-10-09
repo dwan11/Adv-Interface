@@ -86,6 +86,7 @@
   <nav class="tabs" role="tablist" aria-label="Weeks">
     <button role="tab" id="tab-week1" aria-controls="week1-panel" aria-selected="true">Week 1</button>
     <button role="tab" id="tab-week2" aria-controls="week2-panel" aria-selected="false" tabindex="-1">Week 2</button>
+    <button role="tab" id="tab-week3" aria-controls="week3-panel" aria-selected="false" tabindex="-1">Week 3</button>
   </nav>
 
   <section id="week1-panel" role="tabpanel" aria-labelledby="tab-week1">
@@ -96,6 +97,10 @@
   <section id="week2-panel" role="tabpanel" aria-labelledby="tab-week2" hidden>
     <h2>Week 2 <span>Badges &amp; Tooltips · 7 sets</span></h2>
     <div class="grid" id="week2"></div>
+  </section>
+  <section id="week3-panel" role="tabpanel" aria-labelledby="tab-week3" hidden>
+    <h2>Week 3 <span>Pixel salon · 3 components</span></h2>
+    <div class="grid" id="week3"></div>
   </section>
 </main>
 
@@ -125,6 +130,12 @@
     { dir: "tones", name: "Five Tones", desc: "Playful, Futuristic, Elegant, Raw, Nostalgic" },
   ];
 
+  const week3 = [
+    { dir: "salon-timer", name: "Salon Timer", desc: "A pixel hairdryer lifts a rolling ball to start the timer. Color, airflow and motion follow its state." },
+    { dir: "salon-checklist", name: "Salon Checklist", desc: "Pixel checkboxes fill with blue, stars track progress, and confetti celebrates a finished routine." },
+    { dir: "sliding-pearl", name: "Sliding Pearl", desc: "A pixel pearl rolls along a dotted path, changing color with each finishing choice." },
+  ];
+
   function render(id, week, list) {
   const grid = document.getElementById(id);
   for (const p of list) {
@@ -146,6 +157,7 @@
     grid.appendChild(card);
   }
   }
+  render("week3", "week3", week3);
   render("week2", "week2", week2);
   render("week1", "week1", week1);
 

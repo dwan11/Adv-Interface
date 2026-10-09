@@ -1,0 +1,173 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Salon timer · Adv Interface</title><style>:root{color-scheme:light dark}*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;background:light-dark(#faf0f5,#211a23)}body>main{width:min(736px,100%)}.cursor-interaction,input,button,label{cursor:pointer}button:focus-visible{outline:2px solid light-dark(#487aa1,#bddfff);outline-offset:5px}</style><script>(()=>{const key='adv-interface-salon-timer';let state=null;try{state=JSON.parse(localStorage.getItem(key))}catch{}window.openai={widgetState:state,setWidgetState(next){this.widgetState=next;try{localStorage.setItem(key,JSON.stringify(next))}catch{}return Promise.resolve()}}})();</script></head><body><main><div id="salon-timer" class="viz-dotted-background">
+<style>
+#salon-timer{padding:28px 8px;color-scheme:light dark;font-family:ui-sans-serif,system-ui,sans-serif;--paper:light-dark(#fffaf7,#292326);--ink:light-dark(#49353d,#f4e6eb);--muted:light-dark(#95747f,#bca3ad);--pink:light-dark(#f4dbe4,#563a48);--line:light-dark(#e8c5d2,#795365);color:var(--ink)}#salon-timer *{box-sizing:border-box}#salon-timer .phone{max-width:360px;margin:auto;padding:26px 22px 30px;background:var(--paper);border:1px solid var(--line);border-radius:30px;box-shadow:0 12px 35px #00000008}#salon-timer .top{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);letter-spacing:.08em}#salon-timer .brand{color:var(--ink);font-weight:500;letter-spacing:.16em}#salon-timer .title{font-size:23px;font-weight:500;letter-spacing:-.7px;margin:35px 0 5px}#salon-timer .subtitle{font-size:13px;color:var(--muted)}#salon-timer .clock{font-size:64px;font-weight:400;letter-spacing:-3px;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:32px;text-align:center}#salon-timer .timer-label{font-size:11px;letter-spacing:.17em;text-align:center;color:var(--muted);margin-top:6px}#salon-timer .assembly{position:relative;display:flex;align-items:flex-start;gap:10px;margin-top:37px;height:95px}#salon-timer canvas{width:60px;height:72px;flex:0 0 60px;image-rendering:pixelated;margin-top:1px}#salon-timer .toggle{position:relative;flex:1;height:58px;border:1.5px solid var(--line);border-radius:40px;padding:0;background:var(--pink);overflow:visible;box-shadow:inset 0 2px 5px #8d45640a;transition:background .3s,border-color .3s}#salon-timer[data-on="true"] .toggle{background:light-dark(#dbeaf9,#314a65);border-color:light-dark(#aac9e8,#6584a4)}#salon-timer .ball{position:absolute;left:5px;top:5px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 32% 25%,#f2f9ff 0,#c6e2ff 38%,#96bff1 75%,#80a9dc 100%);border:1px solid #83a7d377;box-shadow:0 3px 5px #4d65872b,inset 0 1px 2px #ffffffb3;z-index:3;will-change:transform}#salon-timer .off,#salon-timer .on{position:absolute;top:21px;font-size:10px;letter-spacing:1.8px;color:var(--muted)}#salon-timer .off{right:22px}#salon-timer .on{left:22px;opacity:0}#salon-timer[data-on="true"] .off{opacity:0}#salon-timer[data-on="true"] .on{opacity:1}#salon-timer .wind{position:absolute;left:-14px;right:8px;top:17px;height:24px;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s}#salon-timer[data-on="true"] .wind{opacity:.8}#salon-timer .wind i{position:absolute;height:2px;width:18px;border-radius:2px;background:#90b9ed;left:-24px;animation:salon-wind 1s linear infinite;animation-play-state:paused}#salon-timer .wind i:nth-child(1){top:3px;animation-delay:-.1s}#salon-timer .wind i:nth-child(2){top:11px;animation-delay:-.6s;width:25px}#salon-timer .wind i:nth-child(3){top:20px;animation-delay:-.3s}#salon-timer[data-on="true"] .wind i{animation-play-state:running}#salon-timer .state{text-align:center;font-size:13px;color:var(--muted);margin-top:0}#salon-timer .footer{display:flex;justify-content:space-between;margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}@keyframes salon-wind{to{transform:translateX(260px)}}@media(prefers-reduced-motion:reduce){#salon-timer .wind i{animation:none;left:20px}#salon-timer .toggle{transition:none}}
+</style>
+<div class="phone"><div class="clock" role="timer" aria-label="Time remaining">10:00</div><div class="assembly"><canvas width="60" height="72" aria-hidden="true"></canvas><button class="toggle cursor-interaction" type="button" role="switch" aria-label="Start salon timer" aria-checked="false"><span class="wind" aria-hidden="true"><i></i><i></i><i></i></span><span class="off" aria-hidden="true">OFF</span><span class="on" aria-hidden="true">ON</span><span class="ball-shadow" aria-hidden="true"></span><span class="ball" aria-hidden="true"></span></button></div><div class="state" aria-live="polite">Ready when you are</div></div>
+<script>
+(()=>{const root=document.getElementById('salon-timer'),button=root.querySelector('button'),ball=root.querySelector('.ball'),canvas=root.querySelector('canvas'),c=canvas.getContext('2d'),clock=root.querySelector('.clock'),status=root.querySelector('.state');let on=false,x=0,v=0,raf=0,last=0,remaining=600,cycleDuration=600,started=false,deadline=0,flow=0,gust=0,gustTarget=0,gustAt=0,climbStart=0,climbFrom=0,dryerFill=0,returnStart=0,returnX=0,returnFill=0;const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const rect=(a,b,w,h,color)=>{c.fillStyle=color;c.fillRect(a,b,w,h)};function poly(points,color){c.fillStyle=color;c.beginPath();points.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fill()}
+function dryer(){
+poly([[8,18],[12,18],[12,15],[20,15],[20,12],[29,12],[29,15],[35,15],[35,18],[45,18],[45,15],[53,15],[53,18],[56,18],[56,21],[59,21],[59,37],[56,37],[56,40],[53,40],[53,43],[43,43],[43,40],[33,40],[33,43],[27,43],[27,65],[24,65],[24,68],[18,68],[18,65],[15,65],[15,42],[12,42],[12,39],[8,39],[8,36],[5,36],[5,23],[8,23]],'#ac4165');
+poly([[15,41],[27,41],[27,61],[24,61],[24,65],[18,65],[18,62],[15,62]],'#d51d89');rect(18,43,7,18,'#fb77b4');rect(18,43,3,18,'#ff9dca');rect(18,61,6,3,'#f254a4');
+poly([[8,22],[12,22],[12,18],[21,18],[21,15],[29,15],[29,18],[35,18],[35,21],[48,21],[48,18],[53,18],[53,22],[56,22],[56,36],[53,36],[53,40],[43,40],[43,37],[32,37],[32,40],[20,40],[20,37],[12,37],[12,34],[8,34]],'#ff88b3');
+rect(11,22,37,7,'#ff9dbf');rect(17,19,12,3,'#ffacd0');rect(25,29,23,8,'#fb79a8');rect(12,33,8,4,'#fc79a8');rect(30,34,15,3,'#fa70a1');rect(24,23,22,3,'#fff2e8');rect(18,23,4,3,'#fff2e8');
+rect(7,24,14,3,'#ac4165');rect(7,30,14,3,'#ac4165');rect(10,36,10,2,'#ac4165');rect(7,27,9,2,'#f9619b');
+poly([[48,19],[54,19],[54,22],[57,22],[57,36],[54,36],[54,39],[48,39],[48,36],[46,36],[46,22],[48,22]],'#f7d2d5');rect(49,22,6,3,'#b97688');rect(49,28,6,3,'#b97688');rect(49,34,6,3,'#b97688');rect(48,20,5,2,'#fff2e8');
+rect(12,43,12,10,'#205c9f');rect(15,40,6,10,'#3b85d2');rect(15,43,3,6,'#8bbcf5');rect(12,46,9,4,'#276ab3');if(on){rect(15,42,3,3,'#d4f0ff')}
+}
+const limit=()=>Math.max(0,button.clientWidth-58);
+function draw(){const travel=Math.max(1,restingPosition()-climbFrom),u=Math.max(0,Math.min(1,(x-climbFrom)/travel));if(on&&climbStart&&!reduced.matches){ball.style.filter=`hue-rotate(${110+610*u}deg) saturate(${1.15+.2*Math.sin(u*Math.PI)} )`;if(u>.98||performance.now()-climbStart>3500){climbStart=0;ball.style.filter=''}}else{ball.style.filter=''}const angle=x/(ball.offsetWidth/2)*180/Math.PI;ball.style.transform=`translateX(${x}px) rotate(${angle}deg)`;root.querySelector('.ball-shadow').style.transform=`translateX(${x}px)`}
+const dryerColor=document.createElement('canvas');dryerColor.width=60;dryerColor.height=72;const colorCtx=dryerColor.getContext('2d');
+function drawDryer(){
+c.clearRect(0,0,60,72);dryer();colorCtx.clearRect(0,0,60,72);colorCtx.drawImage(canvas,0,0);
+const original=c.getImageData(0,0,60,72),outline=c.createImageData(60,72),ink=getComputedStyle(canvas).color;c.fillStyle=ink||'#ac4165';c.fillRect(0,0,1,1);const rgb=c.getImageData(0,0,1,1).data;
+const solid=(a,b)=>a>=0&&a<60&&b>=0&&b<72&&original.data[(b*60+a)*4+3]>0;
+for(let y=0;y<72;y++)for(let x=0;x<60;x++){if(!solid(x,y))continue;let edge=false;for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])if(!solid(x+dx,y+dy))edge=true;if(edge){const n=(y*60+x)*4;outline.data[n]=rgb[0];outline.data[n+1]=rgb[1];outline.data[n+2]=rgb[2];outline.data[n+3]=255}}
+c.putImageData(outline,0,0);c.strokeStyle=ink||'#ac4165';c.lineWidth=1.5;c.strokeRect(13,43,10,9);for(const y of [23,29,35]){c.beginPath();c.moveTo(49,y);c.lineTo(55,y);c.stroke()}
+if(dryerFill>0){c.save();c.beginPath();c.rect(0,72*(1-dryerFill),60,72*dryerFill);c.clip();c.drawImage(dryerColor,0,0);c.restore()}
+}
+function time(){clock.textContent=`${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(Math.ceil(remaining)%60).padStart(2,'0')}`}
+function progress(){const seconds=on?Math.max(0,(deadline-Date.now())/1000):remaining;return Math.max(0,Math.min(1,seconds/Math.max(1,cycleDuration)))}
+function restingPosition(){return Math.max(0,limit()-8)*progress()}
+function tick(t){
+ const dt=Math.min((t-last)/1000,.025)||.016;last=t;
+ dryerFill+=((on?1:0)-dryerFill)*(1-Math.exp(-dt/.28));if(dryerFill<.003)dryerFill=0;if(dryerFill>.997)dryerFill=1;drawDryer();
+ flow+=((on?1:0)-flow)*(1-Math.exp(-dt/.18));
+ if(t>=gustAt){gustTarget=(Math.random()-.5)*150;gustAt=t+350+Math.random()*900}
+ gust+=(gustTarget-gust)*(1-Math.exp(-dt/.3));
+ const gravity=950*Math.sin(4*Math.PI/180)/1.4;
+ const equilibrium=restingPosition();
+ const turbulence=(gust+20*Math.sin(t*.0041)+9*Math.sin(t*.0073+1.2))*Math.min(1,progress()*6);
+ const air=flow*(gravity+22*(equilibrium-x)+turbulence);
+ root.style.setProperty('--air-speed',(1.25-.45*progress())+'s');
+ const drag=(1.1+4.6*flow)*v;
+ if(!on&&returnStart){const u=Math.min(1,(t-returnStart)/900),fraction=1-u*u*(3-2*u);const previous=x;x=returnX*fraction;v=(x-previous)/dt;dryerFill=returnFill*fraction;drawDryer();if(u===1){x=0;v=0;dryerFill=0;returnStart=0}}else{v+=(air-gravity-drag)*dt;x+=v*dt;}
+ if(x<0){x=0;v=v< -10?-v*.16:Math.max(0,v)}
+ if(x>limit()){x=limit();v=v>10?-v*.18:Math.min(0,v)}
+ root.querySelector('.wind').style.opacity=String(flow*(.6+.2*Math.max(-1,Math.min(1,turbulence/90))));
+ draw();
+ if(on||x>.05||Math.abs(v)>.3||flow>.01||(!on&&dryerFill>.003)){raf=requestAnimationFrame(tick)}
+ else{x=0;v=0;flow=0;draw();raf=0;root.querySelector('.wind').style.opacity='0'}
+}
+
+function save(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{hairdryerOn:on,remainingSeconds:remaining},privateContent:{deadline:on?deadline:null,started,cycleDuration}}).catch(()=>{})}
+function set(value,persist=false){const activating=value&&!on;if(on&&!value){returnStart=performance.now();returnX=x;returnFill=dryerFill}else if(value){returnStart=0}if(activating){climbStart=performance.now();climbFrom=x}else if(!value){climbStart=0}if(on)remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));on=value;if(on){if(remaining<=0)remaining=600;if(activating&&persist)cycleDuration=remaining;started=true;deadline=Date.now()+remaining*1000}root.dataset.on=String(on);root.dataset.state=on?'running':remaining===0?'complete':started?'paused':'ready';button.setAttribute('aria-checked',String(on));button.setAttribute('aria-label',on?'Pause salon timer':'Start salon timer');status.textContent=on?'Your session is in progress':remaining===0?'Session complete':started?'Timer paused':'Ready when you are';drawDryer();time();cancelAnimationFrame(raf);raf=0;if(reduced.matches){dryerFill=on?1:0;drawDryer();x=on?restingPosition():0;v=0;flow=on?1:0;draw()}else{last=performance.now();raf=requestAnimationFrame(tick)}if(persist)save()}
+button.addEventListener('click',()=>set(!on,true));new ResizeObserver(()=>{x=Math.min(x,limit());if(on&&!raf)x=restingPosition();draw()}).observe(button);setInterval(()=>{if(on){remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));time();if(reduced.matches){x=restingPosition();draw()}if(!remaining)set(false,true)}},250);
+function restore(s){if(!s)return;on=false;remaining=Number.isFinite(s.modelContent?.remainingSeconds)?Math.max(0,s.modelContent.remainingSeconds):600;started=s.privateContent?.started===true;cycleDuration=Number.isFinite(s.privateContent?.cycleDuration)?Math.max(1,s.privateContent.cycleDuration):Math.max(1,remaining);if(s.modelContent?.hairdryerOn&&s.privateContent?.deadline)remaining=Math.max(0,Math.ceil((s.privateContent.deadline-Date.now())/1000));set(s.modelContent?.hairdryerOn===true&&remaining>0)}restore(window.openai?.widgetState);drawDryer();time();window.addEventListener('openai:set_globals',e=>restore(e.detail?.globals?.widgetState));
+})();
+</script>
+</div>
+<style>
+#salon-timer .assembly{transform:rotate(-8deg);transform-origin:70px 29px;margin-top:46px;height:104px}
+#salon-timer .toggle{--edge:light-dark(#ba718e,#aa718d);--inside:light-dark(#f4dbe4,#563a48);--pixel-end:polygon(20px 0,calc(100% - 20px) 0,calc(100% - 20px) 4px,calc(100% - 12px) 4px,calc(100% - 12px) 8px,calc(100% - 8px) 8px,calc(100% - 8px) 12px,calc(100% - 4px) 12px,calc(100% - 4px) 20px,100% 20px,100% calc(100% - 20px),calc(100% - 4px) calc(100% - 20px),calc(100% - 4px) calc(100% - 12px),calc(100% - 8px) calc(100% - 12px),calc(100% - 8px) calc(100% - 8px),calc(100% - 12px) calc(100% - 8px),calc(100% - 12px) calc(100% - 4px),calc(100% - 20px) calc(100% - 4px),calc(100% - 20px) 100%,20px 100%,20px calc(100% - 4px),12px calc(100% - 4px),12px calc(100% - 8px),8px calc(100% - 8px),8px calc(100% - 12px),4px calc(100% - 12px),4px calc(100% - 20px),0 calc(100% - 20px),0 20px,4px 20px,4px 12px,8px 12px,8px 8px,12px 8px,12px 4px,20px 4px);border:0;border-radius:0;background:transparent;box-shadow:none;isolation:isolate}
+#salon-timer .toggle::before,#salon-timer .toggle::after{content:"";position:absolute;clip-path:var(--pixel-end);pointer-events:none;z-index:-1}
+#salon-timer .toggle::before{inset:0;background:var(--edge)}
+#salon-timer .toggle::after{inset:3px;background:var(--inside);box-shadow:inset 0 -4px 0 #b4738d25}
+#salon-timer[data-on="true"] .toggle{--edge:light-dark(#729dce,#729dce);--inside:light-dark(#dbeaf9,#314a65);background:transparent;border:0}
+#salon-timer .ball{top:6px;left:6px;width:46px;height:46px;border:0;border-radius:0;box-shadow:none;clip-path:polygon(16px 0,30px 0,30px 3px,36px 3px,36px 6px,40px 6px,40px 10px,43px 10px,43px 16px,46px 16px,46px 30px,43px 30px,43px 36px,40px 36px,40px 40px,36px 40px,36px 43px,30px 43px,30px 46px,16px 46px,16px 43px,10px 43px,10px 40px,6px 40px,6px 36px,3px 36px,3px 30px,0 30px,0 16px,3px 16px,3px 10px,6px 10px,6px 6px,10px 6px,10px 3px,16px 3px);background:linear-gradient(to bottom,#def0ff 0 3px,#b9dbff 3px 9px,#a5cfff 9px 33px,#83b3ee 33px 40px,#6493cf 40px 46px)}
+#salon-timer .ball::before{content:"";position:absolute;left:7px;top:9px;width:9px;height:9px;background:#eff8ff;box-shadow:6px -3px 0 #eff8ff,0 6px 0 #d4eaff}
+#salon-timer .ball::after{content:"";position:absolute;right:3px;top:16px;width:3px;height:16px;background:#77a8e4}
+#salon-timer .wind{border-radius:0}#salon-timer .wind i{border-radius:0}
+#salon-timer .off,#salon-timer .on{font-family:ui-monospace,SFMono-Regular,monospace}
+</style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+#salon-timer .phone{position:relative;isolation:isolate;overflow:hidden;font-family:'VT323',ui-monospace,monospace}
+#salon-timer .phone>div:not(.sparkles),#salon-timer .phone>h2{position:relative;z-index:1}
+#salon-timer .top{font-size:17px;letter-spacing:.06em}#salon-timer .brand{font-weight:400;letter-spacing:.12em}
+#salon-timer .title{font-family:inherit;font-size:29px;font-weight:400;letter-spacing:0;line-height:1.1}
+#salon-timer .subtitle{font-size:18px}#salon-timer .clock{font-family:inherit;font-size:82px;line-height:1;letter-spacing:1px;font-weight:400}
+#salon-timer .timer-label{font-size:15px;letter-spacing:.08em}#salon-timer .state{font-size:19px}#salon-timer .footer{font-size:16px;gap:10px}
+#salon-timer .on,#salon-timer .off{font-family:'VT323',ui-monospace,monospace;font-size:16px;top:19px;letter-spacing:1px}
+#salon-timer .sparkles{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;--spark-pink:light-dark(#ed86b4,#b76891);--spark-gold:light-dark(#f7e7a1,#85713d)}
+#salon-timer .sparkle{position:absolute;left:var(--sx);top:var(--sy);width:3px;height:3px;background:var(--spark-pink);box-shadow:0 -3px 0 var(--spark-pink),0 3px 0 var(--spark-pink),-3px 0 0 var(--spark-pink),3px 0 0 var(--spark-pink),-3px -3px 0 var(--spark-gold),-6px 0 0 var(--spark-gold),-3px 3px 0 var(--spark-gold);opacity:0;transform-origin:center;animation:salon-sparkle var(--cycle) steps(4,end) infinite;animation-delay:var(--delay)}
+#salon-timer .sparkle:nth-child(3n){width:2px;height:2px}
+@keyframes salon-sparkle{0%,18%,72%,100%{opacity:0;transform:scale(.3)}25%{opacity:.28;transform:scale(.6)}36%,48%{opacity:.6;transform:scale(1)}58%{opacity:.22;transform:scale(.6)}}
+@media(prefers-reduced-motion:reduce){#salon-timer .sparkle{animation:none;opacity:.22;transform:none}}
+</style>
+<script>
+(()=>{const root=document.getElementById('salon-timer'),phone=root.querySelector('.phone');const layer=document.createElement('div');layer.className='sparkles';layer.setAttribute('aria-hidden','true');const positions=[[8,18],[90,22],[15,35],[86,40],[9,52],[92,59],[20,71],[88,78],[10,87],[72,12],[43,29],[64,62],[48,89],[32,7]];positions.forEach(([x,y],i)=>{const star=document.createElement('span');star.className='sparkle';star.style.setProperty('--sx',x+'%');star.style.setProperty('--sy',y+'%');star.style.setProperty('--cycle',(4.8+(i%5)*.7)+'s');star.style.setProperty('--delay',(-i*.87)+'s');layer.appendChild(star)});phone.prepend(layer)})();
+</script>
+<style>
+#salon-timer .phone{padding:32px 22px 20px;min-height:340px}
+#salon-timer .title{text-align:center;font-size:24px;color:var(--muted);margin:8px 0 0;letter-spacing:.02em}
+#salon-timer .clock{font-size:92px;margin-top:32px;line-height:1}
+#salon-timer .assembly{margin-top:52px;height:100px}
+#salon-timer .phone>.state{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+</style>
+<style>
+#salon-timer .phone{max-width:350px;min-height:0;padding:28px 20px 21px;border-radius:34px;border:1px solid light-dark(#edd2dc,#65515a);background:linear-gradient(145deg,light-dark(#fffdfa,#30282d),light-dark(#fcf1f3,#292226));box-shadow:inset 0 1px 0 light-dark(#ffffff,#4d3c45),inset 0 -2px 3px light-dark(#e9ccd54d,#170f184d),0 14px 28px #3d1f3010,0 3px 7px #3d1f300a;transition:box-shadow .5s}
+#salon-timer .clock{display:flex;justify-content:center;align-items:center;min-height:142px;margin:0;padding:18px 8px 12px;border-radius:23px;letter-spacing:2px;font-size:88px;line-height:1;color:light-dark(#694456,#dbc0cd);background:linear-gradient(180deg,light-dark(#f0e2e7,#201c22),light-dark(#f8edf0,#28212a));box-shadow:inset 0 3px 7px light-dark(#b37b9426,#00000055),inset 0 1px 2px light-dark(#ae7b9430,#00000040),inset 0 -1px 0 light-dark(#ffffff,#3b3039);text-shadow:0 2px 0 light-dark(#fff8fc,#171119);transition:color .4s,background .5s,text-shadow .4s}
+#salon-timer[data-state="running"] .clock{color:light-dark(#5b7192,#b9d8f4);text-shadow:0 2px 0 light-dark(#ffffff,#101722),0 0 14px light-dark(#aaccee24,#a9d7ff18)}
+#salon-timer[data-state="complete"] .clock{color:light-dark(#b56389,#eda2c4)}
+#salon-timer .assembly{margin:42px 0 0;height:99px;gap:10px}
+#salon-timer .toggle::after{background:linear-gradient(to bottom,light-dark(#b786a122,#00000033) 0 4px,transparent 4px 80%,light-dark(#ffffff55,#ffffff08) 80% 100%),var(--inside);box-shadow:inset 0 5px 8px light-dark(#8c597d24,#00000035),inset 0 -3px 0 light-dark(#ffffff88,#cfb2d018);transition:background .35s}
+#salon-timer .toggle::before{background:linear-gradient(to bottom,light-dark(#ffffff30,#ffffff15) 0 3px,transparent 3px calc(100% - 4px),#69405225 calc(100% - 4px)),var(--edge);transition:background .35s}
+#salon-timer .ball-shadow{position:absolute;left:8px;top:44px;width:43px;height:9px;background:light-dark(#69558b30,#0e0c1f66);clip-path:polygon(6px 0,37px 0,37px 2px,43px 2px,43px 7px,37px 7px,37px 9px,6px 9px,6px 7px,0 7px,0 2px,6px 2px);z-index:2;will-change:transform}
+#salon-timer .on,#salon-timer .off{transition:opacity .24s,translate .24s;translate:0 1px}
+#salon-timer[data-on="true"] .on{translate:0 0}#salon-timer[data-on="true"] .off{translate:0 -2px}
+#salon-timer canvas{filter:drop-shadow(0 2px 0 light-dark(#985f7a20,#120b1740))}
+#salon-timer[data-on="true"] canvas{animation:dryer-hum .22s steps(2,end) infinite}
+@keyframes dryer-hum{0%,100%{translate:0 0}50%{translate:0 -.35px}}
+#salon-timer .sparkle{filter:opacity(.8)}
+@media(prefers-reduced-motion:reduce){#salon-timer .clock,#salon-timer .phone,#salon-timer .on,#salon-timer .off{transition:none}#salon-timer[data-on="true"] canvas{animation:none}}
+</style>
+<script>
+(()=>{const root=document.getElementById('salon-timer'),clock=root.querySelector('.clock');const reduce=matchMedia('(prefers-reduced-motion: reduce)');let previous=clock.textContent;new MutationObserver(()=>{if(clock.textContent!==previous){previous=clock.textContent;if(!reduce.matches)clock.animate([{transform:'translateY(1px)',opacity:.88},{transform:'translateY(0)',opacity:1}],{duration:180,easing:'ease-out'})}}).observe(clock,{childList:true});let current=root.dataset.state;new MutationObserver(()=>{if(root.dataset.state===current)return;current=root.dataset.state;if(!reduce.matches)clock.animate([{transform:'scale(.985)'},{transform:'scale(1)'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'})}).observe(root,{attributes:true,attributeFilter:['data-state']})})();
+</script>
+<style>
+#salon-timer .toggle{--floor:light-dark(#b47c982f,#09071355);--floor-edge:light-dark(#a26d8d55,#08061088)}
+#salon-timer[data-on="true"] .toggle{--floor:light-dark(#6f94c23d,#0d213a66);--floor-edge:light-dark(#658bb45e,#08182eaa)}
+#salon-timer .toggle::after{background:linear-gradient(to bottom,light-dark(#8d637a16,#00000028) 0 4px,transparent 4px calc(100% - 12px),var(--floor) calc(100% - 12px) calc(100% - 8px),var(--floor-edge) calc(100% - 8px) calc(100% - 3px),light-dark(#fff5fb88,#b3b8da22) calc(100% - 3px)),var(--inside);box-shadow:inset 0 3px 5px light-dark(#8c597d19,#00000030),inset 0 -7px 8px var(--floor),inset 0 -1px 0 light-dark(#fff9fc,#d6d5ec33)}
+#salon-timer canvas{filter:drop-shadow(1px 3px 0 light-dark(#9c657c25,#100b174f)) drop-shadow(2px 6px 3px light-dark(#7d51642c,#00000055))}
+</style>
+<style>
+#salon-timer .wind i{animation-duration:var(--air-speed,1s)}
+#salon-timer .on{opacity:0}#salon-timer[data-on="true"] .on{opacity:1}
+</style>
+<style>
+#salon-timer .wind{inset:3px;height:auto;overflow:hidden;clip-path:var(--pixel-end);border-radius:0;z-index:1;color:light-dark(#7da7d3,#9fc3ed)}
+#salon-timer .wind i,#salon-timer .wind i:nth-child(2){left:-38px;width:34px;height:14px;background:none;border-radius:0;animation-duration:calc(var(--air-speed,1s) * 1.65)}
+#salon-timer .wind i:nth-child(1){top:6px;animation-delay:-.2s}
+#salon-timer .wind i:nth-child(2){top:20px;animation-delay:-.9s;opacity:.8}
+#salon-timer .wind i:nth-child(3){top:33px;animation-delay:-.55s;opacity:.65}
+#salon-timer .wind i::before{content:"";position:absolute;left:0;top:10px;width:25px;height:2px;background:currentColor;border-radius:2px}
+#salon-timer .wind i::after{content:"";position:absolute;left:18px;top:0;width:14px;height:12px;border:2px solid currentColor;border-left-color:transparent;border-radius:50%;box-sizing:border-box;transform:rotate(-12deg)}
+@keyframes salon-wind{0%{transform:translateX(0) translateY(1px);opacity:0}12%{opacity:.75}48%{transform:translateX(128px) translateY(-1px)}80%{opacity:.6}100%{transform:translateX(280px) translateY(1px);opacity:0}}
+@media(prefers-reduced-motion:reduce){#salon-timer .wind i{animation:none;left:25px}#salon-timer .wind i:nth-child(2){left:90px}#salon-timer .wind i:nth-child(3){left:150px}}
+</style>
+<style>
+#salon-timer .ball{filter:hue-rotate(110deg) saturate(1.1);transition:filter .4s ease}
+#salon-timer[data-on="true"] .ball{filter:hue-rotate(0deg) saturate(1)}
+#salon-timer .ball-shadow{background:light-dark(#92557335,#16091966);transition:background .4s}
+#salon-timer[data-on="true"] .ball-shadow{background:light-dark(#69558b30,#0e0c1f66)}
+@media(prefers-reduced-motion:reduce){#salon-timer .ball,#salon-timer .ball-shadow{transition:none}}
+</style>
+<style>
+#salon-timer .on,#salon-timer .off{z-index:4;pointer-events:none;text-shadow:0 1px 0 light-dark(#fff5fbbb,#172031aa)}
+#salon-timer[data-on="true"] .on{opacity:1;color:light-dark(#526f96,#c6def6)}
+</style>
+<style>
+#salon-timer .on,#salon-timer .off,#salon-timer[data-on="true"] .on,#salon-timer[data-on="true"] .off{z-index:2;opacity:1;translate:0 0;transition:none;pointer-events:none}
+#salon-timer .ball{z-index:3}
+</style>
+<style>
+#salon-timer .clock{background:radial-gradient(circle,light-dark(#a36b8012,#c08ba313) 1px,transparent 1px) 0 0/4px 4px,linear-gradient(180deg,light-dark(#f0e2e7,#201c22),light-dark(#f8edf0,#28212a))}
+</style>
+<style>
+#salon-timer{padding:45px 22px 42px}
+#salon-timer .phone{transform:rotate(-4deg);transform-origin:center;max-width:350px}
+#salon-timer .assembly{transform:none}
+</style>
+<style>
+#salon-timer .phone{--card-cut:polygon(24px 0,58% 0,58% 3px,63% 3px,63% 0,calc(100% - 20px) 0,calc(100% - 20px) 5px,calc(100% - 10px) 5px,calc(100% - 10px) 12px,calc(100% - 4px) 12px,calc(100% - 4px) 24px,100% 24px,100% 57%,calc(100% - 3px) 57%,calc(100% - 3px) 65%,100% 65%,100% calc(100% - 26px),calc(100% - 5px) calc(100% - 26px),calc(100% - 5px) calc(100% - 15px),calc(100% - 13px) calc(100% - 15px),calc(100% - 13px) calc(100% - 6px),calc(100% - 26px) calc(100% - 6px),calc(100% - 26px) 100%,39% 100%,39% calc(100% - 3px),32% calc(100% - 3px),32% 100%,18px 100%,18px calc(100% - 5px),8px calc(100% - 5px),8px calc(100% - 13px),0 calc(100% - 13px),0 48%,4px 48%,4px 40%,0 40%,0 23px,5px 23px,5px 12px,13px 12px,13px 5px,24px 5px);background:none;border:0;border-radius:0;box-shadow:none;overflow:visible;filter:drop-shadow(0 3px 0 light-dark(#d8b7c666,#110c1755)) drop-shadow(0 12px 16px #54344715)}
+#salon-timer .phone::before,#salon-timer .phone::after{content:"";position:absolute;pointer-events:none;clip-path:var(--card-cut);z-index:-1}
+#salon-timer .phone::before{inset:0;background:linear-gradient(140deg,light-dark(#eac7d6,#785362),light-dark(#c9a3b8,#4c3548))}
+#salon-timer .phone::after{inset:2px;background:linear-gradient(90deg,transparent 0 13%,light-dark(#ffffff,#765569) 13% 19%,transparent 19% 36%,light-dark(#ebcbd988,#87617466) 36% 40%,transparent 40% 80%,light-dark(#ffffff,#765569) 80% 86%,transparent 86%) 0 5px/100% 3px no-repeat,linear-gradient(90deg,transparent 0 16%,light-dark(#c39aaf66,#0f081666) 16% 23%,transparent 23% 54%,light-dark(#dec0d080,#634c6480) 54% 59%,transparent 59% 74%,light-dark(#c39aaf66,#0f081666) 74% 83%,transparent 83%) 0 calc(100% - 5px)/100% 4px no-repeat,repeating-linear-gradient(180deg,transparent 0 24px,light-dark(#e3c2d177,#6d4b6277) 24px 28px,transparent 28px 52px) 5px 0/3px 100% no-repeat,repeating-linear-gradient(180deg,transparent 0 41px,light-dark(#c9a1b544,#100a1c66) 41px 45px,transparent 45px 76px) calc(100% - 5px) 0/3px 100% no-repeat,linear-gradient(145deg,light-dark(#fffdfa,#30282d),light-dark(#fcf1f3,#292226));box-shadow:inset 0 -5px 6px light-dark(#bb87a115,#00000022)}
+</style>
+
+<style>
+#salon-timer{--dryer-outline:light-dark(#ac4165,#e3a1be)}
+#salon-timer canvas{color:var(--dryer-outline)}
+</style>
+</main></body></html>
