@@ -14,7 +14,7 @@ function control(kind,key,index=0){
 const uid=`${key}-${kind}-${index}`;
 if(key==='console'){
 if(kind==='switch')return `<span class="graphic switch mechanical" aria-hidden="true"><span class="knob"><span class="grip"></span></span><span class="contact"></span></span>`;
-if(kind==='check')return `<span class="graphic check mechanical" aria-hidden="true"><span class="socket"><span class="cap">${svg('<path class="check-path" d="M8 14 L12 18 L20 9"/>','0 0 28 28')}<span class="cap-grip"></span></span></span><span class="contact"></span></span>`;
+if(kind==='check')return `<span class="graphic check mechanical" aria-hidden="true"><span class="socket"><span class="cap">${svg('<path class="check-path check-bevel" d="M8 14 L12 18 L20 9"/><path class="check-path check-recess" d="M8 14 L12 18 L20 9"/>','0 0 28 28')}<span class="cap-grip"></span></span></span><span class="contact"></span></span>`;
 if(kind==='radio')return `<span class="graphic radio mechanical" aria-hidden="true"><span class="flange"><span class="dial-cap"><span class="dial-grip"></span></span></span><span class="contact"></span></span>`;
 }
 if(kind==='switch')return `<span class="graphic switch" aria-hidden="true"><span class="onoff"><span>ON</span><span>OFF</span></span><span class="knob"></span></span>`;

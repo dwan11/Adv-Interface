@@ -64,3 +64,8 @@
 .console .row:not(:has(input:disabled)):is(:active,[data-press=true]) .label-text{transform:scale(.97);transition-duration:85ms}
 .console .row:has(input:disabled) .graphic.mechanical :is(.cap,.dial-cap,.knob,.grip,.dial-grip){transition:none}
 @media(prefers-reduced-motion:reduce){.console *,.console *:before,.console *:after{transition:none!important;animation:none!important}}
+
+/* Debossed check: a shaded groove with a light-catching lower edge. */
+.console .cap .check-bevel{stroke:#fffdf4;stroke-width:2.8;transform:translate(.25px,.7px);opacity:.9}
+.console .cap .check-recess{stroke:#79766d;stroke-width:2.2;filter:drop-shadow(0 -.35px .25px #514e4655)}
+.console .row:has(input:checked) .cap .check-recess{stroke:#79766d}
