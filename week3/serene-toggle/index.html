@@ -55,11 +55,10 @@
 #home-search-demo .is-search .search-lane { width:calc(100% - 58px); }
 #home-search-demo .is-search .toggle-slider { width:calc(100% - 64px); transform:translateX(58px); }
 #home-search-demo .is-search .search-reveal { width:calc(100% - 54px); opacity:1; transform:translateX(0); transition-delay:0ms,180ms,120ms; }
-#home-search-demo .typing-home .home-word::after { content:"▎"; margin-left:2px; color:#fffbe3; animation:type-caret 700ms steps(1) infinite; }
 #home-search-demo .typing-home .home-word { min-width:48px; text-align:left; }
 @keyframes type-caret { 50% { opacity:0; } }
 #home-search-demo .is-search.is-erasing .home-word { max-width:60px; opacity:1; transform:none; filter:none; transition:none; }
-#home-search-demo .is-search.is-erasing .home-button { width:var(--home-slot,128px); gap:10px; transition:width 180ms ease; }
+#home-search-demo .is-search.is-erasing .home-button { width:var(--home-slot,128px); gap:10px; transition:width 450ms cubic-bezier(.22,1,.36,1); }
 #home-search-demo .is-search.is-erasing .search-lane { width:calc(100% - var(--home-slot,128px) - 4px); }
 #home-search-demo .is-search.is-erasing .toggle-slider { width:calc(100% - var(--home-slot,128px) - 10px); transform:translateX(calc(var(--home-slot,128px) + 4px)); }
 </style>
@@ -103,7 +102,7 @@
  function settle(){
    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
    pressMotion?.cancel();
-   pressMotion=track.animate([{transform:'scale(1)'},{transform:'scale(.985)',offset:.22},{transform:'scale(1.006)',offset:.7},{transform:'scale(1)'}],{duration:480,easing:'ease-out'});
+   pressMotion=track.animate([{transform:'scale(1)'},{transform:'scale(.992)',offset:.35},{transform:'scale(1)'}],{duration:600,easing:'cubic-bezier(.22,1,.36,1)'});
  }
  track.addEventListener('pointermove',event=>{const bounds=track.getBoundingClientRect();track.style.setProperty('--light-x',`${Math.max(0,Math.min(100,(event.clientX-bounds.left)/bounds.width*100))}%`);});
  track.addEventListener('pointerleave',()=>track.style.removeProperty('--light-x'));
@@ -114,7 +113,7 @@
    const text=active?'Search here':'Home';
    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
    let letters=0;
-   const write=value=>{if(active)searchInput.placeholder=value+(value.length<text.length?'▎':'');else homeWord.textContent=value;};
+   const write=value=>{if(active)searchInput.placeholder=value;else homeWord.textContent=value;};
    write(reduced?text:'');
    product.classList.toggle('typing-search',active&&!reduced);
    product.classList.toggle('typing-home',!active&&!reduced);
@@ -123,9 +122,9 @@
      letters++;
      write(text.slice(0,letters));
      if(letters===text.length)product.classList.remove('typing-search','typing-home');
-     if(letters<text.length){if(active)searchTypeTimer=setTimeout(next,330);else homeTypeTimer=setTimeout(next,480);}
+     if(letters<text.length){if(active)searchTypeTimer=setTimeout(next,180);else homeTypeTimer=setTimeout(next,260);}
    }
-   if(active)searchTypeTimer=setTimeout(next,750);else homeTypeTimer=setTimeout(next,650);
+   if(active)searchTypeTimer=setTimeout(next,400);else homeTypeTimer=setTimeout(next,280);
  }
  function eraseHome(){
    clearTimeout(eraseTimer);
