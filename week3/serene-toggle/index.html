@@ -58,9 +58,6 @@
 #home-search-demo .typing-home .home-word { min-width:48px; text-align:left; }
 @keyframes type-caret { 50% { opacity:0; } }
 #home-search-demo .is-search.is-erasing .home-word { max-width:60px; opacity:1; transform:none; filter:none; transition:none; }
-#home-search-demo .is-search.is-erasing .home-button { width:var(--home-slot,128px); gap:10px; transition:width 450ms cubic-bezier(.22,1,.36,1); }
-#home-search-demo .is-search.is-erasing .search-lane { width:calc(100% - var(--home-slot,128px) - 4px); }
-#home-search-demo .is-search.is-erasing .toggle-slider { width:calc(100% - var(--home-slot,128px) - 10px); transform:translateX(calc(var(--home-slot,128px) + 4px)); }
 </style>
 <style>
 #home-search-demo { padding:32px 12px; }
@@ -88,6 +85,13 @@
 @media(max-width:400px) { #home-search-demo .toggle-product { min-height:300px; border-radius:22px; } #home-search-demo .toggle-track { max-width:calc(100% - 24px); } }
 @media(pointer:coarse) { #home-search-demo input { font-size:16px; } }
 </style>
+<style>
+#home-search-demo .home-word { width:48px; min-width:48px; flex-shrink:0; text-align:left; }
+#home-search-demo .is-search .home-word { position:absolute; left:42px; width:48px; min-width:0; pointer-events:none; }
+#home-search-demo .is-search.is-erasing .home-word { opacity:0; }
+#home-search-demo .home-button { width:128px; }
+#home-search-demo .is-search .home-button { width:54px; }
+</style>
 <script>
 (() => {
  const root=document.getElementById('home-search-demo');
@@ -113,7 +117,12 @@
    const text=active?'Search here':'Home';
    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
    let letters=0;
-   const write=value=>{if(active)searchInput.placeholder=value;else homeWord.textContent=value;};
+   const write=value=>{
+     if(active){searchInput.placeholder=value;searchInput.animate([{opacity:.8},{opacity:1}],{duration:140,easing:'ease-out'});}
+     else{
+       homeWord.replaceChildren(...[...value].map((letter,index)=>{const span=document.createElement('span');span.textContent=letter;if(index===value.length-1&&!reduced)span.animate([{opacity:0},{opacity:1}],{duration:160,easing:'ease-out'});return span;}));
+     }
+   };
    write(reduced?text:'');
    product.classList.toggle('typing-search',active&&!reduced);
    product.classList.toggle('typing-home',!active&&!reduced);
@@ -122,21 +131,19 @@
      letters++;
      write(text.slice(0,letters));
      if(letters===text.length)product.classList.remove('typing-search','typing-home');
-     if(letters<text.length){if(active)searchTypeTimer=setTimeout(next,180);else homeTypeTimer=setTimeout(next,260);}
+     if(letters<text.length){if(active)searchTypeTimer=setTimeout(next,65);else homeTypeTimer=setTimeout(next,85);}
    }
-   if(active)searchTypeTimer=setTimeout(next,400);else homeTypeTimer=setTimeout(next,280);
+   if(active)searchTypeTimer=setTimeout(next,180);else homeTypeTimer=setTimeout(next,120);
  }
  function eraseHome(){
    clearTimeout(eraseTimer);
    const word=homeWord.textContent;
-   product.style.setProperty('--home-slot','128px');
    product.classList.add('is-erasing');
    let letters=word.length;
    if(!letters){product.classList.remove('is-erasing');return;}
    function next(){
      letters--;
      homeWord.textContent=word.slice(0,letters);
-     product.style.setProperty('--home-slot',`${letters ? 64+letters*10 : 54}px`);
      if(letters>0) eraseTimer=setTimeout(next,450);
      else product.classList.remove('is-erasing');
    }
