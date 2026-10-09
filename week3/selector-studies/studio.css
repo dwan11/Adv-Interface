@@ -1,0 +1,167 @@
+/* Layout and geometry shared by both material systems. */
+*{box-sizing:border-box}
+body{margin:0;background:#eeeee8;color:#293429;font:14px/20px 'DM Sans',sans-serif}
+main{max-width:1040px;margin:auto;padding:48px 32px}
+#prototype{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;align-items:start}
+.component-set{min-width:0}
+.set-caption{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+.set-caption h1{font:400 30px/36px 'Cormorant Garamond';letter-spacing:-.6px;margin:0}
+.set-caption>span{font:10px/16px 'IBM Plex Mono';color:#687263}
+.set-caption>span:last-child{margin-left:auto;font-size:9px}
+.device{--paper:#f4f1df;--ink:#36412f;--sub:#61704f;--line:#c8cdb3;--active:#4a6144;--well:#e6e7ce;--light:#fffef0;--motion:300ms;--ease:cubic-bezier(.22,.9,.25,1);--hover:#6679530a;--press:#66795314;--focus:#3d6030;--error:#8e352c;--error-bg:#f6e6de;--column:40px;background:var(--paper);color:var(--ink);border-radius:9px;box-shadow:0 20px 36px -22px #252d2440;overflow:visible}
+.content{padding:28px}
+.control-group{border:0;padding:0;margin:0 0 28px;min-width:0}
+.control-group:last-of-type{margin-bottom:0}
+.group-label,legend{font:10px/16px 'IBM Plex Mono';letter-spacing:1.1px;color:var(--sub);margin:0 0 12px;padding:0}
+.group-label{display:flex;justify-content:space-between;gap:8px}
+.group-label span:last-child{letter-spacing:0}
+.row{position:relative;isolation:isolate;display:flex;align-items:center;gap:16px;min-height:64px;padding:7px 0;border-bottom:1px solid var(--line);border-radius:3px;transition:background 160ms}
+.row:last-child{border-bottom:0}
+.switch-row{min-height:76px;padding:13px 0;margin-bottom:28px;border-bottom:1px solid var(--line)!important}
+.row input{position:absolute;inset:0;margin:0;width:100%;height:100%;opacity:0;z-index:4;cursor:pointer}
+.text{position:relative;isolation:isolate;flex:1;min-width:0;font-size:14px;line-height:20px;font-weight:500;pointer-events:none;transition:color 180ms}
+.label-text{overflow-wrap:anywhere}
+.ordinal{font:9px/16px 'IBM Plex Mono';color:var(--sub);pointer-events:none}
+.graphic{position:relative;display:block;flex-shrink:0;pointer-events:none}
+.graphic svg{display:block;width:100%;height:100%;overflow:visible}
+.graphic.check,.graphic.radio{width:40px;height:40px;flex:0 0 var(--column);display:grid;place-items:center}
+.tide .check svg{width:28px;height:28px}.tide .radio svg{width:30px;height:30px}
+.switch{width:76px;height:38px;flex:0 0 76px}
+.switch .knob{position:absolute;left:4px;top:4px;width:30px;height:30px;z-index:2;transition:transform var(--motion) var(--ease)}
+.row:has(input:checked) .switch .knob{transform:translateX(38px)}
+.onoff{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 9px;font:7px/12px 'IBM Plex Mono';color:#4d6240}
+.check-path{stroke-dasharray:30;stroke-dashoffset:30;fill:none;stroke:var(--light);stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset 180ms}
+.row:has(input:checked) .check-path{stroke-dashoffset:0}
+.switch-state{display:block;font:11px/16px 'IBM Plex Mono';color:var(--sub);margin-top:3px}
+.switch-state:before{content:'';display:inline-block;vertical-align:middle;width:5px;height:5px;border:1px solid currentColor;border-radius:50%;margin-right:6px}
+.device[data-on=true] .switch-state:before{background:currentColor}
+/* Label surfaces respond in the same transition as the physical control. */
+.row:not(.switch-row) .text{padding:8px 10px;margin-left:-10px;border-radius:5px}
+.row:not(.switch-row) .text:before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;opacity:0;transform:scaleX(.97);transform-origin:left;transition:opacity 180ms,transform 220ms ease-out}
+.row:not(.switch-row):has(input:checked) .text:before{opacity:1;transform:scaleX(1)}
+/* Tidal Glass: one upper-left light, consistent rims and recessed olive depths. */
+.tide .switch{border-radius:22px;border:1px solid #91a17f;background:linear-gradient(145deg,#d0d9bd,#e7e9d0);box-shadow:inset 0 2px 4px #52644828,inset 0 -1px #fffefa}
+.tide .switch:before{content:'';position:absolute;inset:2px;border-radius:20px;background:linear-gradient(135deg,#b2c29c,#677e5c);clip-path:inset(0 60% 0 0 round 20px);transition:clip-path var(--motion) var(--ease)}
+.tide .row:has(input:checked) .switch:before{clip-path:inset(0 0 0 0 round 20px)}
+.tide .knob{border-radius:50%;background:radial-gradient(circle at 33% 22%,#fffff3 0,#e5ebcf 32%,#b6c59e 65%,#728863 100%);border:1px solid #889c7180;box-shadow:inset 1px 2px 3px #fff8,0 3px 4px #33442355}
+.tide .knob:after{content:'';position:absolute;inset:5px;border:1px solid #fffff270;border-radius:50%;box-shadow:inset 2px -1px 2px #68854b55}
+.tide .check .well{fill:#e4e8ce;stroke:#83936e;stroke-width:1.2}
+.tide .check .water{fill:#4e6a40;transform:translateY(26px);transition:transform 260ms var(--ease)}
+.tide .row:has(input:checked) .water{transform:translateY(0)}
+.tide .radio .ripple-ring{stroke:#899b73;fill:none;stroke-width:.8;transition:stroke 180ms}
+.tide .row:has(input:checked) .ripple-ring{stroke:#526e40}
+.tide .radio .core{fill:#49673f;stroke:#dce6c5;stroke-width:1;transform-box:view-box;transform-origin:15px 15px;transform:scale(0);transition:transform 220ms var(--ease)}
+.tide .row:has(input:checked) .core{transform:scale(1)}
+.tide .row:not(.switch-row) .text:before{background:linear-gradient(135deg,#b4c39a66,#d3dcbb66 75%,#dde4c522);box-shadow:inset 0 1px #ffffed99,inset 0 -1px #7c926a22}
+.tide .row:has(input:checked) .text{color:#2c452c}
+/* Night Console: a shared 96px mounting column and mechanically centered faces. */
+.console{--paper:#2c3530;--ink:#e7e6d6;--sub:#b5bfaa;--line:#515e4c;--active:#dbb377;--well:#424e3d;--light:#252e26;--motion:260ms;--ease:cubic-bezier(.2,.85,.25,1);--hover:#f5dca40a;--press:#f5dca414;--focus:#f3d8a3;--error:#ffd1b5;--error-bg:#5b352c;--column:96px;font-family:'Space Grotesk',sans-serif;background-image:repeating-linear-gradient(90deg,transparent 0 2px,#ffffff02 2px 3px),linear-gradient(140deg,#37413a,#263028);box-shadow:0 22px 32px -24px #1b261b88,inset 0 1px #67745b}
+.console .graphic.mechanical{order:-1;flex:0 0 96px;width:96px}
+.console .check.mechanical,.console .radio.mechanical{height:48px}
+.console .graphic.mechanical{overflow:visible}.console .switch.mechanical{width:96px;height:48px;border-radius:7px;border:1px solid #111b12;background:linear-gradient(135deg,#67735d,#313d2d 42%,#1c291d);box-shadow:inset 0 1px #8a957b77,0 2px 2px #0c150a99;perspective:220px}.console .switch.mechanical:before{content:'';position:absolute;left:13px;right:13px;top:4px;bottom:4px;border-radius:4px;background:#111c11;box-shadow:inset 0 4px 6px #000a,0 1px #93a08266;border:1px solid #101b12}.console .mount{position:absolute;top:20px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#9eaa8d,#526244 60%,#1c2b17);box-shadow:0 1px 1px #0b170bcc;border:1px solid #1b2b17}.console .mount:after{content:'';position:absolute;left:1px;right:1px;top:2px;height:1px;background:#1d2b17;transform:rotate(-25deg);box-shadow:0 1px #b5bf9b66}.console .mount.left{left:3px}.console .mount.right{right:3px}.console .hinge{position:absolute;width:70px;height:4px;left:12px;top:21px;background:linear-gradient(#adb89e,#364b2c,#8b9a73);box-shadow:0 1px 2px #000a}.console .switch.mechanical .knob{width:64px;height:36px;left:15px;top:5px;border-radius:3px;border:1px solid #536849;background:linear-gradient(90deg,#45543d 0,#89957b 35%,#a9b297 48%,#6e7b60 54%,#425239 100%);transform:rotateY(-22deg);box-shadow:inset 0 1px #bdc8a077,inset 0 -2px #17281488,4px 0 4px #000a;transition:transform 260ms cubic-bezier(.2,.95,.3,1),box-shadow 260ms}.console .switch.mechanical .knob:after{display:none}.console .row:has(input:checked) .switch.mechanical .knob{transform:rotateY(22deg);box-shadow:inset 0 1px #bdc8a077,inset 0 -2px #17281488,-4px 0 4px #000a}.console .engrave{position:absolute;left:8px;right:8px;top:6px;display:flex;justify-content:space-between;font:11px 'IBM Plex Mono';color:#24321d;text-shadow:0 1px #c6d0b06b}.console .grip{position:absolute;left:27px;top:4px;bottom:4px;width:9px;background:repeating-linear-gradient(90deg,#14270f66 0 1px,#c8d3ad55 1px 2px,transparent 2px 4px)}.console .contact{position:absolute;width:5px;height:5px;border-radius:1px;background:#52603b;border:1px solid #23321a;box-shadow:inset 0 1px 2px #1119;transition:background 160ms 70ms,box-shadow 160ms 70ms}.console .switch.mechanical .contact{left:9px;bottom:7px}.console .row:has(input:checked) .contact{background:#f2c785;box-shadow:0 0 5px #eccb8d88,inset 0 1px #fff1d9}.console .check.mechanical{width:38px;height:38px}.console .socket{position:absolute;inset:0;border-radius:5px;border:1px solid #728365;background:linear-gradient(135deg,#1a2618,#071006);box-shadow:0 1px #b2bea077,inset 0 4px 5px #000c}.console .cap{position:absolute;inset:4px;border:1px solid #657a51;border-radius:3px;background:linear-gradient(140deg,#879773,#536842 60%,#3a512c);box-shadow:0 3px 0 #152810,0 4px 3px #0008,inset 0 1px #c8d9a577;transform:translateY(-1px);transition:transform 200ms cubic-bezier(.2,1.3,.35,1),box-shadow 200ms,background 200ms}.console .row:has(input:checked) .cap{transform:translateY(1px);box-shadow:0 1px 0 #13250e,0 1px 2px #0008,inset 0 1px #cdd7b055;background:linear-gradient(140deg,#768865,#4b613a 60%,#324626)}.console .cap svg{position:absolute;inset:0;width:100%;height:100%}.console .cap .check-path{stroke:#e3d0a6;stroke-width:2;transition:stroke-dashoffset 180ms,opacity 180ms;text-shadow:0 1px #111}.console .cap-grip{position:absolute;left:5px;right:5px;bottom:3px;height:3px;background:repeating-linear-gradient(0deg,#14230f55 0 1px,#c2d4a344 1px 2px)}.console .check.mechanical>.contact{right:-7px;top:16px;width:3px;height:6px}.console .radio.mechanical{width:38px;height:38px}.console .flange{position:absolute;inset:0;border:1px solid #172613;border-radius:50%;background:repeating-radial-gradient(circle,#879778 0 1px,#546846 1px 2px,#6d805b 2px 3px);box-shadow:0 1px #b7c5a366,inset 0 1px #c2d5a855,0 2px 2px #071006aa}.console .flange:before{content:'';position:absolute;inset:4px;border-radius:50%;background:#0e1b0a;box-shadow:inset 0 3px 4px #000b;border:1px solid #25391c}.console .dial-cap{position:absolute;inset:6px;border-radius:50%;border:1px solid #66804e;background:radial-gradient(ellipse at 32% 20%,#a6b88a,#768c5c 35%,#506939 67%,#2a441b);box-shadow:0 3px 0 #15290e,0 4px 4px #0008,inset 0 1px #d3dfb477;transform:translateY(-1px);transition:transform 240ms cubic-bezier(.2,1.2,.35,1),box-shadow 240ms,background 240ms}.console .row:has(input:checked) .dial-cap{transform:translateY(1px) scale(.96);box-shadow:0 1px 0 #12260c,0 1px 2px #0008,inset 0 1px #c7d6a85c;background:radial-gradient(ellipse at 35% 25%,#8c9e73,#5e7546 50%,#263f19)}.console .center-ring{position:absolute;inset:7px;border:1px solid #263d1b;border-radius:50%;box-shadow:0 1px #c4d4a24d,inset 0 1px #14290d;transition:background 160ms 70ms,box-shadow 160ms 70ms;background:#40572b}.console .row:has(input:checked) .center-ring{background:radial-gradient(circle at 30% 25%,#ffe4ac,#dcad68);border-color:#af925b;box-shadow:0 0 4px #eccc8480,inset 0 1px #fff0c2}.console .radio.mechanical>.contact{display:none}.console .row:not(:has(input:disabled)):active .cap,.console .row:not(:has(input:disabled)):active .dial-cap{transform:translateY(2px) scale(.97)}
+/* Anchor outer housings; all movement belongs to the inset face. */
+.console .check.mechanical,.console .radio.mechanical{width:96px;height:48px}
+.console .check.mechanical .socket,.console .radio.mechanical .flange{inset:5px 29px}
+.console .check.mechanical>.contact{right:24px;top:21px}
+.console .radio.mechanical>.contact{display:none}
+.console .switch.mechanical{align-self:center;flex-basis:96px}
+.console .engrave{font:8px/10px 'IBM Plex Mono';top:8px;left:5px;right:4px;text-shadow:0 1px #c6d0b044}
+.console .mode-on{color:#314124}.console .mode-off{color:#f0ead5;text-shadow:0 1px #162711}
+.console .row:has(input:checked) .mode-on{color:#ffe2a7;text-shadow:0 0 3px #dfb97655}
+.console .row:has(input:checked) .mode-off{color:#314124;text-shadow:0 1px #c6d0b044}
+.console .row:not(.switch-row) .text{padding:8px 12px;margin-left:-12px;border-radius:3px}
+.console .row:not(.switch-row) .text:before{background:linear-gradient(135deg,#72795744,#a2926144 50%,#4e5b3e66);border:1px solid #8b90604d;box-shadow:inset 0 1px 3px #13210e44,0 1px #c0b57922;transform:none;transition:opacity 180ms}
+.console .row:has(input:checked) .text{color:#f3d8a3}
+.console .row:not(.switch-row) .text:after{content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:1px;background:#f0c98a;opacity:0;transition:opacity 160ms 70ms}
+.console .row:has(input:checked) .text:after{opacity:1}
+.console[data-on=true] .switch-state{color:#f3d8a3}
+/* Full state palette. Selection survives hover, press and keyboard focus. */
+@media(hover:hover) and (pointer:fine){.row:not(:has(input:disabled)):hover{background:var(--hover)}}
+.row:not(:has(input:disabled)):active,.device[data-preview=pressed] .row{background:var(--press)}
+.device[data-preview=hover] .row{background:var(--hover)}
+.row:has(input:focus-visible),.device[data-preview=focus] .row{outline:2px solid var(--focus);outline-offset:3px}
+button:focus-visible,summary:focus-visible,select:focus-visible,.long-label-toggle:has(input:focus-visible){outline:2px solid #516348;outline-offset:4px}
+.row:has(input:disabled){opacity:.55;cursor:not-allowed}
+.row input:disabled{cursor:not-allowed}
+.console[data-preview=pressed] .cap,.console[data-preview=pressed] .dial-cap{transform:translateY(2px) scale(.97)}
+.tide .row:not(:has(input:disabled)):active .knob,.tide[data-preview=pressed] .knob{box-shadow:inset 1px 2px 3px #fff8,0 1px 2px #33442355}
+.row:has(input[aria-invalid=true]){box-shadow:inset -2px 0 var(--error)}
+.error-message{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:18px;margin:20px 0 0;color:var(--error);background:var(--error-bg);padding:12px;border-radius:4px}
+.error-message[hidden]{display:none}
+.error-message>span{flex:0 0 18px;height:18px;text-align:center;border:1px solid currentColor;border-radius:50%;font-weight:600}
+.component-specs,.component-review{margin-top:18px;color:#5e6954;font:11px/18px 'DM Sans'}
+summary{cursor:pointer;list-style:none;min-height:28px;display:flex;align-items:center;gap:8px}
+summary:before{content:'+'}details[open]>summary:before{content:'−'}
+.component-specs dl{display:grid;grid-template-columns:78px 1fr;gap:12px}.component-specs dd{margin:0;color:#46523f}.component-specs dt{font-size:10px}.component-specs a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.review-tools{display:grid;gap:12px;padding:12px 0}.review-tools label{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.review-tools select{font:12px 'DM Sans';padding:7px 10px;border:1px solid #aeb8a4;background:#f6f5ee;border-radius:4px;color:#32462b}.long-label-toggle{cursor:pointer}.long-label-toggle input{margin:0;accent-color:#4a6144;width:16px;height:16px}
+.device.restoring *, .device.restoring *:before, .device.restoring *:after{transition:none!important}
+@media(max-width:760px){main{padding:28px 20px;max-width:460px}#prototype{grid-template-columns:1fr;gap:32px}.content{padding:24px}.set-caption h1{font-size:28px}}
+@media(max-width:350px){main{padding:24px 14px}.content{padding:20px}.text{font-size:13px}.set-caption h1{font-size:26px}.component-specs dl{grid-template-columns:64px 1fr}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+@media(forced-colors:active){.device{background:Canvas;color:CanvasText}.row:has(input:checked) .text{color:Highlight}.row:has(input:checked) .text:before{border:1px solid Highlight}.row:has(input:focus-visible){outline:2px solid Highlight}.row input{position:static;opacity:1;width:24px;height:24px;flex:0 0 24px}.graphic{display:none!important}.row input:disabled{opacity:1}.switch-state{color:CanvasText}}
+/* Visible, reversible material choreography; state remains immediate. */
+.tide{--motion:480ms}
+.tide .check .water{transition-duration:440ms}
+.tide .check-path{transition-duration:280ms;transition-delay:90ms}
+.tide .radio .core{transition-duration:380ms}
+.tide .radio .ripple-ring{transition-duration:420ms}
+.tide .row:not(.switch-row) .text:before{opacity:0;transform:none;clip-path:inset(0 100% 0 0 round 5px);background:linear-gradient(115deg,#a5bb8566,#d3dfbbaa 60%,#c1d4a777);transition:clip-path 560ms cubic-bezier(.2,.8,.25,1),opacity 200ms}
+.tide .row:not(.switch-row):has(input:checked) .text:before{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 5px)}
+.console .switch.mechanical .knob{transition-duration:420ms}
+.console .cap{transition-duration:340ms}
+.console .dial-cap{transition-duration:380ms}
+.console .row:has(input:checked) .cap{transform:translateY(2px)}
+.console .row:has(input:checked) .dial-cap{transform:translateY(2px) scale(.96)}
+.console .row:not(.switch-row) .text:before{opacity:0;transform:translateX(-7px) translateY(-2px) scaleX(.92);transform-origin:left;transition:transform 440ms cubic-bezier(.2,.9,.3,1),opacity 260ms;box-shadow:inset 0 1px #d3d5a133,0 2px 2px #12210c66}
+.console .row:not(.switch-row):has(input:checked) .text:before{opacity:1;transform:translateX(0) translateY(0) scaleX(1)}
+.console .row:not(.switch-row) .text:after{transition-duration:240ms;transition-delay:120ms}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+/* Tone-specific movement: buoyancy versus a mechanical detent. */
+.tide{--motion:620ms;--ease:cubic-bezier(.16,.85,.25,1)}
+.tide .knob{transition:transform 620ms var(--ease),border-radius 620ms var(--ease),box-shadow 620ms var(--ease)}
+.tide .row:has(input:checked) .switch .knob{transform:translateX(38px) rotate(18deg);border-radius:45% 52% 48% 50%;box-shadow:inset 1px 2px 3px #fff8,0 4px 6px #33442344}
+.tide .check .water{transition:transform 560ms var(--ease)}
+.tide .check-path{transition:stroke-dashoffset 340ms var(--ease) 150ms}
+.tide .radio .core{transition:transform 520ms cubic-bezier(.18,1.35,.3,1)}
+.tide .row:not(.switch-row) .label-text{display:inline-block;transform:translateY(0);transition:transform 620ms var(--ease),letter-spacing 620ms var(--ease);letter-spacing:0}
+.tide .row:not(.switch-row):has(input:checked) .label-text{transform:translateY(-2px);letter-spacing:.12px}
+.tide .row:not(.switch-row) .text:before{clip-path:inset(0 100% 0 0 round 45% 5px 5px 45%);transform:translateY(2px);transition:clip-path 720ms var(--ease),transform 620ms var(--ease),opacity 320ms}
+.tide .row:not(.switch-row):has(input:checked) .text:before{clip-path:inset(0 0 0 0 round 5px);transform:translateY(0)}
+/* A retained circular wave expands once the selection engages. */
+.tide .radio svg:after{content:none}
+.tide .radio:after{content:'';position:absolute;width:24px;height:24px;left:8px;top:8px;border:1px solid #71865b;border-radius:50%;opacity:0;transform:scale(.6);transition:transform 700ms var(--ease),opacity 700ms var(--ease)}
+.tide .row:has(input:checked) .radio:after{transform:scale(1.55);opacity:.2}
+.console{--motion:210ms;--ease:cubic-bezier(.55,0,.15,1)}
+.console .switch.mechanical .knob{transition:transform 210ms var(--ease),box-shadow 210ms var(--ease)}
+.console .cap{transition:transform 150ms cubic-bezier(.7,0,.2,1),box-shadow 150ms,background 150ms}
+.console .dial-cap{transition:transform 190ms cubic-bezier(.6,0,.1,1.25),box-shadow 190ms,background 190ms}
+.console .cap .check-path{transition:stroke-dashoffset 100ms 80ms}
+.console .row:not(.switch-row) .label-text{display:inline-block;transform:translateY(0);transition:transform 180ms cubic-bezier(.65,0,.15,1)}
+.console .row:not(.switch-row):has(input:checked) .label-text{transform:translateY(2px)}
+.console .row:not(.switch-row) .text:before{transform:translateY(-3px);clip-path:inset(0 0 0 0);transition:transform 180ms cubic-bezier(.65,0,.15,1),opacity 90ms;box-shadow:0 3px 0 #13220d88,inset 0 1px #d3d5a133}
+.console .row:not(.switch-row):has(input:checked) .text:before{transform:translateY(1px);box-shadow:0 1px 0 #13220d88,inset 0 1px #d3d5a133}
+.console .row:not(.switch-row) .text:after{transition:opacity 80ms 160ms}
+.console .contact,.console .center-ring{transition-duration:80ms;transition-delay:110ms}
+/* Radio sockets, text and ordinals share one settled centerline.
+   Latching moves into depth instead of displacing the face vertically. */
+.console .row:has(input[type=radio]) .dial-cap{transform:scale(1)}
+.console .row:has(input[type=radio]:checked) .dial-cap{transform:scale(.96)}
+.console .row:has(input[type=radio]) .label-text{transform:translateY(0)}
+.console .row:has(input[type=radio]:checked) .label-text{transform:translateY(0);animation:radio-label-latch 180ms cubic-bezier(.65,0,.15,1)}
+.console .row:has(input[type=radio]:checked) .text:before{transform:translateY(0)}
+.console .row:has(input[type=radio]) .text{display:flex;align-items:center;min-height:36px}
+.console .row:not(:has(input:disabled)):has(input[type=radio]):active .dial-cap,
+.console[data-preview=pressed] .row:has(input[type=radio]) .dial-cap{transform:scale(.93)}
+@keyframes radio-label-latch{0%{transform:translateY(0)}45%{transform:translateY(2px)}100%{transform:translateY(0)}}
+/* Checkbox faces settle at the socket center, like the radio faces. */
+.console .row:has(input[data-kind=check]) .cap{transform:scale(1)}
+.console .row:has(input[data-kind=check]:checked) .cap{transform:scale(.97)}
+.console .row:has(input[data-kind=check]) .label-text{transform:translateY(0)}
+.console .row:has(input[data-kind=check]:checked) .label-text{transform:translateY(0);animation:radio-label-latch 180ms cubic-bezier(.65,0,.15,1)}
+.console .row:has(input[data-kind=check]:checked) .text:before{transform:translateY(0)}
+.console .row:has(input[data-kind=check]) .text{display:flex;align-items:center;min-height:36px}
+.console .row:not(:has(input:disabled)):has(input[data-kind=check]):active .cap,
+.console[data-preview=pressed] .row:has(input[data-kind=check]) .cap{transform:scale(.93)}
+body[data-set] main{max-width:560px}
+body[data-set] #prototype{grid-template-columns:minmax(0,1fr)}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
