@@ -75,3 +75,19 @@
 .console .row:has(input[data-kind=check]) .text:after{inset:0;width:auto;height:auto;border:1px solid #d97531;border-radius:inherit;background:transparent;box-shadow:inset 0 0 0 1px #ffcc8c44,0 0 5px #ef8b3233;opacity:0;clip-path:inset(0 100% 0 0 round 8px);transform:none;transition:clip-path 220ms cubic-bezier(.4,0,.6,1),opacity 180ms;}
 .console .row:has(input[data-kind=check]:checked) .text:after{opacity:1;clip-path:inset(0 0 0 0 round 8px);transition:clip-path 560ms cubic-bezier(.2,.8,.2,1) 100ms,opacity 180ms 100ms;}
 @media(prefers-reduced-motion:reduce){.console .row:has(input[data-kind=check]) .text:after{transition:none!important}}
+/* Checkbox geometry: 48px hardware column, 16px gap to a padded label plate. */
+.console .row:has(input[data-kind=check]){gap:16px;min-height:76px;padding:10px 0}
+.console .row:has(input[data-kind=check]) .graphic.mechanical{width:48px;flex-basis:48px;height:48px}
+.console .row:has(input[data-kind=check]) .socket{inset:0;border-radius:12px}
+.console .row:has(input[data-kind=check]) .text{margin-left:0;padding:12px 16px;min-height:44px;border-radius:12px}
+.console .row:has(input[data-kind=check]:checked) .cap .check-recess{stroke:#c45b20;filter:drop-shadow(0 -.4px .25px #79381066)}
+.console .row:has(input[data-kind=check]:checked) .cap .check-bevel{stroke:#ffe8bf;opacity:1}
+/* A cream rim catches the light and dissolves toward the far edge. */
+.console .row:has(input[data-kind=check]) .text:before{background:linear-gradient(100deg,#fff5dfdd,#fff6e6a8 65%,#fff6e620);border:1px solid transparent;box-shadow:none;border-radius:12px}
+.console .row:has(input[data-kind=check]) .text:after{inset:0;width:auto;height:auto;border:1px solid #fff7e3;border-radius:12px;background:transparent;box-shadow:inset 0 1px 1px #fffdf4,0 0 3px #fff5d966;mask-image:linear-gradient(90deg,#000 0%,#000c 55%,transparent 100%);clip-path:inset(0 100% 0 0 round 12px)}
+.console .row:has(input[data-kind=check]:checked) .text:after{clip-path:inset(0 0 0 0 round 12px)}
+.console .row:has(input[data-kind=check]) .label-text:before{content:'';position:absolute;left:-16px;top:1px;bottom:1px;width:3px;border-radius:3px;background:#ca601f;opacity:0;transform:scaleY(.4);transition:transform 340ms cubic-bezier(.2,.8,.2,1),opacity 220ms}
+.console .row:has(input[data-kind=check]) .label-text{position:relative}
+.console .row:has(input[data-kind=check]:checked) .label-text:before{opacity:1;transform:scaleY(1);transition-delay:120ms}
+@media(prefers-reduced-motion:reduce){.console .row:has(input[data-kind=check]) .label-text:before{transition:none!important}}
+.console .row:has(input[data-kind=check]:checked) .text:before{box-shadow:none;border-color:transparent}
