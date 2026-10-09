@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Waterlight Checklist · Serene</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#e8f6f7,#071f2c);--ink:light-dark(#224d45,#e9f5eb);--edge:light-dark(#bfd9cf,#315148)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:780px;margin:0 auto;padding:28px 12px}header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:0 12px}a{color:inherit}h1{font-size:22px;font-weight:500;margin:0}header span{font-size:13px;opacity:.65}nav{display:flex;gap:6px;margin:24px 12px 0}button{font:inherit;color:inherit;border:1px solid var(--edge);border-radius:12px;background:transparent;padding:8px 16px;cursor:pointer}button[aria-selected=true]{background:var(--ink);color:var(--bg)}iframe{display:block;width:100%;height:440px;border:0}iframe[hidden]{display:none}@media(max-width:400px){button{font-size:14px;padding:8px 12px}}
+</style>
+</head>
+<body><main>
+<header><a href="../../#week3" aria-label="Back to Week 3">←</a><h1>Waterlight Checklist</h1><span>Serene</span></header>
+<nav role="tablist" aria-label="Checklist motion">
+<button type="button" role="tab" id="flip-tab" aria-selected="true" aria-controls="flip-panel">Calendar flip</button>
+<button type="button" role="tab" id="whoosh-tab" aria-selected="false" aria-controls="whoosh-panel">Whoosh</button>
+<button type="button" role="tab" id="single-tab" aria-selected="false" aria-controls="single-panel">Single</button>
+</nav>
+<iframe id="flip-panel" src="flip.html" title="Calendar flip checklist"></iframe>
+<iframe id="whoosh-panel" src="whoosh.html" title="Whoosh checklist" hidden></iframe>
+<iframe id="single-panel" src="single.html" title="Single glass checkbox" hidden></iframe>
+</main>
+<script>
+const tabs=[...document.querySelectorAll('[role=tab]')];
+tabs.forEach((tab,index)=>{
+tab.addEventListener('click',()=>tabs.forEach(item=>{const active=item===tab;item.setAttribute('aria-selected',String(active));item.tabIndex=active?0:-1;document.getElementById(item.getAttribute('aria-controls')).hidden=!active;}));
+tab.tabIndex=index===0?0:-1;
+tab.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();const next=tabs[(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length];next.click();next.focus();}});
+});
+</script></body></html>

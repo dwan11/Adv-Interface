@@ -1,0 +1,242 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Whoosh checkbox list</title><style>*{box-sizing:border-box}body{margin:0;background:#e8f6f7;min-height:100vh;display:grid;place-items:center}#whoosh-checkbox-list-demo{width:min(760px,100%)}input,button{cursor:pointer}</style></head><body><div id="whoosh-checkbox-list-demo" class="viz-dotted-background">
+  <div class="checkbox-product" aria-label="Glass checkbox over water">
+    <canvas class="water-surface" aria-hidden="true"></canvas>
+<div class="checkbox-list" role="group" aria-label="Waterside checklist">    <label class="checkbox-row cursor-interaction">
+      <input type="checkbox" aria-label="Explore the shoreline" data-key="explore"><span class="calendar-leaf"><span class="calendar-face calendar-front">
+      <span class="checkbox-well" aria-hidden="true">
+        <span class="checkbox-glass">
+          <span class="checkbox-reflection"></span>
+          <span class="checkbox-light"></span>
+          <span class="checkbox-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span>
+        </span>
+      </span>
+    <span class="checkbox-label">Explore the shoreline</span></span><span class="calendar-face calendar-back" aria-hidden="true">
+      <span class="checkbox-well" aria-hidden="true">
+        <span class="checkbox-glass">
+          <span class="checkbox-reflection"></span>
+          <span class="checkbox-light"></span>
+          <span class="checkbox-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span>
+        </span>
+      </span>
+    <span class="checkbox-label">Explore the shoreline</span></span></span></label>
+    <label class="checkbox-row cursor-interaction">
+      <input type="checkbox" aria-label="Save a quiet spot" data-key="save"><span class="calendar-leaf"><span class="calendar-face calendar-front">
+      <span class="checkbox-well" aria-hidden="true">
+        <span class="checkbox-glass">
+          <span class="checkbox-reflection"></span>
+          <span class="checkbox-light"></span>
+          <span class="checkbox-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span>
+        </span>
+      </span>
+    <span class="checkbox-label">Save a quiet spot</span></span><span class="calendar-face calendar-back" aria-hidden="true">
+      <span class="checkbox-well" aria-hidden="true">
+        <span class="checkbox-glass">
+          <span class="checkbox-reflection"></span>
+          <span class="checkbox-light"></span>
+          <span class="checkbox-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span>
+        </span>
+      </span>
+    <span class="checkbox-label">Save a quiet spot</span></span></span></label>
+    <label class="checkbox-row cursor-interaction">
+      <input type="checkbox" aria-label="Return to the water" data-key="return"><span class="calendar-leaf"><span class="calendar-face calendar-front">
+      <span class="checkbox-well" aria-hidden="true">
+        <span class="checkbox-glass">
+          <span class="checkbox-reflection"></span>
+          <span class="checkbox-light"></span>
+          <span class="checkbox-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span>
+        </span>
+      </span>
+    <span class="checkbox-label">Return to the water</span></span><span class="calendar-face calendar-back" aria-hidden="true">
+      <span class="checkbox-well" aria-hidden="true">
+        <span class="checkbox-glass">
+          <span class="checkbox-reflection"></span>
+          <span class="checkbox-light"></span>
+          <span class="checkbox-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span>
+        </span>
+      </span>
+    <span class="checkbox-label">Return to the water</span></span></span></label></div>
+  </div>
+</div>
+<style>
+@property --checkbox-light-angle { syntax:"<angle>"; inherits:false; initial-value:0deg; }
+#whoosh-checkbox-list-demo { padding:32px 12px; display:grid; place-items:center; }
+#whoosh-checkbox-list-demo .checkbox-product { position:relative; isolation:isolate; overflow:hidden; width:100%; min-height:340px; display:grid; place-items:center; border-radius:28px; background:linear-gradient(135deg,#164d46,#73d8c3); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+#whoosh-checkbox-list-demo .water-surface { position:absolute; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; }
+#whoosh-checkbox-list-demo .checkbox-product::after { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; border-radius:inherit; background:radial-gradient(ellipse at 22% 0%,#f6f6c50c,transparent 58%),linear-gradient(180deg,#001f251f,transparent 40%,#002e201a); box-shadow:inset 0 1px 0 #dcfff22e,inset 0 -1px 0 #04251e26; }
+#whoosh-checkbox-list-demo .checkbox-control { position:relative; display:block; width:58px; height:58px; }
+#whoosh-checkbox-list-demo input { position:absolute; inset:0; margin:0; width:100%; height:100%; opacity:0; z-index:3; }
+#whoosh-checkbox-list-demo .checkbox-well { position:absolute; inset:0; border-radius:14px; border:1px solid #d9fff226; background:linear-gradient(155deg,#133d365e,#0a302e73); backdrop-filter:blur(18px) saturate(1.25); -webkit-backdrop-filter:blur(18px) saturate(1.25); box-shadow:inset 0 2px 7px #001c2426,inset 0 -1px 3px #dafff11c,0 2px 3px #00292112,0 12px 25px -10px #002e3259; transition:transform 260ms ease,box-shadow 450ms ease; }
+#whoosh-checkbox-list-demo .checkbox-glass { position:absolute; inset:3px; border-radius:10px; display:grid; place-items:center; background:radial-gradient(ellipse at 20% 0%,#fffbe51c,transparent 68%),linear-gradient(160deg,#e8fff10b,#c7ede005); box-shadow:inset 1px 1px 2px #f4ffe916,inset -1px -2px 5px #032a2817; transition:background 500ms ease,box-shadow 500ms ease; }
+#whoosh-checkbox-list-demo .checkbox-glass::before { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; background:linear-gradient(135deg,#f4ffff60,#e1ffff18 45%,#ffffff07 75%,#cdf1e928); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; }
+#whoosh-checkbox-list-demo .checkbox-reflection { position:absolute; inset:0; overflow:hidden; border-radius:inherit; background:linear-gradient(120deg,transparent 15%,#fffde212 40%,transparent 65%); opacity:.4; transition:opacity 500ms ease; }
+#whoosh-checkbox-list-demo .checkbox-light { position:absolute; inset:0; border-radius:inherit; opacity:0; transition:opacity 600ms ease; }
+#whoosh-checkbox-list-demo .checkbox-light::before,#whoosh-checkbox-list-demo .checkbox-light::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1.5px; background:conic-gradient(from var(--checkbox-light-angle),#fff1b500 0deg,#fff1b500 220deg,#fff1b51a 265deg,#fff1b58c 310deg,#fff8dce6 340deg,#fffff5 352deg,#fff5c900 360deg); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; animation:checkbox-orbit 3.8s linear infinite; animation-play-state:paused; }
+#whoosh-checkbox-list-demo .checkbox-light::after { inset:-1px; padding:3px; filter:blur(3px); opacity:.65; }
+#whoosh-checkbox-list-demo .checkbox-check { color:#fff3b5; opacity:0; transform:translateY(2px) scale(.8); filter:drop-shadow(0 0 3px #fff4b552) drop-shadow(0 0 7px #fff6c026); transition:opacity 220ms ease,transform 450ms cubic-bezier(.16,1,.3,1); }
+#whoosh-checkbox-list-demo .checkbox-check svg { width:22px; height:22px; stroke-width:2; }
+#whoosh-checkbox-list-demo .checkbox-check svg path,#whoosh-checkbox-list-demo .checkbox-check svg polyline { stroke-dasharray:32; stroke-dashoffset:32; transition:stroke-dashoffset 500ms cubic-bezier(.16,1,.3,1); }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-glass { background:radial-gradient(ellipse at 20% 0%,#fffbe52e,transparent 68%),linear-gradient(160deg,#e8fff11c,#c7ede00b); box-shadow:inset 1px 1px 2px #f4ffe923,inset -1px -2px 5px #032a2817,0 0 14px #fff2bb0e; }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-light { opacity:1; }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-light::before,#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-light::after { animation-play-state:running; }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-check { opacity:1; transform:translateY(0) scale(1); }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-check svg path,#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-check svg polyline { stroke-dashoffset:0; transition-delay:100ms; }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-well .checkbox-reflection { opacity:1; }
+#whoosh-checkbox-list-demo .checkbox-control:hover .checkbox-reflection { opacity:.9; }
+#whoosh-checkbox-list-demo .checkbox-control:active .checkbox-well { transform:scale(.95); }
+#whoosh-checkbox-list-demo input:focus-visible + .checkbox-well { outline:2px solid #fff3b5b3; outline-offset:4px; }
+#whoosh-checkbox-list-demo .checkbox-row:not(.is-complete) .checkbox-well { border-color:#e8fff224; background:linear-gradient(155deg,#37685b32,#163f3836); box-shadow:inset 0 1px 5px #001c2415,inset 0 -1px 3px #dafff114,0 8px 20px -12px #002e3233; }
+#whoosh-checkbox-list-demo .checkbox-row:not(.is-complete) .checkbox-well .checkbox-glass { background:linear-gradient(155deg,#e8fff112,#c7ede005); box-shadow:none; }
+#whoosh-checkbox-list-demo .checkbox-row:not(.is-complete) .checkbox-well .checkbox-glass::before { padding:0; background:none; mask:none; -webkit-mask:none; border:1px dashed #eaffed70; }
+#whoosh-checkbox-list-demo .checkbox-glass::after { content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none; opacity:0; background:radial-gradient(ellipse at 50% 0%,#fffde846,transparent 62%); box-shadow:0 -5px 12px -7px #fff8cfc9,inset 0 1px 1px #fffce8c2; transition:opacity 400ms ease; }
+#whoosh-checkbox-list-demo .checkbox-control:hover .checkbox-glass::after { opacity:1; }
+#whoosh-checkbox-list-demo .checkbox-control:hover .checkbox-reflection { opacity:1; }
+@keyframes checkbox-orbit { to { --checkbox-light-angle:360deg; } }
+@media(max-width:400px) { #whoosh-checkbox-list-demo .checkbox-product { min-height:300px; border-radius:22px; } }
+@media(prefers-reduced-motion:reduce) { #whoosh-checkbox-list-demo *,#whoosh-checkbox-list-demo *::before,#whoosh-checkbox-list-demo *::after { animation:none!important; transition:none!important; } }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-list { display:flex; flex-direction:column; gap:18px; padding:28px; border-radius:22px; background:linear-gradient(145deg,#0b39344d,#0b393426); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:inset 0 1px 0 #edffec20,0 12px 30px #0029201f; max-width:calc(100% - 32px); }
+#whoosh-checkbox-list-demo .checkbox-row { position:relative; display:flex; align-items:center; gap:18px; min-height:58px; color:#effaf1; }
+#whoosh-checkbox-list-demo .checkbox-row input { width:58px; height:58px; }
+#whoosh-checkbox-list-demo .checkbox-row .checkbox-well { width:58px; height:58px; inset:auto; left:0; top:0; }
+#whoosh-checkbox-list-demo .checkbox-label { margin-left:76px; font-size:15px; font-weight:400; letter-spacing:-.015em; transition:color 350ms ease; }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-label { color:#fff3b5; }
+#whoosh-checkbox-list-demo .checkbox-row:hover .checkbox-glass::after { opacity:1; }
+#whoosh-checkbox-list-demo .checkbox-row:hover .checkbox-reflection { opacity:1; }
+#whoosh-checkbox-list-demo .checkbox-row:active .checkbox-well { transform:scale(.95); }
+@media(max-width:400px) { #whoosh-checkbox-list-demo .checkbox-list { padding:20px 16px; gap:16px; } #whoosh-checkbox-list-demo .checkbox-label { font-size:14px; margin-left:70px; } #whoosh-checkbox-list-demo .checkbox-product { min-height:340px; } }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-control { width:44px; height:44px; }
+#whoosh-checkbox-list-demo .checkbox-well { width:28px; height:28px; inset:8px; border-radius:8px; }
+#whoosh-checkbox-list-demo .checkbox-glass { inset:2px; border-radius:5px; }
+#whoosh-checkbox-list-demo .checkbox-check svg { width:15px; height:15px; stroke-width:2.3; }
+#whoosh-checkbox-list-demo .checkbox-list { width:min(320px,calc(100% - 40px)); padding:8px 16px; gap:0; border-radius:18px; }
+#whoosh-checkbox-list-demo .checkbox-row { min-height:52px; gap:0; }
+#whoosh-checkbox-list-demo .checkbox-row input { width:44px; height:44px; top:4px; left:-4px; }
+#whoosh-checkbox-list-demo .checkbox-row .checkbox-well { width:28px; height:28px; top:12px; left:4px; border-radius:8px; }
+#whoosh-checkbox-list-demo .checkbox-label { margin-left:46px; font-size:17px; line-height:22px; letter-spacing:-.025em; }
+#whoosh-checkbox-list-demo .checkbox-row:not(:last-child)::after { content:""; position:absolute; bottom:0; left:46px; right:0; height:1px; background:#e4fff015; pointer-events:none; }
+@media(max-width:400px) { #whoosh-checkbox-list-demo .checkbox-list { padding:8px 14px; } #whoosh-checkbox-list-demo .checkbox-label { margin-left:46px; font-size:17px; } }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-list { position:relative; }
+#whoosh-checkbox-list-demo .checkbox-list::before { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; background:linear-gradient(135deg,#f5ffe987 0%,#e6fff04d 22%,#d6fff026 48%,#e5fff012 70%,#defff044 100%); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-label { display:inline-block; transition:color 450ms ease,transform 500ms cubic-bezier(.16,1,.3,1),text-shadow 500ms ease; }
+#whoosh-checkbox-list-demo .checkbox-row.is-complete .checkbox-label { transform:translateX(3px) translateY(-1px); text-shadow:0 0 10px #fff3b526; }
+#whoosh-checkbox-list-demo .checkbox-row:hover .checkbox-label { text-shadow:0 0 12px #f4ffe928; }
+@media(prefers-reduced-motion:reduce) { #whoosh-checkbox-list-demo .checkbox-label { transform:none!important; transition:none!important; } }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-row { transform-origin:50% 50%; transform-style:preserve-3d; }
+#whoosh-checkbox-list-demo input:checked ~ .checkbox-label { transform:none; }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-row { transform:none; }
+#whoosh-checkbox-list-demo .checkbox-row .checkbox-well,#whoosh-checkbox-list-demo .checkbox-label { transform-origin:50% 0%; backface-visibility:hidden; }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-row { perspective:650px; transform-style:preserve-3d; }
+#whoosh-checkbox-list-demo .calendar-leaf { position:absolute; inset:0; transform-style:preserve-3d; transform-origin:50% 50%; pointer-events:none; }
+#whoosh-checkbox-list-demo .calendar-face { position:absolute; inset:0; display:flex; align-items:center; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:7px; background:linear-gradient(180deg,#c6e4cf08,#092e250a); }
+#whoosh-checkbox-list-demo .calendar-back { transform:rotateX(180deg); }
+#whoosh-checkbox-list-demo .checkbox-row .checkbox-label,#whoosh-checkbox-list-demo .checkbox-row .checkbox-well { transform:none; }
+#whoosh-checkbox-list-demo .calendar-face::after { content:""; position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 1px 0 #e8ffe90c; pointer-events:none; }
+</style>
+<style>
+#whoosh-checkbox-list-demo .checkbox-list { overflow:hidden; min-height:68px; }
+#whoosh-checkbox-list-demo .checkbox-row[hidden] { display:none; }
+#whoosh-checkbox-list-demo .restore-tasks { border:0; background:transparent; color:#eaf7e1c9; font:400 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; padding:10px 0 8px; text-align:left; }
+#whoosh-checkbox-list-demo .restore-tasks[hidden] { display:none; }
+</style>
+<script>
+(() => {
+ const root=document.getElementById('whoosh-checkbox-list-demo');
+ const product=root.querySelector('.checkbox-product');
+ const checkboxes=[...root.querySelectorAll('input')];
+ const completed=new Set();
+ const exiting=new Set();
+ let cardMotion;
+ const reset=document.createElement('button');reset.type='button';reset.className='restore-tasks cursor-interaction';reset.textContent='Restore tasks';reset.hidden=true;
+ const list=root.querySelector('.checkbox-list');list.appendChild(reset);
+ function save(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{completed:[...completed]},privateContent:null}).catch(()=>{});}
+ function restore(saved){completed.clear();(saved?.modelContent?.completed||[]).forEach(key=>completed.add(key));checkboxes.forEach(input=>{input.checked=completed.has(input.dataset.key);input.parentElement.hidden=input.checked;input.parentElement.classList.toggle('is-complete',input.checked);});reset.hidden=completed.size===0;}
+ restore(window.openai?.widgetState);
+ checkboxes.forEach(input=>input.addEventListener('change',()=>{
+   if(!input.checked)return;
+   const row=input.parentElement;row.classList.add('is-complete');input.disabled=true;
+   completed.add(input.dataset.key);exiting.add(row);reset.hidden=false;
+   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+   const finish=()=>{
+     const from=list.getBoundingClientRect().height;
+     cardMotion?.cancel();
+     row.hidden=true;input.disabled=false;exiting.delete(row);
+     const to=list.getBoundingClientRect().height;
+     if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&from!==to){
+       cardMotion=list.animate([{height:`${from}px`},{height:`${to}px`}],{duration:600,easing:'cubic-bezier(.22,1,.36,1)'});
+     }
+     save();
+   };
+   if(reduced){finish();return;}
+   const before=new Map(checkboxes.filter(item=>!item.parentElement.hidden).map(item=>[item.parentElement,item.parentElement.getBoundingClientRect().top]));
+   const exit=row.animate([
+     {transform:'translateX(0)',opacity:1,filter:'blur(0)'},
+     {transform:'translateX(12px)',opacity:1,filter:'blur(0)',offset:.18},
+     {transform:'translateX(100px)',opacity:1,filter:'blur(0)',offset:.5},
+     {transform:'translateX(240px)',opacity:1,filter:'blur(0)',offset:.8},
+     {transform:'translateX(340px)',opacity:1,filter:'blur(0)'}
+   ],{duration:1050,delay:220,easing:'cubic-bezier(.35,0,.65,1)'});
+   exit.onfinish=()=>{finish();checkboxes.forEach(item=>{const remaining=item.parentElement;if(!remaining.hidden){const delta=before.get(remaining)-remaining.getBoundingClientRect().top;if(delta)remaining.animate([{transform:`translateY(${delta}px)`},{transform:'translateY(0)'}],{duration:600,easing:'cubic-bezier(.22,1,.36,1)'});}});};
+ }));
+ reset.addEventListener('click',()=>{restore(null);save();checkboxes[0].focus();});
+ window.addEventListener('openai:set_globals',event=>{const saved=event.detail?.globals?.widgetState;if(saved&&exiting.size===0)restore(saved);});
+ const canvas=root.querySelector('.water-surface');
+ const gl=canvas.getContext('webgl',{alpha:false,antialias:false});
+ if(gl) {
+   const vertex='attribute vec2 position;void main(){gl_Position=vec4(position,0.,1.);}';
+   const fragment=`precision mediump float;
+   uniform vec2 resolution; uniform float time;
+   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+   vec2 hash2(vec2 p){return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}
+   float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
+   float fbm(vec2 p){float n=0.,a=.5;for(int i=0;i<5;i++){n+=a*noise(p);p=mat2(.8,-.6,.6,.8)*p*2.03+3.1;a*=.5;}return n;}
+   float caustic(vec2 p,float t){vec2 cell=floor(p),f=fract(p);float first=8.,second=8.;for(int y=-1;y<=1;y++){for(int x=-1;x<=1;x++){vec2 g=vec2(float(x),float(y));vec2 h=hash2(cell+g);vec2 o=.5+.38*sin(t*.45+6.2831*h);vec2 r=g+o-f;float d=dot(r,r);if(d<first){second=first;first=d;}else if(d<second){second=d;}}}return 1.-smoothstep(.01,.16,second-first);}
+   void main(){vec2 uv=gl_FragCoord.xy/resolution.xy;vec2 p=uv*vec2(resolution.x/resolution.y,1.);float t=time*.32;
+     vec2 warp=vec2(fbm(p*3.+vec2(t*.12,0.)),fbm(p*3.+vec2(7.,t*.1)));
+     vec2 q=p+warp*.32;
+     float stone=fbm(q*7.);float grain=noise(q*95.);
+     float shade=smoothstep(.24,.72,fbm(q*2.+vec2(4.,9.)));
+     vec3 deep=vec3(.025,.17,.14),shallow=vec3(.25,.69,.57);
+     vec3 color=mix(deep,shallow,clamp(.25+stone*.75+(1.-uv.y)*.34-shade*.4,0.,1.));
+     color+=(stone-.5)*.12+(grain-.5)*.035;
+     float c1=caustic(q*9.+vec2(t*.16,t*.09),t);
+     float c2=caustic(q*13.+vec2(4.-t*.1,3.),t+2.);
+     float sun=smoothstep(.2,.9,1.-uv.y*.65+uv.x*.2-shade*.45);
+     color+=vec3(.4,.62,.47)*(c1*.43+c2*.19)*sun;
+     float glint=pow(max(0.,sin(q.x*50.+t+sin(q.y*42.-t)*2.)),18.)*pow(max(0.,sin(q.y*47.-t)),14.);
+     color+=vec3(.6,.8,.72)*glint*.16*sun;
+     gl_FragColor=vec4(color,1.);
+   }`;
+   function compile(type,source){const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) return null;return shader;}
+   const vs=compile(gl.VERTEX_SHADER,vertex),fs=compile(gl.FRAGMENT_SHADER,fragment);
+   if(vs&&fs) {
+     const program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
+     if(gl.getProgramParameter(program,gl.LINK_STATUS)) {
+       gl.useProgram(program);const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+       const position=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+       const size=gl.getUniformLocation(program,'resolution'),clock=gl.getUniformLocation(program,'time');
+       const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+       let frame=0;
+       function draw(now){const width=Math.round(product.clientWidth),height=Math.round(product.clientHeight);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);}gl.uniform2f(size,width,height);gl.uniform1f(clock,reduced.matches?0:now/1000);gl.drawArrays(gl.TRIANGLES,0,6);if(!reduced.matches&&root.isConnected)frame=requestAnimationFrame(draw);}
+       new ResizeObserver(()=>{if(reduced.matches)draw(0);}).observe(product);
+       reduced.addEventListener('change',()=>{cancelAnimationFrame(frame);draw(performance.now());});
+       draw(performance.now());
+     }
+   }
+ }
+
+})();
+</script>
+</body></html>

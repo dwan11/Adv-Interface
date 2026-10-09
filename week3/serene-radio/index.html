@@ -1,0 +1,175 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Glass radio buttons</title><style>*{box-sizing:border-box}body{margin:0;background:#e8f6f7;min-height:100vh;display:grid;place-items:center}#glass-radio-demo{width:min(760px,100%)}label,input{cursor:pointer}</style></head><body><div id="glass-radio-demo" class="viz-dotted-background">
+  <div class="radio-product">
+    <canvas class="water-surface" aria-hidden="true"></canvas>
+    <fieldset class="radio-card">
+      <legend>Choose your pace</legend>
+      <label class="radio-row cursor-interaction"><input type="radio" name="water-pace" value="drift" checked><span class="radio-shell" aria-hidden="true"><span class="radio-dot"></span></span><span class="radio-text">Drift</span></label>
+      <label class="radio-row cursor-interaction"><input type="radio" name="water-pace" value="wander"><span class="radio-shell" aria-hidden="true"><span class="radio-dot"></span></span><span class="radio-text">Wander</span></label>
+      <label class="radio-row cursor-interaction"><input type="radio" name="water-pace" value="explore"><span class="radio-shell" aria-hidden="true"><span class="radio-dot"></span></span><span class="radio-text">Explore</span></label>
+    </fieldset>
+  </div>
+</div>
+<style>
+#glass-radio-demo { padding:32px 12px; }
+#glass-radio-demo .radio-product { position:relative; isolation:isolate; overflow:hidden; width:100%; min-height:340px; display:grid; place-items:center; border-radius:28px; background:linear-gradient(135deg,#164d46,#73d8c3); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+#glass-radio-demo .water-surface { position:absolute; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; }
+#glass-radio-demo .radio-card { position:relative; box-sizing:border-box; width:min(320px,calc(100% - 40px)); margin:0; padding:8px 16px; border:0; border-radius:18px; color:#effaf1; background:linear-gradient(145deg,#0b39344d,#0b393426); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:inset 0 1px 0 #edffec20,0 12px 30px #0029201f; }
+#glass-radio-demo legend { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+#glass-radio-demo .radio-card::before { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; background:linear-gradient(135deg,#f5ffe987,#e6fff04d 22%,#d6fff026 48%,#e5fff012 70%,#defff044); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; }
+#glass-radio-demo .radio-row { position:relative; display:flex; align-items:center; min-height:52px; }
+#glass-radio-demo input { position:absolute; width:44px; height:44px; left:-4px; top:4px; opacity:0; margin:0; }
+#glass-radio-demo .radio-shell { position:relative; box-sizing:border-box; display:grid; place-items:center; width:28px; height:28px; margin-left:4px; flex-shrink:0; border-radius:50%; background:linear-gradient(155deg,#37685b32,#163f3836); box-shadow:inset 0 2px 5px #001c2429,inset 0 -1px 2px #dafff120; transition:box-shadow 450ms ease,background 450ms ease; }
+#glass-radio-demo .radio-shell::before { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; background:conic-gradient(from 135deg,#e6fff019,#d1f6e426 18%,#fffae68c 40%,#edffef50 50%,#e1ffe926 64%,#ffffff0d 82%,#e6fff019); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; transition:opacity 400ms ease; opacity:.6; }
+#glass-radio-demo .radio-shell::after { content:""; position:absolute; inset:0; border-radius:inherit; background:radial-gradient(ellipse at 45% 0%,#fffde840,transparent 65%); opacity:0; transition:opacity 350ms ease; }
+#glass-radio-demo .radio-dot { width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 35% 25%,#fffdea,#fff3b5 55%,#dfcf90); box-shadow:inset 0 1px 1px #fffef399,0 0 8px #fff1b540; opacity:0; transform:scale(.4); transition:transform 450ms cubic-bezier(.2,1.3,.4,1),opacity 220ms ease; }
+#glass-radio-demo input:checked + .radio-shell { background:linear-gradient(145deg,#d7efc721,#c7ede00b); box-shadow:inset 0 1px 3px #f4ffe920,inset 0 -1px 3px #032a2820,0 0 12px #fff2bb0c; }
+#glass-radio-demo input:checked + .radio-shell::before { opacity:1; }
+#glass-radio-demo input:checked + .radio-shell .radio-dot { opacity:1; transform:scale(1); }
+#glass-radio-demo .radio-text { margin-left:14px; font-size:17px; line-height:22px; letter-spacing:-.025em; transition:color 400ms ease,text-shadow 400ms ease; }
+#glass-radio-demo input:checked ~ .radio-text { color:#fff3b5; text-shadow:0 0 10px #fff3b526; }
+#glass-radio-demo .radio-row:not(:last-child)::after { content:""; position:absolute; bottom:0; left:46px; right:0; height:1px; background:#e4fff015; }
+#glass-radio-demo .radio-row:hover .radio-shell::after { opacity:1; }
+#glass-radio-demo input:focus-visible + .radio-shell { outline:2px solid #fff3b5b3; outline-offset:4px; }
+@media(max-width:400px) { #glass-radio-demo .radio-product { min-height:300px; border-radius:22px; } }
+@media(prefers-reduced-motion:reduce) { #glass-radio-demo *,#glass-radio-demo *::before,#glass-radio-demo *::after { animation:none!important; transition:none!important; } }
+</style>
+<style>
+#glass-radio-demo .radio-row { transition:transform 450ms cubic-bezier(.22,1,.36,1); }
+
+@media(prefers-reduced-motion:reduce) { #glass-radio-demo .radio-row { transform:none!important; transition:none!important; } }
+</style>
+<style>
+#glass-radio-demo .radio-card { display:flex; flex-direction:column; gap:8px; padding:12px; perspective:800px; }
+#glass-radio-demo .radio-row { padding:0 8px; border-radius:12px; background:linear-gradient(145deg,#c3ebd310,#0a332d1a); box-shadow:inset 0 1px 0 #edffec20,inset 0 -1px 2px #002b2414,0 2px 5px #00282012; transform:translateZ(0); transform-origin:center; transition:transform 450ms cubic-bezier(.22,1,.36,1),box-shadow 450ms ease,background 450ms ease; }
+#glass-radio-demo .radio-row::before { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; background:linear-gradient(135deg,#f5ffe947,#e6fff019 40%,#e5fff009 70%,#defff023); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; }
+#glass-radio-demo .radio-row:not(:last-child)::after { display:none; }
+#glass-radio-demo .radio-row input { left:4px; }
+@media(hover:hover) { #glass-radio-demo .radio-row:hover { z-index:2; transform:translateZ(20px) scale(1.025); background:linear-gradient(145deg,#ddf8d922,#20483c24); box-shadow:inset 0 1px 1px #f6ffe438,inset 0 -1px 2px #002b2414,0 8px 16px -5px #002b354d,0 2px 5px #00282026; } }
+</style>
+<style>
+#glass-radio-demo .radio-shell .radio-dot { visibility:hidden; }
+#glass-radio-demo .travel-ball { position:absolute; width:12px; height:12px; border-radius:50%; pointer-events:none; z-index:5; background:radial-gradient(circle at 32% 22%,#fffdef 0%,#fff5c9 35%,#f0e8b8 72%,#d4dfb4); box-shadow:inset 0 1px 1px #ffffef80,inset -1px -1px 2px #45726326,0 1px 3px #063c3530,0 0 7px #fff5c02b; border:1px solid #fffde966; box-sizing:border-box; }
+</style>
+<style>
+#glass-radio-demo .travel-ball { display:block; left:0; top:0; margin:0; transform:translate(-50%,-50%); transform-origin:center; }
+#glass-radio-demo .radio-card { position:relative; }
+</style>
+<style>
+#glass-radio-demo .radio-card { padding:10px; gap:6px; border-radius:24px; background:radial-gradient(ellipse at 20% 0%,#dcffe610,transparent 65%),linear-gradient(145deg,#0b393452,#0b39342e); box-shadow:inset 0 1px 1px #edffec20,inset 0 -1px 2px #032c2520,0 4px 8px #00322610,0 16px 28px -12px #00292038; }
+#glass-radio-demo .radio-row { min-height:56px; border-radius:14px; background:linear-gradient(150deg,#c3ebd310,#0a332d12); box-shadow:inset 0 1px 0 #edffec13,inset 0 -1px 3px #002b2410,0 1px 3px #00282009; transition:transform 520ms cubic-bezier(.22,1,.36,1),box-shadow 500ms ease,background 500ms ease; }
+#glass-radio-demo .radio-row input { top:6px; }
+#glass-radio-demo .radio-row:has(input:checked) { background:radial-gradient(ellipse at 10% 0%,#fff8db11,transparent 70%),linear-gradient(150deg,#daf5d914,#a4d4c20b); box-shadow:inset 0 1px 1px #f7ffe320,inset 0 -1px 2px #05362b0d,0 2px 4px #0028200d; }
+#glass-radio-demo .radio-row:has(input:checked)::before { background:linear-gradient(135deg,#fff9df6c,#eaffed28 35%,#ffffff09 65%,#ddffe526); }
+#glass-radio-demo .radio-row::after,#glass-radio-demo .radio-row:not(:last-child)::after { content:""; display:block; position:absolute; inset:0; width:auto; height:auto; border-radius:inherit; pointer-events:none; background:radial-gradient(ellipse at var(--reflection-x,25%) 0%,#fffbe522,transparent 68%); opacity:0; transition:opacity 450ms ease; }
+#glass-radio-demo .radio-row:hover::after { opacity:1; }
+#glass-radio-demo .radio-shell { box-shadow:inset 0 2px 5px #001c2424,inset 0 -1px 2px #dafff11c; }
+#glass-radio-demo .radio-text { font-weight:400; letter-spacing:-.022em; color:#e9f5ebdf; transition:color 450ms ease,text-shadow 450ms ease; }
+#glass-radio-demo input:checked ~ .radio-text { color:#fff3c2; text-shadow:0 0 8px #fff3b518; }
+@media(hover:hover) { #glass-radio-demo .radio-row:hover { transform:translateZ(12px) scale(1.018); box-shadow:inset 0 1px 1px #f6ffe42d,inset 0 -1px 2px #002b2410,0 7px 14px -5px #002b3533,0 2px 4px #00282018; } }
+</style>
+<script>
+(() => {
+ const root=document.getElementById('glass-radio-demo');
+ const product=root.querySelector('.radio-product');
+ const radios=[...root.querySelectorAll('input')];
+ radios.forEach(input=>{const row=input.closest('.radio-row');row.addEventListener('pointermove',event=>{const b=row.getBoundingClientRect();row.style.setProperty('--reflection-x',`${(event.clientX-b.left)/b.width*100}%`);});row.addEventListener('pointerleave',()=>row.style.removeProperty('--reflection-x'));});
+ const card=root.querySelector('.radio-card');
+ const ball=document.createElement('span');ball.className='travel-ball';ball.setAttribute('aria-hidden','true');product.appendChild(ball);
+ let selected=0,flight=null,current=null,lastTime=0,velocity={x:0,y:0};
+ const motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
+ function position(index){const socket=radios[index].nextElementSibling;const bounds=socket.getBoundingClientRect(),parent=product.getBoundingClientRect();return {x:bounds.left-parent.left-product.clientLeft+bounds.width/2,y:bounds.top-parent.top-product.clientTop+bounds.height/2,scale:bounds.width/socket.offsetWidth};}
+ function paint(point,height=0){
+   const socket=radios[selected].nextElementSibling;
+   if(!flight){
+     if(ball.parentElement!==socket)socket.appendChild(ball);
+     ball.style.left='50%';ball.style.top='50%';
+   }else{
+     if(ball.parentElement!==product)product.appendChild(ball);
+     ball.style.left=`${point.x}px`;ball.style.top=`${point.y}px`;
+   }
+   ball.style.margin='0';
+   ball.style.background=`radial-gradient(circle at ${50-18*height}% ${50-28*height}%,rgba(255,253,239,${.85+.1*height}),rgba(255,245,201,${.72+.15*height}) 42%,rgba(230,243,200,${.45+.18*height}) 74%,rgba(185,217,183,${.15+.15*height}))`;
+   ball.style.borderColor=`rgba(255,253,233,${.25+.2*height})`;
+   ball.style.opacity=String(.95+.05*height);
+   ball.style.transform=`translate(-50%,-50%) scale(${(flight?point.scale:1)*(1+.45*height)})`;
+   ball.style.transformOrigin='50% 50%';
+   ball.style.filter=`brightness(${1+.05*height})`;
+   ball.style.boxShadow=`inset 0 1px 1px rgba(255,255,239,${.1+.2*height}),0 ${1+5*height}px ${3+7*height}px rgba(6,60,53,${.04+.08*height}),0 0 ${6+4*height}px #fff5c026`;
+ }
+ function restore(saved){const choice=saved?.modelContent?.choice||'drift';const next=Math.max(0,radios.findIndex(input=>input.value===choice));if(next!==selected){flight=null;selected=next;}radios.forEach((input,index)=>input.checked=index===selected);if(!current){current=position(selected);paint(current);}}
+ restore(window.openai?.widgetState);
+ function frame(now){
+   if(!root.isConnected)return;
+   const target=position(selected);let point=target,height=0;
+   if(flight&&!motionPreference.matches){
+     const elapsed=(now-flight.start)/1000,t=Math.min(1,elapsed/flight.duration);
+     if(t<1){
+       const h00=2*t*t*t-3*t*t+1,h10=t*t*t-2*t*t+t,h01=-2*t*t*t+3*t*t;
+       point={x:h00*flight.from.x+h10*flight.vx*flight.duration+h01*target.x,y:h00*flight.from.y+h10*flight.vy*flight.duration+h01*target.y,scale:target.scale};
+       height=16*t*t*(1-t)*(1-t);
+     }else{
+       height=0;flight=null;
+     }
+   }else flight=null;
+   const dt=(now-lastTime)/1000;
+   if(current&&dt>0&&dt<.1)velocity={x:(point.x-current.x)/dt,y:(point.y-current.y)/dt};
+   current=point;lastTime=now;paint(point,height);requestAnimationFrame(frame);
+ }
+ requestAnimationFrame(frame);
+ radios.forEach((input,index)=>input.addEventListener('change',()=>{
+   if(!input.checked)return;
+   const from=current||position(selected);selected=index;const target=position(index);
+   const distance=Math.hypot(target.x-from.x,target.y-from.y),duration=Math.min(.8,.58+distance*.0008);
+   const retained=flight?velocity:{x:0,y:0};
+   flight={from:{...from},vx:retained.x,vy:retained.y,start:performance.now(),duration};
+   if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{choice:input.value},privateContent:null}).catch(()=>{});
+ }));
+ window.addEventListener('openai:set_globals',event=>{const saved=event.detail?.globals?.widgetState;if(saved)restore(saved);});
+ const canvas=root.querySelector('.water-surface');
+ const gl=canvas.getContext('webgl',{alpha:false,antialias:false});
+ if(gl) {
+   const vertex='attribute vec2 position;void main(){gl_Position=vec4(position,0.,1.);}';
+   const fragment=`precision mediump float;
+   uniform vec2 resolution; uniform float time;
+   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+   vec2 hash2(vec2 p){return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}
+   float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
+   float fbm(vec2 p){float n=0.,a=.5;for(int i=0;i<5;i++){n+=a*noise(p);p=mat2(.8,-.6,.6,.8)*p*2.03+3.1;a*=.5;}return n;}
+   float caustic(vec2 p,float t){vec2 cell=floor(p),f=fract(p);float first=8.,second=8.;for(int y=-1;y<=1;y++){for(int x=-1;x<=1;x++){vec2 g=vec2(float(x),float(y));vec2 h=hash2(cell+g);vec2 o=.5+.38*sin(t*.45+6.2831*h);vec2 r=g+o-f;float d=dot(r,r);if(d<first){second=first;first=d;}else if(d<second){second=d;}}}return 1.-smoothstep(.01,.16,second-first);}
+   void main(){vec2 uv=gl_FragCoord.xy/resolution.xy;vec2 p=uv*vec2(resolution.x/resolution.y,1.);float t=time*.32;
+     vec2 warp=vec2(fbm(p*3.+vec2(t*.12,0.)),fbm(p*3.+vec2(7.,t*.1)));
+     vec2 q=p+warp*.32;
+     float stone=fbm(q*7.);float grain=noise(q*95.);
+     float shade=smoothstep(.24,.72,fbm(q*2.+vec2(4.,9.)));
+     vec3 deep=vec3(.025,.17,.14),shallow=vec3(.25,.69,.57);
+     vec3 color=mix(deep,shallow,clamp(.25+stone*.75+(1.-uv.y)*.34-shade*.4,0.,1.));
+     color+=(stone-.5)*.12+(grain-.5)*.035;
+     float c1=caustic(q*9.+vec2(t*.16,t*.09),t);
+     float c2=caustic(q*13.+vec2(4.-t*.1,3.),t+2.);
+     float sun=smoothstep(.2,.9,1.-uv.y*.65+uv.x*.2-shade*.45);
+     color+=vec3(.4,.62,.47)*(c1*.43+c2*.19)*sun;
+     float glint=pow(max(0.,sin(q.x*50.+t+sin(q.y*42.-t)*2.)),18.)*pow(max(0.,sin(q.y*47.-t)),14.);
+     color+=vec3(.6,.8,.72)*glint*.16*sun;
+     gl_FragColor=vec4(color,1.);
+   }`;
+   function compile(type,source){const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) return null;return shader;}
+   const vs=compile(gl.VERTEX_SHADER,vertex),fs=compile(gl.FRAGMENT_SHADER,fragment);
+   if(vs&&fs) {
+     const program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
+     if(gl.getProgramParameter(program,gl.LINK_STATUS)) {
+       gl.useProgram(program);const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+       const position=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+       const size=gl.getUniformLocation(program,'resolution'),clock=gl.getUniformLocation(program,'time');
+       const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+       let frame=0;
+       function draw(now){const width=Math.round(product.clientWidth),height=Math.round(product.clientHeight);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);}gl.uniform2f(size,width,height);gl.uniform1f(clock,reduced.matches?0:now/1000);gl.drawArrays(gl.TRIANGLES,0,6);if(!reduced.matches&&root.isConnected)frame=requestAnimationFrame(draw);}
+       new ResizeObserver(()=>{if(reduced.matches)draw(0);}).observe(product);
+       reduced.addEventListener('change',()=>{cancelAnimationFrame(frame);draw(performance.now());});
+       draw(performance.now());
+     }
+   }
+ }
+
+})();
+</script>
+</body></html>
