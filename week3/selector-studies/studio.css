@@ -173,4 +173,12 @@ body[data-set] #prototype{grid-template-columns:minmax(0,1fr)}
 .console .row:has(input[type=radio]) .label-text{transition:transform 320ms cubic-bezier(.22,.75,.25,1)}
 .console .row:has(input[type=radio]) .text:after{transition:opacity 240ms 70ms}
 .console .row:has(input[type=radio]:not(:checked)) .text:after{transition-delay:0ms}
+/* Optical alignment: DM Sans ink sits above its line-box center.
+   Apply the same correction to every glass radio label, selected or not. */
+.tide .row:has(input[type=radio]) .label-text,
+.tide .row:has(input[type=radio]:checked) .label-text{transform:translateY(2px)}
+/* Draw the selection wave in the same SVG coordinates as the core. */
+.tide .radio:after{content:none}
+.tide .radio .selection-wave{fill:none;stroke:#71865b;stroke-width:.8;opacity:0;transform-box:view-box;transform-origin:15px 15px;transform:scale(.6);transition:transform 700ms var(--ease),opacity 700ms var(--ease)}
+.tide .row:has(input:checked) .selection-wave{transform:scale(1.28);opacity:.2}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}

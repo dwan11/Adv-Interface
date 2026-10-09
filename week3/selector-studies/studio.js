@@ -23,14 +23,14 @@ let body='';const check='<path class="check-path" d="M8 14 L12 18 L20 9"/>';
 if(key==='tide')body=`<defs><clipPath id="${uid}-clip"><rect x="2" y="2" width="24" height="24" rx="7"/></clipPath></defs><rect class="well" x="2" y="2" width="24" height="24" rx="7"/><g clip-path="url(#${uid}-clip)"><path class="water" d="M0 5 Q7 0 14 4 T28 3 L28 29 H0Z"/></g>${check}`;
 if(key==='console')body=`<rect class="well" x="2" y="2" width="24" height="24" rx="3"/><rect class="plunger" x="5" y="5" width="18" height="18" rx="2"/>${check}`;
 return `<span class="graphic check">${svg(body,'0 0 28 28')}</span>`;}
-let body='';if(key==='tide')body='<circle class="ripple-ring" cx="15" cy="15" r="14"/><circle class="ripple-ring" cx="15" cy="15" r="10"/><circle class="ripple-ring" cx="15" cy="15" r="6"/><circle class="core" cx="15" cy="15" r="5"/>';
+let body='';if(key==='tide')body='<circle class="selection-wave" cx="15" cy="15" r="14"/><circle class="ripple-ring" cx="15" cy="15" r="14"/><circle class="ripple-ring" cx="15" cy="15" r="10"/><circle class="ripple-ring" cx="15" cy="15" r="6"/><circle class="core" cx="15" cy="15" r="5"/>';
 if(key==='console')body='<circle class="rim" cx="15" cy="15" r="13"/><path stroke="#6b7c5d" stroke-width=".8" d="M7 8L9 10 M15 4V7 M23 8L21 10"/><path class="needle" d="M15 15V7"/><circle class="core" cx="15" cy="15" r="3"/>';
 
 return `<span class="graphic radio">${svg(body)}</span>`;
 }function row(key,label,type,index,checked){
   const id=`${key}-${type}-${index}`,isSwitch=type==='switch';
   return `<label class="row ${isSwitch?'switch-row':''}" for="${id}"><input id="${id}" type="${type==='radio'?'radio':'checkbox'}" ${isSwitch?'role="switch"':''} name="${type==='radio'?key+'-profile':id}" data-kind="${type}" data-index="${index}" value="${type==='radio'?(key==='tide'?[10,20,30]:['original','warm','bright'])[index]:type==='switch'?'enabled':index}" ${checked?'checked':''}>
-  ${isSwitch?'':control(type,key,index)}<span class="text"><span class="label-text">${label}</span>${isSwitch?`<small class="switch-state" aria-hidden="true">${checked?'On':'Off'}</small>`:''}</span>${isSwitch?control(type,key,index):`<span class="ordinal" aria-hidden="true">${type==='radio'?['01','02','03'][index]:''}</span>`}</label>`;
+  ${isSwitch?'':control(type,key,index)}<span class="text"><span class="label-text">${label}</span>${isSwitch?`<small class="switch-state" aria-hidden="true">${checked?'On':'Off'}</small>`:''}</span>${isSwitch?control(type,key,index):''}</label>`;
 }
 function specifications(key){return `<dl>
 <dt>Context</dt><dd>${SETS[key].context}</dd>
