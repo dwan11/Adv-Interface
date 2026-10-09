@@ -69,3 +69,9 @@
 .console .cap .check-bevel{stroke:#fffdf4;stroke-width:2.8;transform:translate(.25px,.7px);opacity:.9}
 .console .cap .check-recess{stroke:#79766d;stroke-width:2.2;filter:drop-shadow(0 -.35px .25px #514e4655)}
 .console .row:has(input:checked) .cap .check-recess{stroke:#79766d}
+
+/* Checkbox confirmation belongs to the label plate, not a separate lamp. */
+.console .check.mechanical>.contact{display:none}
+.console .row:has(input[data-kind=check]) .text:after{inset:0;width:auto;height:auto;border:1px solid #d97531;border-radius:inherit;background:transparent;box-shadow:inset 0 0 0 1px #ffcc8c44,0 0 5px #ef8b3233;opacity:0;clip-path:inset(0 100% 0 0 round 8px);transform:none;transition:clip-path 220ms cubic-bezier(.4,0,.6,1),opacity 180ms;}
+.console .row:has(input[data-kind=check]:checked) .text:after{opacity:1;clip-path:inset(0 0 0 0 round 8px);transition:clip-path 560ms cubic-bezier(.2,.8,.2,1) 100ms,opacity 180ms 100ms;}
+@media(prefers-reduced-motion:reduce){.console .row:has(input[data-kind=check]) .text:after{transition:none!important}}
