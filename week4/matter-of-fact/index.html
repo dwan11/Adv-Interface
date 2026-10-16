@@ -48,7 +48,7 @@
   .dot.ping { animation: ping .38s ease-out; }
   .dot[hidden] { display: none; }
   .dot { transition: background-color .2s, scale .2s ease-out; }
-  .dot[data-near] { scale: 1.6; background: #fff; }
+  .dot[data-near] { scale: 1.6; background: var(--thumb); }
   .dot-tag { position: absolute; bottom: calc(50% + 14px); font: 500 14px/20px var(--font); font-variant-numeric: tabular-nums; color: var(--muted);
     translate: -50% 4px; opacity: 0; pointer-events: none; transition: opacity .16s ease-out, translate .22s cubic-bezier(.3, 1.3, .5, 1); }
   .slider[data-dot] .dot-tag { opacity: 1; translate: -50% 0; }

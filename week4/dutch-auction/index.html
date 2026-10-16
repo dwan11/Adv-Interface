@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dutch Auction · Adv Interface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --void: #05070a; --alu-hi: #3c454c; --alu: #262d33; --alu-lo: #171c20; --grid: rgba(120, 160, 180, .07);
+    --label: #6e7b85; --text: #d8e3ea; --emerald: #2dffa0; --crimson: #ff2d55; --amber: #ffb547; --tick: #28323a;
+    --mono: "JetBrains Mono", ui-monospace, monospace; --grotesk: "Space Grotesk", "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100svh; display: grid; place-items: center; overflow-x: hidden; color: var(--text); font-family: var(--grotesk);
+    background: radial-gradient(1100px 620px at 50% -5%, #0f171c, var(--void) 70%); -webkit-font-smoothing: antialiased; }
+  /* Terminal grid floor */
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .9;
+    background: linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 44px 44px, linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 45%, #000 15%, transparent 70%); mask-image: radial-gradient(ellipse at 50% 45%, #000 15%, transparent 70%); }
+  main { display: flex; flex-wrap: wrap; justify-content: center; gap: 56px 64px; padding: 72px 16px; perspective: 1800px; }
+  figure { position: relative; margin: 0; display: grid; justify-items: center; gap: 22px; }
+  /* Volumetric backlight + floor shadow */
+  figure::before { content: ""; position: absolute; inset: 4% -6% 18%; z-index: -1; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(45, 255, 160, .16), rgba(40, 120, 255, .05) 60%, transparent); filter: blur(36px); }
+  figure::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 26px; height: 30px; z-index: -1; border-radius: 50%; background: rgba(0, 0, 0, .75); filter: blur(18px); }
+  figcaption { font: 600 11px/1 var(--grotesk); letter-spacing: .26em; text-transform: uppercase; color: var(--label); }
+
+  .device { position: relative; width: min(360px, calc(100vw - 32px)); padding: 14px; border-radius: 24px;
+    background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .018) 0 1px, transparent 1px 3px), linear-gradient(160deg, var(--alu-hi), var(--alu) 38%, var(--alu-lo));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), inset 0 -2px 0 rgba(0, 0, 0, .55), 0 0 0 1px #0a0e11, 0 60px 80px -40px #000, 0 0 140px -40px rgba(45, 255, 160, .3);
+    transform: rotateX(14deg); transform-origin: 50% 70%; transition: transform .7s cubic-bezier(.16, 1, .3, 1); }
+  .device:not([data-state="idle"]) { transform: rotateX(7deg) translateY(-6px); }
+  .screw { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #59636b, #1b2125); box-shadow: inset 0 0 0 .5px #0b0e10; }
+  .screw::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3px; height: 1px; background: #0e1215; rotate: 35deg; }
+
+  .data { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .box { position: relative; min-width: 0; padding: 7px 9px 8px; border-radius: 6px; background: rgba(5, 8, 10, .6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06), inset 0 2px 6px rgba(0, 0, 0, .6); }
+  .box b { display: block; margin-bottom: 6px; font: 600 9px/1 var(--grotesk); letter-spacing: .18em; text-transform: uppercase; color: var(--label); }
+  .box span { display: block; font: 500 12px/1 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .led { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; vertical-align: 1px; background: #38434a; transition: background-color .2s, box-shadow .2s; }
+  .device[data-state="hover"] .led { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+  .device[data-state="press"] .led { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .device[data-state="drag"] .led { background: var(--crimson); box-shadow: 0 0 8px var(--crimson); }
+  .up { color: var(--emerald); } .down { color: var(--crimson); }
+
+  /* ---------- Dial ---------- */
+  .dial { display: block; width: 100%; margin: 8px 0; touch-action: none; cursor: crosshair; outline: none; overflow: visible; -webkit-user-select: none; user-select: none; }
+  .device[data-state="drag"] .dial { cursor: grabbing; }
+  .tick { stroke-linecap: round; }
+  .lbl { font: 500 8px var(--mono); fill: #4d5962; text-anchor: middle; dominant-baseline: central; transition: fill .2s; }
+  .lbl[data-near] { fill: var(--text); }
+  .bloom { opacity: .35; transition: opacity .35s ease-out; }
+  .device[data-state="hover"] .bloom { opacity: .7; }
+  .device[data-state="press"] .bloom, .device[data-state="drag"] .bloom { opacity: 1; }
+  .price { font: 500 44px var(--mono); letter-spacing: -.03em; text-anchor: middle; fill: var(--emerald); }
+  .meta { font: 600 7.5px var(--grotesk); letter-spacing: .24em; text-anchor: middle; fill: var(--label); }
+  .needle line { stroke: var(--crimson); stroke-width: 1.4; stroke-linecap: round; transition: stroke-width .15s; }
+  .device:is([data-state="press"], [data-state="drag"]) .needle line { stroke-width: 2.2; }
+  .ghost { opacity: 0; transition: opacity .2s; }
+  .ghost line { stroke: var(--crimson); stroke-width: 1; stroke-dasharray: 2 4; }
+  .device[data-state="hover"] .ghost { opacity: .55; }
+  .glass { transform-box: view-box; transform-origin: 160px 160px; transition: transform .25s cubic-bezier(.16, 1, .3, 1); }
+  .device:is([data-state="press"], [data-state="drag"]) .glass { transform: scale(.975); }
+  .sweep { transform-box: view-box; transform-origin: 160px 160px; opacity: 0; transition: opacity .4s; animation: spin 2.4s linear infinite; }
+  .device[data-state="hover"] .sweep { opacity: 1; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pulse { transform-box: view-box; transform-origin: 160px 160px; opacity: 0; fill: none; stroke: var(--emerald); stroke-width: 1.2; }
+  .pulse.go { animation: pulse .7s cubic-bezier(.16, 1, .3, 1); }
+  @keyframes pulse { from { opacity: .7; transform: scale(1); } to { opacity: 0; transform: scale(1.62); } }
+  .dial:focus-visible .focus { opacity: 1; }
+  .focus { opacity: 0; fill: none; stroke: var(--emerald); stroke-width: 1; stroke-dasharray: 3 5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .device, .bloom, .glass, .ghost, .sweep, .needle line { transition: none; }
+    .sweep, .pulse.go { animation: none; }
+    .device:not([data-state="idle"]) { transform: rotateX(14deg); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <figure>
+    <div class="device" data-kind="continuous" data-value="105" data-store="auction-continuous" data-label="Continuous bid" data-lot="0482" data-variety="ROSE · RED"></div>
+    <figcaption>Continuous</figcaption>
+  </figure>
+  <figure>
+    <div class="device" data-kind="stepped" data-value="100" data-store="auction-stepped" data-label="Stepped bid" data-lot="0483" data-variety="TULIP · A1"></div>
+    <figcaption>Stepped</figcaption>
+  </figure>
+</main>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const store = {
+    get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return Number.isFinite(v) ? v : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  function spring(s, k, c, dt) {
+    const n = Math.ceil(dt / (1 / 240)), h = dt / n;
+    for (let i = 0; i < n; i++) { s.v += (-k * (s.x - s.t) - c * s.v) * h; s.x += s.v * h; }
+  }
+
+  // Dial geometry: a 300° arc, opening at the bottom. Angles are clockwise from 12 o'clock.
+  const C = 160, MAX = 200, SWEEP = 300, START = -150;
+  const angleOf = (t) => START + SWEEP * t;
+  const pt = (r, deg) => { const a = deg * Math.PI / 180; return [C + r * Math.sin(a), C - r * Math.cos(a)]; };
+  const arc = (r, a0, a1) => {
+    if (a1 - a0 < .05) return "";
+    const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
+    return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+  };
+  const money = (c) => "$" + (c / 100).toFixed(2);
+
+  let uid = 0;
+  class AuctionClock {
+    constructor(dev) {
+      this.dev = dev;
+      this.id = "a" + uid++;
+      this.stepped = dev.dataset.kind === "stepped";
+      this.unit = this.stepped ? 25 : 1;
+      this.ticks = this.stepped ? 41 : 81; // major tick every 25¢ in both
+      this.major = (this.ticks - 1) / 8;
+      let v = +dev.dataset.value;
+      if (dev.dataset.store) v = store.get(dev.dataset.store, v);
+      this.value = this.quantize(v);
+      this.needle = { x: this.value / MAX, v: 0, t: this.value / MAX };
+      this.lastT = this.needle.x;
+      this.boost = new Float32Array(this.ticks);
+      this.boostUp = new Uint8Array(this.ticks);
+      this.delta = 0; this.hoverValue = null; this.scramble = []; this.shownText = "";
+      this.build();
+      this.bind();
+      this.setState("idle");
+      this.report();
+    }
+    quantize(v) { return clamp(Math.round(v / this.unit) * this.unit, 0, MAX); }
+    build() {
+      const d = this.dev, id = this.id;
+      d.innerHTML = `
+        <i class="screw" style="left:9px;top:9px"></i><i class="screw" style="right:9px;top:9px"></i>
+        <i class="screw" style="left:9px;bottom:9px"></i><i class="screw" style="right:9px;bottom:9px"></i>
+        <div class="data">
+          <div class="box"><b>Lot</b><span>${d.dataset.lot}</span></div>
+          <div class="box"><b>Variety</b><span>${d.dataset.variety}</span></div>
+          <div class="box"><b>Units</b><span>1 200</span></div>
+        </div>
+        <svg class="dial" viewBox="0 0 320 320" tabindex="0" role="slider" aria-label="${d.dataset.label}" aria-valuemin="0" aria-valuemax="${MAX}">
+          <defs>
+            <linearGradient id="${id}-bezel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#434c53"/><stop offset=".5" stop-color="#1d2328"/><stop offset="1" stop-color="#2b3238"/></linearGradient>
+            <radialGradient id="${id}-glass" cx=".42" cy=".32" r=".8"><stop offset="0" stop-color="#1a252c"/><stop offset=".6" stop-color="#0a0f13"/><stop offset="1" stop-color="#040608"/></radialGradient>
+            <linearGradient id="${id}-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".5" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#2dffa0" stop-opacity=".18"/></linearGradient>
+            <linearGradient id="${id}-spec" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+            <linearGradient id="${id}-sweep" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2dffa0" stop-opacity="0"/><stop offset="1" stop-color="#2dffa0" stop-opacity=".22"/></linearGradient>
+            <filter id="${id}-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.2"/></filter>
+          </defs>
+          <circle cx="160" cy="160" r="156" fill="url(#${id}-bezel)"/>
+          <circle cx="160" cy="160" r="148" fill="#080b0e" stroke="rgba(255,255,255,.05)"/>
+          <circle class="focus" cx="160" cy="160" r="152"/>
+          <g class="sweep"><path d="${arc(124, -40, 0)}" stroke="url(#${id}-sweep)" stroke-width="26" fill="none"/></g>
+          <path d="${arc(140, START, START + SWEEP)}" stroke="#1b2329" stroke-width="2" fill="none"/>
+          <g id="${id}-lit"><path class="track" stroke="#2dffa0" stroke-width="2" fill="none" stroke-linecap="round"/><g class="ticks"></g></g>
+          <use class="bloom" href="#${id}-lit" filter="url(#${id}-blur)"/>
+          <g class="labels"></g>
+          <circle class="pulse" cx="160" cy="160" r="86"/>
+          <g class="glass">
+            <circle cx="160" cy="160" r="86" fill="url(#${id}-glass)" stroke="url(#${id}-rim)" stroke-width="1.2"/>
+            <circle cx="160" cy="160" r="80" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="5"/>
+            <path d="M96 128a70 70 0 0 1 128 0a120 60 0 0 0 -128 0z" fill="url(#${id}-spec)"/>
+            <text class="meta" x="160" y="122">BID · PER STEM</text>
+            <g id="${id}-price"><text class="price" x="160" y="176"></text></g>
+            <use class="bloom" href="#${id}-price" filter="url(#${id}-blur)"/>
+            <text class="meta step-meta" x="160" y="202"></text>
+          </g>
+          <g class="ghost"><line x1="160" y1="66" x2="160" y2="26"/></g>
+          <g class="needle"><line x1="160" y1="66" x2="160" y2="22"/><circle cx="160" cy="66" r="2.2" fill="#ff2d55"/></g>
+          <g class="needle-glow" filter="url(#${id}-blur)" opacity=".8"><line x1="160" y1="66" x2="160" y2="22" stroke="#ff2d55" stroke-width="3"/></g>
+          <circle class="ref" cx="160" cy="160" r=".5" fill="none"/><circle class="ref" cx="260" cy="160" r=".5" fill="none"/><circle class="ref" cx="160" cy="260" r=".5" fill="none"/>
+        </svg>
+        <div class="data">
+          <div class="box"><b>Target</b><span class="target">—</span></div>
+          <div class="box"><b>Δ</b><span class="delta">+0.00</span></div>
+          <div class="box"><b>State</b><span><i class="led"></i><span class="state" style="display:inline">IDLE</span></span></div>
+        </div>`;
+      const svg = this.svg = d.querySelector(".dial");
+      this.price = svg.querySelector(".price");
+      this.track = svg.querySelector(".track");
+      this.needleG = svg.querySelector(".needle");
+      this.glowG = svg.querySelector(".needle-glow");
+      this.ghost = svg.querySelector(".ghost");
+      this.pulse = svg.querySelector(".pulse");
+      this.refs = [...svg.querySelectorAll(".ref")];
+      this.targetEl = d.querySelector(".target");
+      this.deltaEl = d.querySelector(".delta");
+      this.stateEl = d.querySelector(".state");
+      svg.querySelector(".step-meta").textContent = this.stepped ? "STEP $0.25" : "STEP $0.01";
+      const tg = svg.querySelector(".ticks"), lg = svg.querySelector(".labels");
+      this.tickEls = [];
+      this.labelEls = [];
+      for (let i = 0; i < this.ticks; i++) {
+        const major = i % this.major === 0, a = angleOf(i / (this.ticks - 1));
+        const [x0, y0] = pt(major ? 112 : 120, a), [x1, y1] = pt(132, a);
+        const l = document.createElementNS(NS, "line");
+        l.setAttribute("class", "tick");
+        l.setAttribute("x1", x0.toFixed(2)); l.setAttribute("y1", y0.toFixed(2)); l.setAttribute("x2", x1.toFixed(2)); l.setAttribute("y2", y1.toFixed(2));
+        l.setAttribute("stroke-width", major ? 2 : 1.1);
+        tg.append(l); this.tickEls.push({ el: l, shown: -1, color: "" });
+        if (major) {
+          const [lx, ly] = pt(100, a);
+          const t = document.createElementNS(NS, "text");
+          t.setAttribute("class", "lbl"); t.setAttribute("x", lx.toFixed(1)); t.setAttribute("y", ly.toFixed(1));
+          t.textContent = (i / (this.ticks - 1) * MAX / 100).toFixed(2);
+          lg.append(t); this.labelEls.push({ el: t, t: i / (this.ticks - 1) });
+        }
+      }
+    }
+    setState(s) {
+      if (this.state === s) return;
+      this.state = s;
+      this.dev.dataset.state = s;
+      this.stateEl.textContent = { idle: "IDLE", hover: "HOVER", press: "PRESS", drag: "DRAG" }[s];
+      if (s !== "hover") this.hoverValue = null;
+      this.report();
+    }
+    setValue(v) {
+      v = this.quantize(v);
+      if (v === this.value) return;
+      const prevText = money(this.value);
+      this.delta = v - this.value;
+      this.value = v;
+      this.needle.t = v / MAX;
+      if (reduce.matches) { this.needle.x = this.needle.t; this.needle.v = 0; }
+      // While dragging, changed digits flicker through random values for 70ms before locking in.
+      if (this.state === "drag" && !reduce.matches) {
+        const next = money(v), until = performance.now() + 70;
+        this.scramble = [...next].map((ch, i) => (ch !== prevText[i] && /\d/.test(ch) ? until : 0));
+      }
+      this.report();
+    }
+    report() {
+      this.svg.setAttribute("aria-valuenow", this.value);
+      this.svg.setAttribute("aria-valuetext", money(this.value) + " per stem");
+      const d = this.hoverValue != null ? this.hoverValue - this.value : this.delta;
+      this.targetEl.textContent = this.hoverValue != null ? money(this.hoverValue) : "—";
+      this.deltaEl.textContent = (d >= 0 ? "+" : "−") + (Math.abs(d) / 100).toFixed(2);
+      this.deltaEl.className = "delta " + (d > 0 ? "up" : d < 0 ? "down" : "");
+    }
+    // Screen point → dial coordinates, using three reference points so the 3D tilt is accounted for.
+    dialPoint(e) {
+      const [c, a, b] = this.refs.map((r) => { const q = r.getBoundingClientRect(); return [q.left + q.width / 2, q.top + q.height / 2]; });
+      const ax = (a[0] - c[0]) / 100, ay = (a[1] - c[1]) / 100, bx = (b[0] - c[0]) / 100, by = (b[1] - c[1]) / 100;
+      const px = e.clientX - c[0], py = e.clientY - c[1], det = ax * by - ay * bx;
+      return { u: (px * by - py * bx) / det, v: (ax * py - ay * px) / det };
+    }
+    valueAt(e) {
+      const { u, v } = this.dialPoint(e);
+      const deg = Math.atan2(u, -v) * 180 / Math.PI;
+      let t = (deg - START) / SWEEP;
+      if (deg > 150 || deg < -150) t = this.needle.t < .5 ? 0 : 1; // the gap at the bottom keeps the nearer end
+      return { value: clamp(t, 0, 1) * MAX, r: Math.hypot(u, v) };
+    }
+    bind() {
+      const svg = this.svg;
+      const save = () => { if (this.dev.dataset.store) store.set(this.dev.dataset.store, this.value); };
+      svg.addEventListener("pointermove", (e) => {
+        if (this.state === "press" && Math.hypot(e.clientX - this.downX, e.clientY - this.downY) > 3) this.setState("drag");
+        if (this.state === "drag") { this.setValue(this.valueAt(e).value); return; }
+        if (this.state === "press" || e.pointerType !== "mouse") return;
+        const { value } = this.valueAt(e);
+        this.setState("hover");
+        this.hoverValue = this.quantize(value);
+        this.report();
+      });
+      svg.addEventListener("pointerleave", () => { if (this.state === "hover") this.setState("idle"); });
+      svg.addEventListener("pointerdown", (e) => {
+        if (e.button) return;
+        try { svg.setPointerCapture(e.pointerId); } catch {}
+        this.downX = e.clientX; this.downY = e.clientY;
+        this.setState("press");
+        const { value, r } = this.valueAt(e);
+        if (r > 30) this.setValue(value);
+        if (!reduce.matches) { this.pulse.classList.remove("go"); void this.pulse.getBBox(); this.pulse.classList.add("go"); }
+      });
+      const end = (e) => {
+        if (this.state !== "press" && this.state !== "drag") return;
+        const r = svg.getBoundingClientRect();
+        const inside = e.pointerType === "mouse" && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+        this.setState(inside ? "hover" : "idle");
+        save();
+      };
+      svg.addEventListener("pointerup", end);
+      svg.addEventListener("pointercancel", end);
+      svg.addEventListener("keydown", (e) => {
+        const step = this.stepped ? 25 : (e.shiftKey ? 10 : 1);
+        const map = { ArrowRight: step, ArrowUp: step, ArrowLeft: -step, ArrowDown: -step, PageUp: 25, PageDown: -25 };
+        let next;
+        if (e.key in map) next = this.value + map[e.key];
+        else if (e.key === "Home") next = 0;
+        else if (e.key === "End") next = MAX;
+        else return;
+        e.preventDefault();
+        this.setValue(next);
+        save();
+      });
+    }
+    tick(dt, now) {
+      const n = this.needle;
+      if (reduce.matches) { n.x = n.t; n.v = 0; }
+      else if (this.stepped) spring(n, 1100, 46, dt); // fast, precise snap with a hair of overshoot
+      else spring(n, 700, 50, dt);
+      const t = n.x, a = angleOf(t);
+      this.needleG.setAttribute("transform", `rotate(${a.toFixed(2)} 160 160)`);
+      this.glowG.setAttribute("transform", `rotate(${a.toFixed(2)} 160 160)`);
+      if (this.hoverValue != null) this.ghost.setAttribute("transform", `rotate(${angleOf(this.hoverValue / MAX).toFixed(2)} 160 160)`);
+      this.track.setAttribute("d", arc(140, START, a));
+
+      // Ticks: lit up to the needle. Ticks it sweeps past flash (emerald rising, crimson falling) and fade like phosphor.
+      const decay = Math.exp(-dt * 2.6);
+      for (let i = 0; i < this.ticks; i++) {
+        const tt = i / (this.ticks - 1);
+        if ((this.lastT - tt) * (t - tt) < 0) { this.boost[i] = 1; this.boostUp[i] = t > this.lastT ? 1 : 0; }
+        this.boost[i] *= decay;
+        const lit = tt <= t + 1e-4;
+        const glow = lit ? Math.max(.85, this.boost[i]) : this.boost[i];
+        const color = lit ? (this.boost[i] > .3 ? "#b9ffe0" : "#2dffa0") : (this.boost[i] > .02 ? "#ff2d55" : "#28323a");
+        const op = lit || this.boost[i] > .02 ? .25 + .75 * glow : 1;
+        const s = this.tickEls[i];
+        if (s.color !== color || Math.abs(s.shown - op) > .02) {
+          s.color = color; s.shown = op;
+          s.el.setAttribute("stroke", color); s.el.setAttribute("opacity", op.toFixed(2));
+        }
+      }
+      this.lastT = t;
+      for (const l of this.labelEls) l.el.toggleAttribute("data-near", Math.abs(l.t - t) < .045);
+
+      let text = money(this.value);
+      if (this.scramble.length) {
+        let live = false;
+        text = [...text].map((ch, i) => { if (this.scramble[i] > now) { live = true; return String(Math.floor(Math.random() * 10)); } return ch; }).join("");
+        if (!live) this.scramble = [];
+      }
+      if (text !== this.shownText) { this.price.textContent = text; this.shownText = text; }
+    }
+  }
+
+  const clocks = [...document.querySelectorAll(".device")].map((d) => new AuctionClock(d));
+  let last = performance.now();
+  requestAnimationFrame(function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    for (const c of clocks) c.tick(dt, now);
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>

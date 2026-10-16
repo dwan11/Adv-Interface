@@ -10,6 +10,7 @@ Continuous and stepped sliders with default, hover, pressed and drag states.
 |---|---|---|
 | Matter of Fact | Matter of Fact | [week4/matter-of-fact](week4/matter-of-fact) |
 | Quirky Stack | Quirky | [week4/quirky-stack](week4/quirky-stack) |
+| Dutch Auction | Futuristic | [week4/dutch-auction](week4/dutch-auction) |
 
 ## Week 3: Pixel Salon
 
