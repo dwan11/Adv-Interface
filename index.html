@@ -87,6 +87,7 @@
     <button role="tab" id="tab-week1" aria-controls="week1-panel" aria-selected="true">Week 1</button>
     <button role="tab" id="tab-week2" aria-controls="week2-panel" aria-selected="false" tabindex="-1">Week 2</button>
     <button role="tab" id="tab-week3" aria-controls="week3-panel" aria-selected="false" tabindex="-1">Week 3</button>
+    <button role="tab" id="tab-week4" aria-controls="week4-panel" aria-selected="false" tabindex="-1">Week 4</button>
   </nav>
 
   <section id="week1-panel" role="tabpanel" aria-labelledby="tab-week1">
@@ -101,6 +102,10 @@
   <section id="week3-panel" role="tabpanel" aria-labelledby="tab-week3" hidden>
     <h2>Week 3 <span>Selector studies · Playful, Serene & Rugged</span></h2>
     <div class="grid" id="week3"></div>
+  </section>
+  <section id="week4-panel" role="tabpanel" aria-labelledby="tab-week4" hidden>
+    <h2>Week 4 <span>Sliders · Matter of Fact & Quirky</span></h2>
+    <div class="grid" id="week4"></div>
   </section>
 </main>
 
@@ -141,6 +146,11 @@
     { dir: "sliding-pearl", name: "Sliding Pearl", desc: "Playful · A pixel pearl rolls along a dotted path, changing color with each finishing choice." },
   ];
 
+  const week4 = [
+    { dir: "matter-of-fact", name: "Matter of Fact", desc: "Matter of Fact · Continuous and stepped sliders. Digits roll like a luggage lock, stepped thumbs brake at each stop, and the fill shifts from teal to magenta." },
+    { dir: "quirky-stack", name: "Quirky Stack", desc: "Quirky · Slate control-panel slabs fill with mint water: drops pour in, bubbles rise, and the stack sways. Stepped and continuous." },
+  ];
+
   function render(id, week, list) {
   const grid = document.getElementById(id);
   for (const p of list) {
@@ -162,6 +172,7 @@
     grid.appendChild(card);
   }
   }
+  render("week4", "week4", week4);
   render("week3", "week3", week3);
   render("week2", "week2", week2);
   render("week1", "week1", week1);

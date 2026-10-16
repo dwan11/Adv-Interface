@@ -2,6 +2,15 @@
 
 Coursework for Advanced Interface.
 
+## Week 4: Sliders
+
+Continuous and stepped sliders with default, hover, pressed and drag states.
+
+| Set | Tone | Folder |
+|---|---|---|
+| Matter of Fact | Matter of Fact | [week4/matter-of-fact](week4/matter-of-fact) |
+| Quirky Stack | Quirky | [week4/quirky-stack](week4/quirky-stack) |
+
 ## Week 3: Pixel Salon
 
 Tone: **Playful**.

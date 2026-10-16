@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quirky Stack · Adv Interface</title>
+<style>
+  /* Palette after a slate IoT control panel: flat segments, translucent liquid, mint/cyan accent. */
+  :root {
+    color-scheme: dark;
+    --bg: #22343a; --slab: #34484e; --ring: #6fd0e0;
+    --water-top: #a6ecd0; --water-deep: #5ec8dc; --water-back: rgba(166, 236, 208, .35);
+    --label: #c5d0d2; --on-water: #0f2a30; --peek: rgba(255, 255, 255, .55);
+    --font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); font-family: var(--font); -webkit-font-smoothing: antialiased;
+    display: grid; place-items: center; }
+  main { display: flex; gap: clamp(32px, 10vw, 96px); padding: 48px 16px; flex-wrap: wrap; justify-content: center; }
+  figure { margin: 0; display: grid; justify-items: center; gap: 4px; }
+  /* HIG caption 2 / M3 label small: 11px semibold caps */
+  figcaption { font: 600 11px/13px var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--label); }
+
+  .stack { display: block; width: 200px; touch-action: none; cursor: grab; outline: none; overflow: visible; -webkit-user-select: none; user-select: none; }
+  .stack[data-drag] { cursor: grabbing; }
+  .focus-ring { opacity: 0; fill: none; stroke: var(--ring); stroke-width: 2; }
+  .stack:focus-visible .focus-ring { opacity: 1; }
+  .body { fill: var(--slab); transition: fill .2s; }
+  .back { fill: var(--water-back); }
+  .surface { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 1.4; stroke-linecap: round; }
+  .bubble { fill: rgba(255, 255, 255, .25); stroke: rgba(255, 255, 255, .8); stroke-width: .9; }
+  .drop { fill: var(--water-deep); }
+  /* Value label: 15px semibold, scaled with the control (HIG subheadline / M3 label large) */
+  .pct, .peek { font: 600 17px var(--font); font-variant-numeric: tabular-nums; text-anchor: middle; pointer-events: none; }
+  .pct { fill: var(--on-water); opacity: 0; transition: opacity .18s ease-out; }
+  .stack:is([data-pressed], [data-drag], :focus-visible) .pct { opacity: 1; }
+  /* Hover: the hovered slab's % surfaces faintly, then fades once the pointer leaves. */
+  .peek { fill: var(--peek); opacity: 0; transition: opacity .45s ease-out; }
+  .stack[data-hover]:not([data-pressed]) .peek { opacity: 1; transition-duration: .2s; }
+  @media (prefers-reduced-motion: reduce) { .pct, .peek, .body { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <figure>
+    <svg class="stack" data-mode="stepped" data-value="1" data-store="quirky-stepped" data-label="Stepped level"></svg>
+    <figcaption>Stepped</figcaption>
+  </figure>
+  <figure>
+    <svg class="stack" data-mode="continuous" data-value="2.3" data-store="quirky-continuous" data-label="Continuous level"></svg>
+    <figcaption>Continuous</figcaption>
+  </figure>
+</main>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const store = {
+    get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return Number.isFinite(v) ? v : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  function spring(s, k, c, dt) {
+    const n = Math.ceil(dt / (1 / 240)), h = dt / n;
+    for (let i = 0; i < n; i++) { s.v += (-k * (s.x - s.t) - c * s.v) * h; s.x += s.v * h; }
+  }
+  const el = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+
+  const COUNT = 5, H = 46, PITCH = 50, BOTTOM = 272, CX = 130, W0 = 108, W1 = 140, R = 14;
+  const BASE = [{ x: 2, a: -1 }, { x: -2, a: .8 }, { x: 3, a: -.6 }, { x: -1, a: 1.1 }, { x: 1, a: -.8 }];
+
+  // Water inside one slab, in slab coordinates. The slope cancels the slab's tilt so the surface stays level.
+  function wave(f, tiltDeg, amp, t, lift = 0) {
+    if (f <= .002) return { fill: "", line: "" };
+    const full = f >= .998;
+    const y0 = full ? -H / 2 - 24 : H / 2 - f * H - lift;
+    const slope = Math.tan(tiltDeg * Math.PI / 180);
+    let line = "";
+    for (let x = -W1 / 2 - 16; x <= W1 / 2 + 16; x += 5) {
+      const y = y0 - x * slope + (full ? 0 : amp * (Math.sin(x * .085 + t * 4.6) + .45 * Math.sin(x * .19 - t * 3.1)));
+      line += (line ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+    }
+    return { fill: line + `L${W1 / 2 + 16} ${H}L${-W1 / 2 - 16} ${H}Z`, line: full ? "" : line, y0 };
+  }
+
+  let uid = 0;
+  class Stack {
+    constructor(svg) {
+      this.svg = svg;
+      this.id = "s" + uid++;
+      this.continuous = svg.dataset.mode === "continuous";
+      this.freeze = svg.dataset.freeze || null;
+      let v = +svg.dataset.value;
+      if (svg.dataset.store) v = store.get(svg.dataset.store, v);
+      this.level = this.quantize(v);
+      this.water = { x: this.level, v: 0, t: this.level };
+      this.hoverAt = svg.dataset.hoverAt ? +svg.dataset.hoverAt : null;
+      this.slabs = BASE.map((b, i) => ({
+        i, b, w: { x: W0, v: 0, t: W0 }, dx: { x: b.x, v: 0, t: b.x }, da: { x: 0, v: 0, t: 0 }, bump: { x: 0, v: 0, t: 0 },
+        ripple: 0, bubbles: [], full: this.level >= i + 1,
+      }));
+      this.drops = [];
+      this.time = Math.random() * 10; this.pourClock = 0; this.demoClock = 0; this.demoDir = 1;
+      this.build();
+      if (this.freeze) this.setState(this.freeze); else this.bind();
+      this.announce();
+    }
+    quantize(v) { v = clamp(v, 0, COUNT); return this.continuous ? Math.round(v * 20) / 20 : Math.round(v); }
+    get pct() { return Math.round(this.level / COUNT * 100); }
+    build() {
+      const svg = this.svg, id = this.id;
+      svg.setAttribute("viewBox", "0 0 260 300");
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="${id}-w" gradientUnits="userSpaceOnUse" x1="0" y1="${-H / 2}" x2="0" y2="${H / 2}">
+            <stop offset="0" style="stop-color:var(--water-top)"/><stop offset="1" style="stop-color:var(--water-deep)"/>
+          </linearGradient>
+        </defs>
+        <rect class="focus-ring" x="34" y="14" width="192" height="282" rx="22"/>
+        <g class="slabs"></g>
+        <g class="drops"></g>
+        <text class="peek" aria-hidden="true"></text>
+        <text class="pct" aria-hidden="true"></text>`;
+      const host = svg.querySelector(".slabs");
+      this.dropLayer = svg.querySelector(".drops");
+      this.text = svg.querySelector(".pct");
+      this.peek = svg.querySelector(".peek");
+      // Top slab first, so lower slabs sit in front like a real pile.
+      for (let i = COUNT - 1; i >= 0; i--) {
+        const s = this.slabs[i];
+        const g = el("g");
+        g.innerHTML = `
+          <clipPath id="${id}-c${i}"><rect rx="${R}"/></clipPath>
+          <rect class="body" rx="${R}"/>
+          <g clip-path="url(#${id}-c${i})">
+            <path class="back"/>
+            <path class="front" fill="url(#${id}-w)"/>
+            <path class="surface"/>
+            <g class="bubbles"></g>
+          </g>
+`;
+        host.append(g);
+        Object.assign(s, {
+          g, rects: [...g.querySelectorAll("rect")], back: g.querySelector(".back"), front: g.querySelector(".front"),
+          surface: g.querySelector(".surface"), bubbleLayer: g.querySelector(".bubbles"), drawnW: 0,
+        });
+      }
+      if (!this.freeze) {
+        svg.setAttribute("tabindex", "0");
+        svg.setAttribute("role", "slider");
+        svg.setAttribute("aria-orientation", "vertical");
+        svg.setAttribute("aria-label", svg.dataset.label || "Level");
+        svg.setAttribute("aria-valuemin", "0");
+        svg.setAttribute("aria-valuemax", "100");
+      } else svg.setAttribute("aria-hidden", "true");
+    }
+    announce() {
+      if (this.freeze) return;
+      this.svg.setAttribute("aria-valuenow", this.pct);
+      this.svg.setAttribute("aria-valuetext", this.continuous ? `${this.pct} percent` : `${this.pct} percent, ${this.level} of ${COUNT} slabs`);
+    }
+    setState(s) {
+      ["hover", "pressed", "drag"].forEach((k) => this.svg.removeAttribute("data-" + k));
+      if (s === "hover") this.svg.dataset.hover = "";
+      if (s === "pressed") this.svg.dataset.pressed = "";
+      if (s === "drag") { this.svg.dataset.pressed = ""; this.svg.dataset.drag = ""; }
+    }
+    has(k) { return this.svg.hasAttribute("data-" + k); }
+    setLevel(v) {
+      v = this.quantize(v);
+      if (v === this.level) return;
+      this.level = v; this.water.t = v;
+      if (reduce.matches) { this.water.x = v; this.water.v = 0; }
+      this.announce();
+    }
+    rawAt(e) {
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(this.svg.getScreenCTM().inverse());
+      return (BOTTOM + H / 2 - p.y) / PITCH;
+    }
+    // Stepped: touching slab k means "fill through k".
+    levelAt(e) { const raw = this.rawAt(e); return this.continuous ? clamp(raw, 0, COUNT) : clamp(Math.ceil(raw), 0, COUNT); }
+    bind() {
+      const svg = this.svg;
+      svg.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "mouse" && !this.has("pressed")) {
+          const raw = this.rawAt(e);
+          // Only peek while the pointer is actually over a slab.
+          if (raw > 0 && raw < COUNT) { svg.dataset.hover = ""; this.hoverAt = raw; } else svg.removeAttribute("data-hover");
+        }
+        if (!this.has("pressed")) return;
+        if (!this.has("drag") && Math.abs(e.clientY - this.downY) < 3) return;
+        svg.dataset.drag = "";
+        const vy = e.clientY - (this.lastY ?? e.clientY); this.lastY = e.clientY;
+        this.push = clamp(this.push * .6 + vy * .5, -8, 8);
+        this.setLevel(this.levelAt(e));
+      });
+      svg.addEventListener("pointerleave", () => svg.removeAttribute("data-hover"));
+      svg.addEventListener("pointerdown", (e) => {
+        if (e.button) return;
+        try { svg.setPointerCapture(e.pointerId); } catch {}
+        svg.dataset.pressed = "";
+        this.downY = this.lastY = e.clientY; this.push = 0;
+        this.setLevel(this.levelAt(e));
+      });
+      const end = () => {
+        svg.removeAttribute("data-pressed"); svg.removeAttribute("data-drag"); this.push = 0;
+        if (svg.dataset.store) store.set(svg.dataset.store, this.level);
+      };
+      svg.addEventListener("pointerup", end);
+      svg.addEventListener("pointercancel", end);
+      svg.addEventListener("keydown", (e) => {
+        const unit = this.continuous ? (e.shiftKey ? .5 : .05) : 1;
+        const map = { ArrowUp: unit, ArrowRight: unit, ArrowDown: -unit, ArrowLeft: -unit, PageUp: 1, PageDown: -1 };
+        let next;
+        if (e.key in map) next = this.level + map[e.key];
+        else if (e.key === "Home") next = 0;
+        else if (e.key === "End") next = COUNT;
+        else return;
+        e.preventDefault();
+        this.setLevel(next);
+        if (svg.dataset.store) store.set(svg.dataset.store, this.level);
+      });
+    }
+    demo(dt) {
+      if (this.freeze !== "drag") return;
+      this.demoClock += dt;
+      if (this.continuous) {
+        this.push = Math.cos(this.time * .9) * -4;
+        this.setLevel(2.5 + 2.1 * Math.sin(this.time * .9));
+      } else if (this.demoClock > 1.1) {
+        this.demoClock = 0;
+        if (this.level + this.demoDir > COUNT - 1 || this.level + this.demoDir < 1) this.demoDir *= -1;
+        this.push = -5 * this.demoDir;
+        this.setLevel(this.level + this.demoDir);
+      }
+    }
+    surfaceY(i, f) { return BOTTOM - i * PITCH + H / 2 - f * H; }
+    particle(x, y, vx, vy, r, life, kind, slab) {
+      const c = el("circle", { class: "drop", r: r.toFixed(1) });
+      this.dropLayer.append(c);
+      this.drops.push({ c, x, y, vx, vy, life, max: life, kind, slab });
+    }
+    splash(i, n = 3) {
+      if (reduce.matches || this.drops.length > 40) return;
+      const s = this.slabs[i];
+      for (let k = 0; k < n; k++) this.particle(CX + s.dx.x + rnd(-20, 20), BOTTOM - i * PITCH + H / 2 - 4, rnd(-35, 35), rnd(-120, -70), rnd(1.2, 2.4), .5, "splash");
+    }
+    tick(dt) {
+      this.time += dt;
+      this.demo(dt);
+      const w = this.water, drag = this.has("drag"), pressed = this.has("pressed");
+      if (reduce.matches) { w.x = w.t; w.v = 0; } else spring(w, this.continuous ? 120 : 90, this.continuous ? 14 : 10.5, dt);
+
+      // Continuous: the surface catches at each seam (a soft detent) before spilling over.
+      let shown = w.x;
+      if (this.continuous && !reduce.matches) {
+        const frac = shown - Math.floor(shown);
+        shown = Math.floor(shown) + frac - Math.sin(frac * Math.PI * 2) * .035;
+      }
+      const amp = reduce.matches ? 0 : .5 + Math.min(3.5, Math.abs(w.v) * 3) + (drag ? .6 : 0);
+      const sway = clamp((this.push || 0) * .9 - w.v * 2.2, -7, 7);
+
+      // Pouring: while the level climbs, drops fall onto the surface of the slab being filled.
+      const active = clamp(Math.floor(shown), 0, COUNT - 1);
+      this.pourClock += dt;
+      if (!reduce.matches && w.v > .25 && this.pourClock > .045 && this.drops.length < 40) {
+        this.pourClock = 0;
+        const s = this.slabs[active], f = clamp(shown - active, 0, 1);
+        this.particle(CX + s.dx.x + rnd(-.3, .3) * s.w.x, this.surfaceY(active, f) - rnd(24, 40), rnd(-8, 8), rnd(30, 70), rnd(1.6, 2.8), 1.2, "pour", active);
+      }
+
+      for (const s of this.slabs) {
+        const i = s.i;
+        s.w.t = pressed || drag ? W1 : W0;
+        s.dx.t = s.b.x + (drag ? (i - 2) * 10 + sway * i * .5 : 0);
+        s.da.t = drag ? sway * .35 * (i + 1) / COUNT : 0;
+        const k = 420 - i * 55;
+        if (reduce.matches) { s.w.x = s.w.t; s.dx.x = s.dx.t; s.da.x = s.da.t; }
+        else {
+          spring(s.w, k, Math.sqrt(k) * 1.1, dt);
+          spring(s.dx, k * .6, Math.sqrt(k * .6) * .9, dt);
+          spring(s.da, k * .6, Math.sqrt(k * .6) * .9, dt);
+          spring(s.bump, 380, 9, dt);
+        }
+        s.ripple *= Math.exp(-dt * 3.5);
+        const f = clamp(shown - i, 0, 1);
+        const nowFull = w.x >= i + .98;
+        if (nowFull && !s.full) { s.bump.v = -2.4; if (i < COUNT - 1 && w.t > i + 1) this.splash(i + 1); }
+        s.full = nowFull;
+
+        const angle = s.b.a + s.da.x;
+        s.g.setAttribute("transform", `translate(${(CX + s.dx.x).toFixed(2)} ${BOTTOM - i * PITCH}) rotate(${angle.toFixed(2)}) scale(${(1 - s.bump.x * .03).toFixed(3)} ${(1 + s.bump.x * .06).toFixed(3)})`);
+        if (Math.abs(s.w.x - s.drawnW) > .05) {
+          s.drawnW = s.w.x;
+          for (const r of s.rects) { r.setAttribute("x", (-s.w.x / 2).toFixed(1)); r.setAttribute("y", -H / 2); r.setAttribute("width", s.w.x.toFixed(1)); r.setAttribute("height", H); }
+        }
+        const tilt = angle - sway * .8, a = (f > 0 && f < 1 ? amp : 0) + s.ripple;
+        const front = wave(f, tilt, a, this.time + i);
+        const back = wave(f, tilt, a * .8, this.time * .8 + i + 2.1, 2.5);
+        s.front.setAttribute("d", front.fill); s.back.setAttribute("d", back.fill); s.surface.setAttribute("d", front.line);
+
+        // Bubbles rise through the water, faster and more often while it moves.
+        if (!reduce.matches && f > .15 && s.bubbles.length < 6 && Math.random() < dt * (Math.abs(w.v) > .1 || drag ? 7 : .7)) {
+          const c = el("circle", { class: "bubble", r: rnd(1.2, 2.6).toFixed(1) });
+          s.bubbleLayer.append(c);
+          s.bubbles.push({ c, x: rnd(-.4, .4) * s.w.x, y: H / 2 - 3, vy: rnd(-32, -18), ph: rnd(0, 6) });
+        }
+        const top = f >= .998 ? -H / 2 : H / 2 - f * H;
+        for (let n = s.bubbles.length - 1; n >= 0; n--) {
+          const b = s.bubbles[n];
+          b.y += b.vy * dt; b.ph += dt * 6;
+          b.c.setAttribute("cx", (b.x + Math.sin(b.ph) * 1.5).toFixed(1)); b.c.setAttribute("cy", b.y.toFixed(1));
+          if (b.y < top + 2) { b.c.remove(); s.bubbles.splice(n, 1); }
+        }
+      }
+
+      // Pressed / drag %: on the top wet slab (stepped) or riding the surface (continuous).
+      const topI = clamp(Math.ceil(w.x - .02) - 1, 0, COUNT - 1), ts = this.slabs[topI];
+      const tf = clamp(shown - topI, 0, 1);
+      const ty = this.continuous ? clamp(H / 2 - tf * H + 18, -H / 2 + 20, H / 2 - 9) : 6;
+      const wobble = reduce.matches ? 0 : Math.sin(this.time * 9) * Math.min(5, Math.abs(w.v) * 7);
+      this.text.textContent = this.pct + "%";
+      this.text.setAttribute("transform", `translate(${(CX + ts.dx.x).toFixed(2)} ${BOTTOM - topI * PITCH}) rotate(${(ts.b.a + ts.da.x).toFixed(2)}) translate(0 ${ty.toFixed(1)}) rotate(${wobble.toFixed(2)})`);
+
+      // Hover peek: the hovered slab's value, kept in place so it can fade out after the pointer leaves.
+      if (this.hoverAt != null) {
+        const hi = clamp(Math.floor(this.hoverAt), 0, COUNT - 1), hs = this.slabs[hi];
+        const hv = this.continuous ? Math.round(clamp(this.hoverAt, 0, COUNT) / COUNT * 100) : (hi + 1) * 20;
+        const hy = this.continuous ? clamp(H / 2 - (this.hoverAt - hi) * H + 6, -H / 2 + 20, H / 2 - 9) : 6;
+        this.peek.textContent = hv + "%";
+        this.peek.setAttribute("transform", `translate(${(CX + hs.dx.x).toFixed(2)} ${BOTTOM - hi * PITCH}) rotate(${(hs.b.a + hs.da.x).toFixed(2)}) translate(0 ${hy.toFixed(1)})`);
+      }
+
+      for (let n = this.drops.length - 1; n >= 0; n--) {
+        const d = this.drops[n];
+        d.life -= dt; d.vy += 520 * dt; d.x += d.vx * dt; d.y += d.vy * dt;
+        if (d.kind === "pour") {
+          const f = clamp(shown - d.slab, 0, 1);
+          if (d.y >= this.surfaceY(d.slab, f)) {
+            this.slabs[d.slab].ripple = Math.min(4, this.slabs[d.slab].ripple + 1.4);
+            for (let k = 0; k < 2; k++) this.particle(d.x, d.y - 2, rnd(-40, 40), rnd(-90, -50), rnd(.8, 1.4), .3, "splash");
+            d.life = 0;
+          }
+        }
+        d.c.setAttribute("cx", d.x.toFixed(1)); d.c.setAttribute("cy", d.y.toFixed(1));
+        if (d.kind === "splash") d.c.setAttribute("opacity", Math.max(0, d.life / d.max).toFixed(2));
+        if (d.life <= 0) { d.c.remove(); this.drops.splice(n, 1); }
+      }
+    }
+  }
+
+  const stacks = [...document.querySelectorAll(".stack")].map((s) => new Stack(s));
+  let last = performance.now();
+  requestAnimationFrame(function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    for (const s of stacks) s.tick(dt);
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>
