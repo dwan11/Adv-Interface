@@ -43,8 +43,8 @@
   .amount { position: relative; z-index: 1; display: flex; align-items: baseline; justify-content: center; gap: 1px;
     width: 104px; padding: 6px 10px 10px; margin-bottom: -26px; border-radius: 10px; cursor: text;
     transition: background-color .2s ease-out, scale .15s ease-out; }
-  .amount input { field-sizing: content; min-width: 1ch; width: 3ch; border: 0; padding: 0; background: none; outline: none;
-    font: 600 17px/22px var(--font); font-variant-numeric: tabular-nums; text-align: right; color: var(--label);
+  .amount input { width: 1ch; border: 0; padding: 0; background: none; outline: none;
+    font: 600 17px/22px var(--font); font-variant-numeric: tabular-nums; text-align: center; color: var(--label);
     caret-color: var(--water-top); transition: color .2s; }
   .amount-unit { font: 400 13px/18px var(--font); color: var(--label); opacity: .7; }
   .amount-line { position: absolute; left: 10px; right: 10px; bottom: 4px; height: 2px; border-radius: 2px; background: rgba(197, 208, 210, .25); overflow: hidden; }
@@ -365,7 +365,9 @@
   for (const field of document.querySelectorAll(".amount")) {
     const stack = stacks.find((s) => s.svg.id === field.dataset.for);
     const input = field.querySelector("input");
-    const sync = () => { if (!field.hasAttribute("data-typed")) input.value = stack.pct; };
+    // Width follows the digit count (tabular digits are 1ch), so 1-, 2- or 3-digit values stay centred.
+    const fit = () => { input.style.width = Math.max(1, input.value.length) + "ch"; };
+    const sync = () => { if (!field.hasAttribute("data-typed")) input.value = stack.pct; fit(); };
     stack.onChange = sync; sync();
     const nudge = () => { field.removeAttribute("data-error"); void field.offsetWidth; field.dataset.error = ""; };
     field.addEventListener("pointerdown", () => { field.dataset.pressed = ""; });
@@ -375,7 +377,7 @@
     input.addEventListener("input", () => {
       const raw = input.value.replace(/\D/g, "").slice(0, 3);
       if (raw !== input.value) nudge();
-      input.value = raw;
+      input.value = raw; fit();
       field.dataset.typed = "";
       field.style.setProperty("--typed", Math.min(100, +raw || 0));
     });
@@ -386,7 +388,7 @@
       field.removeAttribute("data-typed");
       stack.setLevel(clamp(v, 0, 100) / 100 * COUNT);
       stack.save();
-      input.value = stack.pct;
+      sync();
     };
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { commit(); input.select(); }
