@@ -33,7 +33,7 @@
   figure:has(.device:not([data-state="idle"]))::after { transform: scale(.92); opacity: .7; }
   figcaption { font: 600 11px/1 var(--grotesk); letter-spacing: .26em; text-transform: uppercase; color: var(--label); }
 
-  .device { position: relative; width: min(360px, calc(100vw - 32px)); padding: 14px; border-radius: 26px;
+  .device { --pad: 22px; --card-r: 8px; position: relative; width: min(372px, calc(100vw - 32px)); padding: var(--pad); border-radius: calc(var(--pad) + var(--card-r));
     background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .5) 0 1px, transparent 1px 3px), linear-gradient(165deg, var(--alu-hi), var(--alu) 42%, var(--alu-lo));
     box-shadow: inset 0 1px 0 #fff, inset 0 -2px 0 rgba(20, 35, 50, .08), 0 0 0 1px rgba(20, 35, 50, .1),
       0 2px 3px rgba(20, 35, 50, .08), 0 14px 28px -10px rgba(20, 35, 50, .22), 0 50px 80px -40px rgba(20, 35, 50, .45);
@@ -41,11 +41,17 @@
   .device:not([data-state="idle"]) { transform: rotateX(5deg) translateY(-6px);
     box-shadow: inset 0 1px 0 #fff, inset 0 -2px 0 rgba(20, 35, 50, .08), 0 0 0 1px rgba(20, 35, 50, .1),
       0 2px 3px rgba(20, 35, 50, .06), 0 22px 40px -12px rgba(20, 35, 50, .28), 0 70px 100px -40px rgba(20, 35, 50, .5); }
-  .screw { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #a9b3bb 70%); box-shadow: 0 .5px 0 #fff, inset 0 0 0 .5px rgba(20, 35, 50, .25); }
-  .screw::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3px; height: 1px; background: rgba(20, 35, 50, .35); rotate: 35deg; }
+  .data { position: relative; }
+  .data:first-child { grid-template-columns: .8fr 1.3fr .9fr; }
+  .box > span.wrap { white-space: normal; line-height: 1.2; }
+  .data::before, .data::after { content: ""; position: absolute; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+    background: linear-gradient(35deg, transparent 44%, rgba(20, 35, 50, .4) 44% 56%, transparent 56%), radial-gradient(circle at 35% 30%, #fff, #a9b3bb 70%);
+    box-shadow: 0 .5px 0 #fff, inset 0 0 0 .5px rgba(20, 35, 50, .25); }
+  .data::before { left: calc(var(--pad) / -2 - 3.5px); }
+  .data::after { right: calc(var(--pad) / -2 - 3.5px); }
 
   .data { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .box { position: relative; min-width: 0; padding: 7px 9px 8px; border-radius: 7px; background: linear-gradient(#f4f6f8, #eaeef1);
+  .box { position: relative; min-width: 0; padding: 8px 10px 9px; border-radius: var(--card-r); background: linear-gradient(#f4f6f8, #eaeef1);
     box-shadow: inset 0 1px 2px rgba(20, 35, 50, .1), inset 0 0 0 1px rgba(20, 35, 50, .07), 0 1px 0 #fff; transition: box-shadow .3s; }
   .box[data-live] { box-shadow: inset 0 1px 2px rgba(20, 35, 50, .1), inset 0 0 0 1px rgba(0, 181, 111, .45), 0 1px 0 #fff, 0 0 0 3px rgba(0, 181, 111, .08); }
   .box b { display: block; margin-bottom: 6px; font: 600 9px/1 var(--grotesk); letter-spacing: .18em; text-transform: uppercase; color: var(--label); }
@@ -62,7 +68,7 @@
   .up { color: var(--emerald); } .down { color: var(--crimson); }
 
   /* ---------- Dial ---------- */
-  .dial-wrap { position: relative; container-type: inline-size; margin: 8px 0; }
+  .dial-wrap { position: relative; container-type: inline-size; margin: 12px 0; }
   .dial { display: block; width: 100%; touch-action: none; cursor: crosshair; outline: none; overflow: visible; -webkit-user-select: none; user-select: none; }
   .device[data-state="drag"] .dial { cursor: grabbing; }
   .tick { stroke-linecap: round; }
@@ -103,25 +109,24 @@
     transition: background-color .25s, color .25s, text-shadow .25s; }
   .amount .cur { opacity: .85; transition: opacity .25s; }
   .amount input { width: 4ch; padding: 0; border: 0; outline: none; background: none; font: inherit; letter-spacing: inherit; color: inherit; text-shadow: inherit; caret-color: var(--neon); text-align: center; }
-  /* Corner brackets (hover + typing) */
-  .amount::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s, inset .3s var(--ease);
-    --c: rgba(45, 255, 160, .55); --l: 2.6cqw;
-    background:
-      linear-gradient(var(--c), var(--c)) top left / var(--l) 1px no-repeat, linear-gradient(var(--c), var(--c)) top left / 1px var(--l) no-repeat,
-      linear-gradient(var(--c), var(--c)) top right / var(--l) 1px no-repeat, linear-gradient(var(--c), var(--c)) top right / 1px var(--l) no-repeat,
-      linear-gradient(var(--c), var(--c)) bottom left / var(--l) 1px no-repeat, linear-gradient(var(--c), var(--c)) bottom left / 1px var(--l) no-repeat,
-      linear-gradient(var(--c), var(--c)) bottom right / var(--l) 1px no-repeat, linear-gradient(var(--c), var(--c)) bottom right / 1px var(--l) no-repeat; }
+  /* Corner brackets (hover + typing): a rounded border masked to its four corners. Radius = plate radius + offset. */
+  .amount::before { content: ""; position: absolute; inset: 0; --o: 0cqw; --c: rgba(45, 255, 160, .55); --l: 3.4cqw;
+    border: 1px solid var(--c); border-radius: calc(1.8cqw + var(--o)); pointer-events: none; opacity: 0; transition: opacity .25s, inset .3s var(--ease);
+    -webkit-mask: linear-gradient(#000 0 0) top left / var(--l) var(--l) no-repeat, linear-gradient(#000 0 0) top right / var(--l) var(--l) no-repeat,
+      linear-gradient(#000 0 0) bottom left / var(--l) var(--l) no-repeat, linear-gradient(#000 0 0) bottom right / var(--l) var(--l) no-repeat;
+    mask: linear-gradient(#000 0 0) top left / var(--l) var(--l) no-repeat, linear-gradient(#000 0 0) top right / var(--l) var(--l) no-repeat,
+      linear-gradient(#000 0 0) bottom left / var(--l) var(--l) no-repeat, linear-gradient(#000 0 0) bottom right / var(--l) var(--l) no-repeat; }
   /* Scan line (typing) */
   .amount::after { content: ""; position: absolute; left: 2.2cqw; right: 2.2cqw; bottom: .5cqw; height: 1px; pointer-events: none; opacity: 0; transition: opacity .25s;
     background: linear-gradient(90deg, transparent, var(--neon), transparent) 0 0 / 40% 100% no-repeat; }
   /* Hover */
   .amount:hover { background: rgba(45, 255, 160, .06); text-shadow: 0 0 2px rgba(45, 255, 160, .8), 0 0 18px rgba(45, 255, 160, .6); }
-  .amount:hover::before { opacity: 1; inset: -.6cqw; }
+  .amount:hover::before { opacity: 1; inset: -.8cqw; --o: .8cqw; }
   .readout:has(.amount:hover) .h-idle { opacity: 0; translate: -50% -3px; }
   .readout:has(.amount:hover) .h-edit { opacity: 1; translate: -50% 0; }
   /* Typing */
   .amount:focus-within { background: rgba(45, 255, 160, .1); color: #eafff4; text-shadow: 0 0 3px rgba(45, 255, 160, .9), 0 0 22px rgba(45, 255, 160, .7); }
-  .amount:focus-within::before { opacity: 1; inset: -.6cqw; --c: var(--neon); }
+  .amount:focus-within::before { opacity: 1; inset: -.8cqw; --o: .8cqw; --c: var(--neon); }
   .amount:focus-within::after { opacity: 1; animation: scan 1.4s ease-in-out infinite alternate; }
   .amount:focus-within .cur { opacity: .5; }
   @keyframes scan { from { background-position: 0 0; } to { background-position: 100% 0; } }
@@ -202,11 +207,9 @@
     build() {
       const d = this.dev, id = this.id;
       d.innerHTML = `
-        <i class="screw" style="left:10px;top:10px"></i><i class="screw" style="right:10px;top:10px"></i>
-        <i class="screw" style="left:10px;bottom:10px"></i><i class="screw" style="right:10px;bottom:10px"></i>
         <div class="data">
           <div class="box"><b>Lot</b><span>${d.dataset.lot}</span></div>
-          <div class="box"><b>Variety</b><span>${d.dataset.variety}</span></div>
+          <div class="box"><b>Variety</b><span class="wrap">${d.dataset.variety}</span></div>
           <div class="box"><b>Trend</b><svg class="spark" viewBox="0 0 39 12" preserveAspectRatio="none" aria-hidden="true"><polyline/><circle r="1.6"/></svg></div>
         </div>
         <div class="dial-wrap">
@@ -248,7 +251,7 @@
           <div class="readout">
             <span class="meta">Bid · per stem</span>
             <label class="amount"><span class="cur" aria-hidden="true">$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="${d.dataset.label}, dollars"></label>
-            <span class="meta hint"><span class="h-idle">Step $${dollars(this.unit)}</span><span class="h-edit">Edit bid</span><span class="h-type">↵ Set · Esc</span></span>
+            <span class="meta hint"><span class="h-idle"></span><span class="h-edit">Edit bid</span><span class="h-type">↵ Set · Esc</span></span>
           </div>
         </div>
         <div class="data">
