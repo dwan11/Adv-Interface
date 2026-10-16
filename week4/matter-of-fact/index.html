@@ -9,7 +9,7 @@
     color-scheme: light;
     --paper: #fbfaf7; --ink: #1f1e1c; --muted: #77736b; --line: #e7e3da;
     --track: #2a2a2a; --dot: #8d8a84; --dot-on: rgba(255, 255, 255, .78);
-    --thumb: #fdf5c4; --thumb-edge: rgba(80, 70, 20, .16); --ring: #8c8564;
+    --thumb: #fdf5c4; --thumb-deep: #efdf8a; --thumb-edge: rgba(80, 70, 20, .16); --ring: #8c8564;
     --teal: #13c8c0; --teal-2: #7fe6dc; --magenta: #d3177a;
     --font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   }
@@ -18,34 +18,21 @@
       color-scheme: dark;
       --paper: #131312; --ink: #eeebe4; --muted: #9a958c; --line: #2a2926;
       --track: #3c3c3a; --dot: #7c7870; --dot-on: rgba(255, 255, 255, .7);
-      --thumb: #f4ebb5; --thumb-edge: rgba(0, 0, 0, .4); --ring: #c2b98a;
+      --thumb: #f4ebb5; --thumb-deep: #fff6c8; --thumb-edge: rgba(0, 0, 0, .4); --ring: #c2b98a;
       --teal: #19d6cd; --teal-2: #8ff0e8; --magenta: #ec3d93;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/22px var(--font); -webkit-font-smoothing: antialiased; }
-  .page { max-width: 1040px; margin: 0 auto; padding: 56px 24px 72px; }
-  .eyebrow, .meta, .state-name, .spec h3 { font: 500 12px/16px var(--font); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0; }
-  h1 { font: 700 34px/41px var(--font); letter-spacing: -.01em; margin: 8px 0; }
-  .lede { margin: 0; color: var(--muted); max-width: 58ch; font-size: 15px; line-height: 20px; }
-
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 48px; }
-  @media (max-width: 780px) { .cols { grid-template-columns: 1fr; gap: 48px; } }
-  .col-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 10px; }
-  .col-head h2 { margin: 0; font: 600 20px/25px var(--font); }
-
-  .live { padding: 28px 0 8px; }
-  .live-label { display: flex; justify-content: space-between; align-items: baseline; }
-  .live-label output { color: var(--muted); font-variant-numeric: tabular-nums; }
-
-  .states { list-style: none; margin: 18px 0 0; padding: 0; }
-  .states li { display: grid; grid-template-columns: 84px 1fr; align-items: center; column-gap: 12px; padding: 10px 0 12px; border-top: 1px solid var(--line); }
-  .states p { grid-column: 2; margin: -6px 0 0 22px; font-size: 13px; line-height: 18px; color: var(--muted); }
+    html, body { height: 100%; }
+  body { display: grid; place-items: center; }
+  .page { width: min(560px, 100%); padding: 48px 16px; display: grid; gap: 40px; }
+  figure { margin: 0; }
+  /* HIG caption 1: 12px, secondary label */
+  figcaption { font: 500 12px/16px var(--font); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding-left: 22px; }
 
   /* ---------- Slider ---------- */
   .slider { --pad: 22px; --f: 0; --th: 10px; position: relative; height: 84px; touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; outline: none; }
-  .slider[data-kind="stepped"] { --th: 6px; }
-  .slider[data-freeze] { pointer-events: none; }
   .track { position: absolute; left: var(--pad); right: var(--pad); top: 50%; height: var(--th); translate: 0 -50%; border-radius: 99px; background: var(--track); }
   @property --mix { syntax: "<number>"; inherits: true; initial-value: 0; }
   .slider[data-kind="stepped"] { transition: --mix .9s cubic-bezier(.4, 0, .2, 1); }
@@ -61,8 +48,7 @@
   .dot.ping { animation: ping .38s ease-out; }
   @keyframes ping { 30% { scale: 1.9; } 100% { scale: 1; } }
 
-  .thumb { position: absolute; top: 50%; left: calc(var(--pad) + var(--f) * (100% - 2 * var(--pad))); width: 40px; height: 30px; margin: -15px 0 0 -20px;
-    transform: translateY(var(--ty, 0px)) skewX(var(--skew, 0deg)) scale(var(--sx, 1), var(--sy, 1)); transform-origin: 50% 100%; }
+  .thumb { position: absolute; top: 50%; left: calc(var(--pad) + var(--f) * (100% - 2 * var(--pad))); width: 40px; height: 30px; margin: -15px 0 0 -20px; }
   .cap { width: 100%; height: 100%; border-radius: 50%; background: var(--thumb);
     box-shadow: inset 0 -2px 0 var(--thumb-edge), 0 1px 2px rgba(0, 0, 0, .2);
     transition: scale .24s cubic-bezier(.3, 1.4, .5, 1), box-shadow .18s ease-out; }
@@ -72,9 +58,9 @@
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
     mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px)); }
   .orbit { opacity: 0; scale: .86; transition: opacity .22s ease-out, scale .3s cubic-bezier(.3, 1.3, .5, 1);
-    background: conic-gradient(from var(--orbit), transparent 0deg 150deg, color-mix(in srgb, var(--ring) 35%, transparent) 260deg, var(--ring) 352deg, var(--ink) 358deg, transparent 360deg);
+    background: conic-gradient(from var(--orbit), transparent 0deg 150deg, color-mix(in srgb, var(--thumb) 40%, transparent) 260deg, var(--thumb) 345deg, var(--thumb-deep) 358deg, transparent 360deg);
     animation: orbit 1.25s linear infinite; }
-  .orbit::before { content: ""; inset: 0; background: var(--ring); opacity: .16; }
+  .orbit::before { content: ""; inset: 0; background: var(--thumb-deep); opacity: .35; }
   @keyframes orbit { to { --orbit: 360deg; } }
   .slider[data-hover]:not([data-pressed]) .orbit { opacity: 1; scale: 1; }
   .slider[data-pressed] .cap, .slider[data-drag] .cap { scale: 1.24 1.2; box-shadow: inset 0 -2px 0 var(--thumb-edge), 0 3px 8px rgba(0, 0, 0, .22); }
@@ -90,84 +76,19 @@
   .drum[data-lead] { width: 0; }
   .digit { position: absolute; inset: 0; text-align: center; line-height: 1.2em; }
 
-  /* Spec */
-  .spec { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--ink); font-size: 13px; line-height: 18px; color: var(--muted); }
-  @media (max-width: 780px) { .spec { grid-template-columns: 1fr; gap: 24px; } }
-  .spec ul { margin: 10px 0 0; padding: 0; list-style: none; }
-  .spec li { padding: 3px 0; }
-  .spec b { color: var(--ink); font-weight: 500; }
-  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; margin-right: 6px; box-shadow: 0 0 0 1px var(--line); }
-
   @media (prefers-reduced-motion: reduce) { .cap, .tag, .drum, .fill, .dot, .orbit, .slider { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
 <main class="page">
-  <header>
-    <p class="eyebrow">Week 4 · Sliders · Study 01</p>
-    <h1>Matter of Fact</h1>
-    <p class="lede">One continuous and one stepped slider. Colors are fully opaque and there is no glow. The fill drifts slowly between nearby shades. The number appears only when you interact, and each change pauses so you can read it.</p>
-  </header>
-
-  <div class="cols">
-    <section aria-labelledby="h-cont">
-      <header class="col-head"><h2 id="h-cont">Continuous</h2><span class="meta">0–100 · step 1</span></header>
-      <div class="live">
-        <div class="live-label"><span>Volume</span><output id="out-cont">35</output></div>
-        <div class="slider" data-kind="continuous" data-value="35" data-store="mof-continuous" data-label="Volume" data-output="out-cont"></div>
-      </div>
-      <ol class="states" aria-label="Continuous states">
-        <li><span class="state-name">Default</span><div class="slider" data-kind="continuous" data-value="0" data-freeze="default"></div><p>Cream thumb on a dark track, with no number.</p></li>
-        <li><span class="state-name">Hover</span><div class="slider" data-kind="continuous" data-value="35" data-freeze="hover"></div><p>A streak circles the thumb like a shooting star, and the value rises above it.</p></li>
-        <li><span class="state-name">Pressed</span><div class="slider" data-kind="continuous" data-value="35" data-freeze="pressed"></div><p>The thumb grows 22% and the streak goes away.</p></li>
-        <li><span class="state-name">Drag</span><div class="slider" data-kind="continuous" data-value="35" data-freeze="drag"></div><p>Same as pressed. Digits change in short stop-motion steps and hold each number long enough to read.</p></li>
-      </ol>
-    </section>
-
-    <section aria-labelledby="h-step">
-      <header class="col-head"><h2 id="h-step">Stepped</h2><span class="meta">5 stops · 25</span></header>
-      <div class="live">
-        <div class="live-label"><span>Brightness</span><output id="out-step">25</output></div>
-        <div class="slider" data-kind="stepped" data-stops="5" data-value="25" data-store="mof-stepped" data-label="Brightness" data-output="out-step"></div>
-      </div>
-      <ol class="states" aria-label="Stepped states">
-        <li><span class="state-name">Default</span><div class="slider" data-kind="stepped" data-stops="5" data-value="0" data-freeze="default"></div><p>A thinner track with one dot for each stop.</p></li>
-        <li><span class="state-name">Hover</span><div class="slider" data-kind="stepped" data-stops="5" data-value="25" data-freeze="hover"></div><p>Same as continuous: orbiting streak and value.</p></li>
-        <li><span class="state-name">Pressed</span><div class="slider" data-kind="stepped" data-stops="5" data-value="25" data-freeze="pressed"></div><p>Same as continuous: the thumb enlarges.</p></li>
-        <li><span class="state-name">Drag</span><div class="slider" data-kind="stepped" data-stops="5" data-value="25" data-freeze="drag"></div><p>The thumb glides to each stop and brakes gently, with a slight forward tip and a small overshoot. The fill blends from teal to magenta and keeps flowing at rest.</p></li>
-      </ol>
-    </section>
-  </div>
-
-  <section class="spec" aria-label="Specification">
-    <div>
-      <h3>Color</h3>
-      <ul>
-        <li><span class="sw" style="background:var(--track)"></span><b>Track</b> solid, 100% opacity</li>
-        <li><span class="sw" style="background:var(--thumb)"></span><b>Thumb</b> cream, 1px drop shadow</li>
-        <li><span class="sw" style="background:var(--teal)"></span><b>Fill</b> teal, slow flowing gradient</li>
-        <li><span class="sw" style="background:var(--magenta)"></span><b>Fill</b> teal → magenta by stop, 900ms blend</li>
-      </ul>
-    </div>
-    <div>
-      <h3>Motion</h3>
-      <ul>
-        <li><b>Hover</b> streak orbits the thumb every 1.25s, value fades in over 160ms</li>
-        <li><b>Press</b> scale 1.22, 240ms, small overshoot</li>
-        <li><b>Digits</b> 3-frame flip (120ms), then hold ≥160ms while dragging</li>
-        <li><b>Drag (stepped)</b> spring k 300 / c 28 (ζ ≈ 0.8), lean ≤ 4°</li>
-      </ul>
-    </div>
-    <div>
-      <h3>Access</h3>
-      <ul>
-        <li><b>Keys</b> ← → step · Shift ×10 · Home / End</li>
-        <li><b>Role</b> slider with value text</li>
-        <li><b>Reduced motion</b> no springs, flips or flowing fill</li>
-        <li><b>Saved</b> values are kept in this browser</li>
-      </ul>
-    </div>
-  </section>
+  <figure>
+    <div class="slider" data-kind="continuous" data-value="35" data-store="mof-continuous" data-label="Continuous"></div>
+    <figcaption>Continuous</figcaption>
+  </figure>
+  <figure>
+    <div class="slider" data-kind="stepped" data-stops="5" data-value="25" data-store="mof-stepped" data-label="Stepped"></div>
+    <figcaption>Stepped</figcaption>
+  </figure>
 </main>
 
 <script>
@@ -192,21 +113,17 @@
       this.el = el;
       this.stepped = el.dataset.kind === "stepped";
       this.stops = +el.dataset.stops || 5;
-      this.freeze = el.dataset.freeze || null;
-      this.output = el.dataset.output && document.getElementById(el.dataset.output);
       let v = +el.dataset.value || 0;
       if (el.dataset.store) v = store.get(el.dataset.store, v);
       this.value = this.quantize(v);
       const f = this.value / 100;
       this.pos = { x: f, v: 0, t: f };
-      this.lean = { x: 0, v: 0, t: 0 };
       this.build();
       this.shown = this.value; this.lastFlip = -1e9;
       this.digits(this.value).forEach((n, i) => { this.drums[i].digit = n; this.drums[i].a.textContent = n; });
       this.markLead();
       this.apply();
-      if (this.freeze) { this.setState(this.freeze); this.demoClock = 0; this.demoIdx = 1; this.demoDir = 1; }
-      else this.bind();
+      this.bind();
     }
     quantize(v) {
       v = clamp(Math.round(v), 0, 100);
@@ -235,19 +152,11 @@
         return { drum, a, b, digit: 0, next: null, dir: 0, t0: 0 };
       });
       this.lastDot = Math.round(this.pos.x * (this.stops - 1));
-      if (!this.freeze) {
-        el.tabIndex = 0;
-        el.setAttribute("role", "slider");
-        el.setAttribute("aria-label", el.dataset.label || "Value");
-        el.setAttribute("aria-valuemin", 0);
-        el.setAttribute("aria-valuemax", 100);
-      } else el.setAttribute("aria-hidden", "true");
-    }
-    setState(s) {
-      for (const k of ["hover", "pressed", "drag"]) this.el.toggleAttribute("data-" + k, false);
-      if (s === "hover") this.el.dataset.hover = "";
-      if (s === "pressed") this.el.dataset.pressed = "";
-      if (s === "drag") { this.el.dataset.pressed = ""; this.el.dataset.drag = ""; }
+      el.tabIndex = 0;
+      el.setAttribute("role", "slider");
+      el.setAttribute("aria-label", el.dataset.label || "Value");
+      el.setAttribute("aria-valuemin", 0);
+      el.setAttribute("aria-valuemax", 100);
     }
     get dragging() { return this.el.hasAttribute("data-drag"); }
 
@@ -261,11 +170,8 @@
     }
     apply() {
       const el = this.el;
-      if (this.output) this.output.textContent = this.value;
-      if (!this.freeze) {
-        el.setAttribute("aria-valuenow", this.value);
-        el.setAttribute("aria-valuetext", this.value + " percent");
-      }
+      el.setAttribute("aria-valuenow", this.value);
+      el.setAttribute("aria-valuetext", this.value + " percent");
       el.style.setProperty("--mix", this.value);
     }
     markLead() {
@@ -339,34 +245,10 @@
       });
     }
 
-    // Frozen "drag" specimens move on their own, like a hand that never lets go.
-    demo(dt, now) {
-      if (this.freeze !== "drag") return;
-      if (!this.stepped) { const f = .5 + .36 * Math.sin(now / 900); this.setValue(f * 100); this.pos.x = this.pos.t = f; this.pos.v = 0; return; }
-      this.demoClock += dt;
-      if (this.demoClock > .7) {
-        this.demoClock = 0;
-        if (this.demoIdx >= this.stops - 1 || this.demoIdx <= 0) this.demoDir *= -1;
-        this.demoIdx += this.demoDir;
-        this.setValue(this.demoIdx * 100 / (this.stops - 1));
-      }
-    }
     tick(dt, now) {
-      this.demo(dt, now);
       const p = this.pos;
-      const accel = stepSpring(p, this.stepped ? 300 : 520, this.stepped ? 28 : 46, dt);
-      const width = this.track.clientWidth || 1;
-      // A gentle brake: the top tips forward slightly as the thumb slows into a stop.
-      this.lean.t = this.stepped && !reduce.matches ? clamp(-accel * width * .00006, -4, 4) : 0;
-      stepSpring(this.lean, 700, 50, dt);
-      const vpx = p.v * width;
-      const squash = this.stepped ? Math.min(.05, Math.abs(vpx) * .00006) : 0;
-      const s = this.thumb.style;
+      stepSpring(p, 520, 46, dt);
       this.el.style.setProperty("--f", p.x.toFixed(4));
-      s.setProperty("--skew", (-this.lean.x).toFixed(2) + "deg");
-      s.setProperty("--sx", (1 + squash).toFixed(3));
-      s.setProperty("--sy", (1 - squash * .6).toFixed(3));
-      s.setProperty("--ty", (-Math.min(1.5, Math.abs(vpx) * .0015)).toFixed(2) + "px");
 
       if (this.stepped) {
         const near = Math.round(p.x * (this.stops - 1));
