@@ -30,9 +30,13 @@
   }
   header p { margin: 0; color: var(--muted); max-width: 60ch; }
   .tabs {
-    display: flex; gap: 4px; margin-top: 40px; border-bottom: 1px solid var(--line);
+    display: flex; gap: 4px; min-width: 0; overflow-x: auto;
   }
-  .tabs button {
+  .tab-row { display: flex; align-items: center; gap: 12px; margin-top: 40px; border-bottom: 1px solid var(--line); }
+  .checklist-link { margin-left: auto; flex-shrink: 0; display: grid; place-items: center; width: 44px; height: 44px; color: var(--muted); border-radius: 8px; }
+  .checklist-link:hover { color: var(--accent); background: var(--preview); }
+  .checklist-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tabs button { white-space: nowrap;
     appearance: none; background: none; border: 0; cursor: pointer;
     padding: 10px 16px; margin-bottom: -1px; color: var(--muted);
     font: 500 .95rem Inter, sans-serif; border-bottom: 2px solid transparent;
@@ -83,12 +87,15 @@
     <p>Coursework for Advanced Interface. Click a card to open the live demo.</p>
   </header>
 
+  <div class="tab-row">
   <nav class="tabs" role="tablist" aria-label="Weeks">
     <button role="tab" id="tab-week1" aria-controls="week1-panel" aria-selected="true">Week 1</button>
     <button role="tab" id="tab-week2" aria-controls="week2-panel" aria-selected="false" tabindex="-1">Week 2</button>
     <button role="tab" id="tab-week3" aria-controls="week3-panel" aria-selected="false" tabindex="-1">Week 3</button>
     <button role="tab" id="tab-week4" aria-controls="week4-panel" aria-selected="false" tabindex="-1">Week 4</button>
   </nav>
+  <a class="checklist-link" href="design-checklist/" aria-label="Design checklist" title="Design checklist"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m6 8 1.5 1.5L10 7M12 8h6m-12 7 1.5 1.5L10 14m2 1h6"/></svg></a>
+  </div>
 
   <section id="week1-panel" role="tabpanel" aria-labelledby="tab-week1">
     <h2>Week 1 <span>Loaders · 6 projects</span></h2>
