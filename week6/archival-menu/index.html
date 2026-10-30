@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Archival Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Libre+Baskerville:wght@400&display=swap">
+<style>
+  :root {
+    /* Colour */
+    --paper: #dde4dd; --note: #eef0ea; --ink: #141310; --ink-read: #34342e; --ink-2: #5e5e57;
+    --rule: rgba(20,19,16,.2);
+    --lightbox: radial-gradient(ellipse 90% 80% at 50% 28%, #e8ede7 0, #dde4dd 55%, #ccd6cf 100%) fixed;
+    --slate: #2e4a5e;
+    /* One scale for everything. Values follow the Material 3 menu. Radius: 16 container, 12 row, 4 small */
+    --r: 16px; --r-row: 12px; --r-paper: 4px;
+    --t-label: 14px; --t-meta: 12px; --t-caps: 10px; --t-title: 26px;
+    /* Menu geometry: Material 3 redlines */
+    --menu-w: 280px; --menu-pad: 4px;
+    --surface: #e6ebe5; --well: #d5ddd6; --ink-shadow: rgba(30,34,30,.22); --pull: .56s;
+    --row-h: 48px; --row-r: var(--r-row); --front-h: 48px; --row-gap: 2px; --row-x: 12px; --row-inner: 8px;
+    --icon: 20px; --label-h: 32px; --sep-y: 8px; --sub-w: 296px; --sub-overlap: 4px;
+    /* Motion */
+    --soft: cubic-bezier(.33,0,.2,1); --bleed-time: .9s; --bleed: 0 0 .4px currentColor, 0 0 1.1px currentColor;
+    --ease: cubic-bezier(.22,.8,.24,1);
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .2 0 0 0 0 .2 0 0 0 .9 -.25'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); background: var(--lightbox);
+    font: 400 var(--t-label)/1.3 "Courier Prime", Courier, "Courier New", monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 20; opacity: .14; mix-blend-mode: multiply;
+    background: var(--grain); pointer-events: none;
+  }
+  .sheet { padding: 16px calc(var(--menu-w) + 72px) 48px 24px; }
+  /* The menu has its own column on the right and stays there while the page scrolls beside it */
+  .rail { position: fixed; z-index: 7; top: 16px; right: 12px; width: calc(var(--menu-w) + 24px); max-height: calc(100vh - 16px); padding: 0 12px 28px; overflow-y: auto; }
+  .bar { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; padding-bottom: 12px; font: 400 var(--t-caps)/1.3 "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+  .bar a { color: inherit; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--slate); outline-offset: 2px; }
+
+  /* ── Plate: objects laid flat on a lightbox and photographed from above ── */
+  .bar-end { display: flex; justify-content: space-between; gap: 12px; }
+  .switch { display: flex; gap: 12px; }
+  .switch button { appearance: none; border: 0; padding: 0; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink-2); cursor: pointer; text-underline-offset: 3px; }
+  .switch button[aria-pressed="true"] { color: var(--ink); text-decoration: underline; }
+  /* Version B: drawers side by side under one cabinet edge, pushing the page down as they open */
+  .hcabinet { display: none; margin-top: 4px; }
+  .hrow { display: grid; grid-template-columns: repeat(4, minmax(0, var(--menu-w))); gap: 12px; align-items: start; }
+  .hrow .tray > .menu { width: 100%; flex: none; }
+  .hrow-cab { max-width: calc(var(--menu-w) * 4 + 36px); }
+  body[data-version="horizontal"] .hcabinet { display: block; }
+  body[data-version="horizontal"] .rail { display: none; }
+  body[data-version="horizontal"] .sheet { padding-right: 24px; }
+  body[data-version="horizontal"] .plate { grid-auto-rows: 260px; }
+  /* Product above, text below */
+  .plate { padding: 12px 0; display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0,1fr)); grid-auto-rows: 300px; }
+  .tile { position: relative; display: grid; place-items: center; border-top: 1px solid var(--rule); }
+  .tile-cap { position: absolute; left: 0; top: 8px; font-size: var(--t-meta); color: var(--ink-2); }
+  .view { position: relative; display: grid; place-items: center; width: 200px; height: 200px; }
+  .view img { position: absolute; display: block; height: auto; filter: saturate(.86) contrast(.97) drop-shadow(0 1px 1px rgba(30,34,30,.3)) drop-shadow(1px 6px 9px rgba(30,34,30,.2)); }
+  /* A preview replaces the object: the old one leaves first, then the new one appears */
+  .view .ghost { opacity: 0; transition: opacity .12s var(--soft); pointer-events: none; }
+  .previewing .ghost { opacity: 1; transition: opacity .32s var(--soft) .1s; }
+  .previewing .main { opacity: 0; }
+  .main { transition: opacity .12s var(--soft); }
+  .drop .main { animation: settle .64s var(--soft) backwards; }
+  .settle { animation: settle .64s var(--soft) both; animation-delay: var(--after, 0ms); }
+  @keyframes settle { from { opacity: 0; } to { opacity: 1; } }
+  /* Nothing is out on the table yet */
+  .empty { position: absolute; width: 24px; height: 24px; background: linear-gradient(var(--rule),var(--rule)) center / 100% 1px no-repeat, linear-gradient(var(--rule),var(--rule)) center / 1px 100% no-repeat; }
+  /* Technical drawing, in the manner of a field study sheet */
+  .drawing { width: 216px; height: auto; overflow: visible; color: var(--ink); }
+  .drawing text { font: 400 var(--t-meta) "Courier Prime", Courier, monospace; fill: currentColor; }
+
+  .lower { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; padding-top: 16px; align-items: start; }
+  /* Wordplay: the object's name comes apart across a typed sheet, in the object's own colour,
+     over its note showing through from the back of the page */
+  .field { position: relative; grid-column: span 2; height: 456px; overflow: hidden; }
+  .ghost-text { position: absolute; top: 40px; right: 0; width: min(100%, 44ch); transform: scaleX(-1); font-size: var(--t-label); line-height: 1.4; color: var(--ink); opacity: .13; }
+  .ghost-text p { margin: 0 0 24px; }
+  .scatter { position: absolute; inset: 0; }
+  .scatter .l { position: absolute; top: calc(var(--row) * 1.4em); right: calc(var(--col) * 1ch); font-size: var(--t-label); line-height: 1; color: var(--object-ink); animation: strike .17s var(--soft) both; animation-delay: calc(var(--t) * 1ms); }
+  .mark { position: absolute; font-size: var(--t-meta); line-height: 1.3; }
+  .mark.when { right: 0; text-align: right; }
+  .col-menu { position: relative; width: 100%; }
+
+  .lower { display: grid; grid-template-columns: minmax(0,1fr) var(--menu-w) calc(var(--sub-w) - var(--sub-overlap)); gap: 0; padding-top: 16px; align-items: start; }
+  .col-menu { width: var(--menu-w); }
+
+  /* Record: a light paper note, pinned to the lightbox */
+  .tag { position: relative; width: 216px; padding: 24px 12px 12px; border-radius: var(--r-paper); background: var(--note); font-size: var(--t-meta); line-height: 1.3; color: var(--ink); transform: rotate(-1.2deg); box-shadow: 0 1px 1px rgba(30,34,30,.12), 1px 6px 12px rgba(30,34,30,.1); }
+  .tag[data-empty] { display: none; }
+  .tag::before { content: ""; position: absolute; left: 50%; top: 9px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--ink-2); box-shadow: 0 2px 2px rgba(30,34,30,.3); }
+  .tag dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; }
+  .tag dt { font-weight: 700; }
+  .tag dd { margin: 0; }
+
+  /* ── Menu system ────────────────────────────────────────────────── */
+
+  /* The menu is a drawer seen from above. The cabinet edge stays still, the front moves,
+     and the contents travel with the front, emerging from under the cabinet */
+  .menu { position: relative; width: var(--menu-w); padding: var(--menu-pad); display: flex; flex-direction: column; gap: var(--row-gap); background: var(--well); }
+  .drawer { position: relative; filter: drop-shadow(0 8px 14px rgba(30,34,30,.14)); }
+  .cabinet { position: relative; z-index: 2; height: 16px; background: var(--surface); border: 1px solid var(--rule); border-bottom-color: rgba(20,19,16,.34); border-radius: var(--r) var(--r) 0 0; box-shadow: 0 3px 6px var(--ink-shadow); }
+  .tray { display: flex; flex-direction: column; justify-content: flex-end; height: 0; overflow: hidden; border-inline: 1px solid var(--rule); background: var(--well); transition: height var(--pull) var(--soft); }
+  #mainMenu { width: 100%; flex: none; }
+  .front { appearance: none; position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; height: var(--front-h); padding: 0 16px; border: 1px solid var(--rule); border-top-color: rgba(255,255,255,.7); border-radius: 0 0 var(--r) var(--r); background: var(--surface); font: inherit; color: var(--ink); cursor: pointer; transition: transform .32s var(--soft); }
+  /* At rest the drawer gives a little under the hand, a hint that it pulls */
+  .front:hover { transform: translateY(2px); }
+  .front:active { transform: translateY(0); }
+  /* Sticker: one small label, used for drawer names and badges alike */
+  .holder, .badge { flex: none; text-transform: uppercase; box-sizing: border-box; height: 24px; white-space: nowrap; padding: 0 8px; border: 1px solid var(--rule); border-radius: var(--r-paper); background: var(--note); font-size: var(--t-meta); line-height: 22px; color: var(--ink); }
+  .pull { flex: none; white-space: nowrap; text-transform: uppercase; font-size: var(--t-label); color: var(--ink-2); }
+  .menu[hidden] { display: none; }
+  .sec-label { position: relative; height: var(--label-h); display: flex; align-items: center; padding: 0 var(--row-x); font: 400 var(--t-caps) "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+  .sep { position: relative; height: 1px; margin: var(--sep-y) var(--row-x); background: var(--rule); }
+
+  .row {
+    position: relative; display: flex; align-items: center; gap: var(--row-inner); height: var(--row-h);
+    padding: 0 var(--row-x); border-radius: var(--row-r); cursor: pointer; outline-offset: -2px;
+    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; color: var(--ink);
+  }
+  /* Focus follows the pointer here, so the ring is shown for keyboard use only */
+  body:not(.kbd) .row:focus-visible { outline: none; }
+  .lead { flex: none; width: var(--icon); height: var(--icon); color: var(--ink-2); transition: color .56s var(--soft); }
+  .lead svg, .trail svg { display: block; width: var(--icon); height: var(--icon); }
+  .label { position: relative; flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; }
+  .trail { flex: none; display: flex; align-items: center; color: var(--ink-2); position: relative; transition: color .56s var(--soft); }
+  .trail svg { transition: transform .18s var(--ease); }
+  .kbd { font-size: var(--t-meta); }
+  
+  /* Enabled: ink that has faded with age */
+  .sans { position: relative; display: inline-block; white-space: nowrap; text-transform: uppercase; font-size: var(--t-label); color: var(--ink-2); transition: transform .42s var(--soft), text-shadow .42s var(--soft); }
+  .w { display: inline-block; margin-right: .5em; }
+  .w:last-child { margin-right: 0; }
+  .l { display: inline-block; }
+  /* Hover: the page clears, then each key strikes. Letters land at once, with a small soft impact,
+     an uneven rhythm, and the slight misalignment and uneven ink of a real machine */
+  .row.is-hover .l, .front.is-hover .l { animation: clear .14s var(--soft) forwards, strike .17s var(--soft) forwards; animation-delay: 0ms, calc(var(--t) * 1ms + 140ms); color: var(--ink-read); }
+  @keyframes clear { to { opacity: 0; } }
+  @keyframes strike { 0% { opacity: 0; transform: translateY(-1.8px); } 30% { opacity: 1; transform: translateY(.5px); } 100% { opacity: var(--press); transform: translateY(var(--dy)); } }
+  .row.is-hover .lead, .row.is-hover .trail { color: var(--ink-read); }
+  /* Pinned part-way through for the spec */
+  .l.done { color: var(--ink-read); opacity: var(--press); transform: translateY(var(--dy)); }
+  .l.pending { opacity: 0; }
+  /* Pressed: pressure on paper. The letters sink at once, then the ink slowly bleeds outward and darkens */
+  .row.is-pressed .sans, .selected .sans { color: var(--ink); text-shadow: var(--bleed); }
+  .row.is-pressed .sans { transform: translateY(.6px); transition: transform .16s var(--soft), text-shadow var(--bleed-time) ease-out; }
+  .selected .sans { transition: transform .42s var(--soft), text-shadow var(--bleed-time) ease-out; }
+  .row.is-pressed .l, .selected .l, .row.is-pressed .lead, .selected .lead, .row.is-pressed .trail, .selected .trail { color: var(--ink); transition: color var(--bleed-time) ease-out; }
+  /* Selected: on file. The bled ink stays against faded neighbours, and so does the rule */
+  .selected.is-hover .l { animation: none; color: var(--ink); }
+  .selected.is-hover .lead, .selected.is-hover .trail { color: var(--ink); }
+  .sans::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .42s linear; }
+  .row.is-pressed .sans::after, .selected .sans::after { transform: none; }
+  /* A drawer is only opened, never selected, so it takes no rule */
+  .row[aria-haspopup] .sans::after { display: none; }
+
+  .wrap { position: relative; }
+  .config .menu, .state .menu { background: none; }
+  /* The submenu is a smaller tray pulled from inside the drawer. It is the same paper as the drawer front,
+     with its edges on the parent's icon and chevron. Its rows bring their own inset, so it adds no padding. Tone alone separates it */
+  .menu.sub { width: auto; margin: var(--row-gap) var(--row-x) var(--row-x); padding: 0; justify-content: flex-end; background: var(--surface); border-radius: var(--r); }
+  .menu.sub.closing { pointer-events: none; }
+  .flap { transform-origin: 50% 100%; transition: transform .42s var(--soft); }
+  .row.is-open .flap { transform: skewX(-16deg) scaleY(.78); }
+  .row[aria-haspopup] .trail svg { transition: transform .42s var(--soft); }
+  .row.is-open .trail svg { transform: rotate(90deg); }
+
+  /* ── Poster footer ──────────────────────────────────────────────── */
+  .note { padding: 12px 0; }
+  .note h1 { margin: 0 0 8px; font: 400 var(--t-caps)/1.3 "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; }
+  .note p { max-width: 38ch; margin: 0; line-height: 1.3; }
+
+  /* ── Specification ──────────────────────────────────────────────── */
+  .spec { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--ink); }
+  .spec > h2 { font: 400 var(--t-title)/1.1 "Libre Baskerville", Georgia, serif; margin: 0 0 12px; }
+  .lede { max-width: 62ch; margin: 0 0 8px; }
+  .block { margin-top: 48px; display: grid; grid-template-columns: 196px minmax(0,1fr); gap: 24px; }
+  .block > header h3 { margin: 0 0 8px; font: 400 var(--t-caps)/1.3 "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; }
+  .block > header p { margin: 0; font-size: var(--t-meta); color: var(--ink-2); }
+  .scroller { overflow-x: auto; padding-bottom: 6px; }
+
+  /* Each figure leaves room around it for its numbers */
+  .figures { display: flex; flex-wrap: wrap; gap: 48px 24px; }
+  .fig { margin: 0; width: calc(var(--menu-w) + 128px); }
+  .fig figcaption { margin-bottom: 40px; font-size: var(--t-meta); color: var(--ink-2); }
+  .fig-body { position: relative; width: var(--menu-w); margin: 0 64px 32px; pointer-events: none; }
+  .fig-body .menu { width: 100%; }
+  .fig-body .menu.sub { width: auto; }
+  .fig-body .m, .fig-body .m-c, .fig-body .m-t, .fig-body .m-lines { z-index: 3; }
+  .fig-body .front:hover { transform: none; }
+  .fig-body .row.is-open .lead { color: var(--ink-2); }
+  .is-padding { --mc: #b0306a; } .is-margin { --mc: #6a3fb0; } .is-gap { --mc: #2f6bb0; } .is-size { --mc: #1f7a4d; } .is-radius { --mc: #a65200; } .is-fill { --mc: #4f5a55; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 24px; padding: 0; list-style: none; font-size: var(--t-meta); }
+  .legend li { display: flex; align-items: center; gap: 8px; color: var(--mc); font-weight: 700; }
+  .legend li::before { content: ""; width: 12px; height: 12px; border-radius: var(--r-paper); background: var(--mc); }
+  .m { position: absolute; background: var(--mc); opacity: .3; pointer-events: none; }
+  .m-c { position: absolute; border: 0 solid var(--mc); pointer-events: none; }
+  .m-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .m-lines line { stroke: var(--mc); stroke-width: 1; }
+  .m-t { position: absolute; font: 700 var(--t-meta)/1 "Courier Prime", Courier, monospace; color: var(--mc); white-space: nowrap; }
+  .at-left { transform: translate(-100%,-50%); } .at-right { transform: translateY(-50%); } .at-center { transform: translate(-50%,-50%); }
+
+  .configs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+  .config h4, .state h4 { margin: 0 0 8px; font-size: var(--t-meta); font-weight: 400; color: var(--ink-2); }
+  .config .menu, .state .menu { width: 100%; max-width: var(--menu-w); padding: 0; border-top: 1px solid var(--rule); }
+  .states { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 24px; }
+  .state p { margin: 12px 0 0; font-size: var(--t-meta); }
+  .state p b { font-weight: 700; }
+  .state .menu { pointer-events: none; }
+
+  table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: var(--t-meta); }
+  th, td { text-align: left; vertical-align: top; padding: 8px 12px 8px 0; border-top: 1px solid var(--rule); line-height: 1.3; font-weight: 400; }
+  thead th { border-top: 0; color: var(--ink-2); }
+  tbody th { font-weight: 700; white-space: nowrap; }
+  td code { font-weight: 700; color: var(--slate); }
+
+  /* Four figures need the room. With less, they sit two by two beside the menu */
+  @media (max-width: 1270px) {
+    .block { grid-template-columns: 1fr; gap: 12px; }
+    .states { grid-template-columns: 1fr; }
+  }
+  /* No room for a side column: the drawer joins the page */
+  @media (max-width: 860px) {
+    .sheet { padding-right: 24px; }
+    .lower { grid-template-columns: minmax(0,1fr); }
+    .field { grid-column: auto; }
+    .hrow { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .rail { position: static; width: 100%; max-width: calc(var(--menu-w) + 24px); max-height: none; margin: 16px 0 0 auto; overflow: visible; }
+  }
+  @media (max-width: 720px) {
+    .plate { grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-rows: 240px; }
+    .tile { overflow: hidden; }
+    .bar { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .bar-end { grid-column: 1 / -1; }
+    .view { transform: scale(.72); }
+    .tag { transform: rotate(-1.2deg) scale(.8); }
+  }
+  @media (max-width: 480px) {
+    .hrow { grid-template-columns: minmax(0,1fr); }
+    .sheet { padding: 16px 16px 48px; }
+    .rail, .menu { width: 100%; max-width: none; }
+    .configs { grid-template-columns: minmax(0,1fr); }
+      }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    /* Typing is the hover signal, so without it the label is underlined instead */
+    .row.is-hover .sans { box-shadow: 0 1px 0 currentColor; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header class="bar">
+    <a href="../../">Archive</a>
+    <span>Buttons, 1870–1964</span>
+    <span class="bar-end">10 objects<span class="switch" role="group" aria-label="Version"><button type="button" data-v="vertical">Vertical</button><button type="button" data-v="horizontal">Horizontal</button></span></span>
+  </header>
+
+  <main>
+  <div class="plate" id="plate">
+    <div class="tile"><div class="view" id="recto"><span class="empty" aria-hidden="true"></span><img class="main" alt="" hidden><img class="ghost" alt="" aria-hidden="true" hidden></div><span class="tile-cap" id="rectoCap">Fig. 1, object</span></div>
+    <div class="tile"><div class="view" id="verso"><span class="empty" aria-hidden="true"></span></div><span class="tile-cap">Fig. 2, section</span></div>
+    <div class="tile"><span class="empty" aria-hidden="true"></span><div id="tag" class="tag" data-empty aria-live="polite"></div><span class="tile-cap">Fig. 3, record</span></div>
+  </div>
+
+  <section class="hcabinet" id="hCabinet" aria-label="Drawers">
+    <div class="hrow-cab"><div class="cabinet" aria-hidden="true"></div></div>
+    <div class="hrow" id="hRow"></div>
+  </section>
+
+  <aside class="rail" aria-label="Drawer menu">
+    <div class="col-menu" id="colMenu">
+      <div class="drawer">
+        <div class="cabinet" aria-hidden="true"></div>
+        <div class="tray" id="tray"></div>
+        <button class="front" id="anchor" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="mainMenu"><span class="holder">Drawer 02</span><span class="pull" id="pullText">Open drawer</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="lower">
+    <section class="note" aria-label="Object note">
+      <h1 id="noteHead">Object note</h1>
+      <p id="noteBody"></p>
+    </section>
+    <div class="field" id="field" aria-hidden="true" hidden></div>
+  </div>
+  </main>
+
+  <section class="spec" aria-labelledby="specTitle">
+    <h2 id="specTitle">Specification</h2>
+    <p class="lede">Set 01, Archival. A record is not performed, it is handled. So one idea drives every decision: <b>the only thing that changes is ink on paper</b>, and the only thing that moves is what a hand would move. The menu is a drawer you pull open, and all colour comes from the objects.</p>
+
+    <div class="block">
+      <header><h3>Two versions</h3><p>Same rows, states and motion. Only the arrangement of drawers changes. Switch at the top of the page.</p></header>
+      <div class="scroller"><table>
+        <thead><tr><th>Version</th><th>Arrangement</th><th>Strength</th><th>Trade-off</th></tr></thead>
+        <tbody>
+          <tr><th>Vertical</th><td>One drawer, fixed on the right. Three choices, then a By decade sub drawer</td><td>Closest to the required Apple menu structure. Figures stay in view</td><td>A long sub drawer can feel like a list</td></tr>
+          <tr><th>Horizontal</th><td>Four drawers in a row. One opens at a time, and moving along the row opens the next</td><td>Reads as a cabinet and a menu bar. Each object can be found several ways</td><td>Opening pushes the note and page down</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="block">
+      <header><h3>Design intention</h3><p>Each state is one step in handling a record. Motion, type and colour all answer to that step.</p></header>
+      <div class="scroller"><table>
+        <thead><tr><th>State</th><th>What is happening</th><th>Motion</th><th>Typography</th><th>Colour</th></tr></thead>
+        <tbody>
+          <tr><th>Enabled</th><td>The record is in storage</td><td>None. Stored things are still</td><td>Courier Prime capitals, as typed on an index card</td><td>Faded ink, <code>#63635C</code>, so the list sits behind the objects</td></tr>
+          <tr><th>Hover / focus</th><td>Someone is typing the record up</td><td>Keys strike one at a time, in an uneven human rhythm, with a small soft impact</td><td>Each letter lands slightly off the baseline with uneven ink, as on a real machine</td><td>Reading ink, <code>#34342E</code>, at 84–100% density per letter</td></tr>
+          <tr><th>Pressed</th><td>The record is marked</td><td>Sinks <code>0.6px</code> while a rule draws left to right. Any keys not yet struck speed up and land as it passes</td><td>Same letters, same place, same weight. Ink slowly bleeds at the edges</td><td>Slowly deepens from <code>#34342E</code> to <code>#141310</code>. Nothing new is introduced</td></tr>
+          <tr><th>Selected</th><td>It is out on the table</td><td>The rule stays, the three figures fade in from left to right, then the sheet is typed</td><td>The bled ink stays, with the hairline rule beneath</td><td>Full ink against faded neighbours. Nothing is selected until you choose</td></tr>
+          <tr><th>Wordplay</th><td>A sheet has been typed about the object, and its note shows through from the back</td><td>Each letter strikes in turn, as on hover</td><td>The name repeats with letters missing and the rest spaced apart, on the monospaced grid</td><td>Ink takes the object's own colour, so the colour still comes only from the object</td></tr>
+          <tr><th>Menu</th><td>The drawer is pulled open, used, and pushed shut</td><td>The front travels and the contents move with it, emerging from under the cabinet</td><td>A typed card names the drawer. Open drawer and Close drawer are typed key by key, like every label</td><td>Lightbox tones only. The well is one step darker, as if in shade</td></tr>
+          <tr><th>Submenu</th><td>A smaller drawer is pulled from inside the first</td><td>It extends beneath its row and pushes the front further out. Nothing overlaps</td><td>Same row, name left, year right, sorted oldest first</td><td>Stays faded. A drawer is opened, never selected, so it takes no rule</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="block">
+      <header><h3>Anatomy and spacing</h3><p>In pixels.</p></header>
+      <div class="scroller">
+        <ul class="legend" aria-label="Colour key">
+          <li class="is-padding">Padding</li><li class="is-margin">Margin</li><li class="is-gap">Gap</li><li class="is-size">Size</li><li class="is-radius">Corner radius</li><li class="is-fill">Fills space</li>
+        </ul>
+        <div class="figures" id="redline"></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <header><h3>Configurations</h3><p>Slots are optional and never change the row's height or inset. All of these are live.</p></header>
+      <div class="configs" id="configs"></div>
+    </div>
+
+    <div class="block">
+      <header><h3>States</h3><p>Pinned for comparison. There are no fills, and hover is shown part-way through.</p></header>
+      <div class="states" id="states"></div>
+    </div>
+
+    <div class="block">
+      <header><h3>Motion values</h3><p>One soft curve throughout, with no overshoot. Nothing bounces, because paper does not.</p></header>
+      <div class="scroller"><table>
+        <thead><tr><th>Moment</th><th>Timing</th><th>Curve</th></tr></thead>
+        <tbody>
+          <tr><th>Label clears on hover</th><td><code>140ms</code></td><td><code>cubic-bezier(.33,0,.2,1)</code></td></tr>
+          <tr><th>Key strike</th><td><code>170ms</code> impact, each key <code>50–155ms</code> after the last, <code>110ms</code> more between words</td><td>Same</td></tr>
+          <tr><th>Leaving, at any point</th><td><code>320ms</code>, from wherever the ink is</td><td>Same</td></tr>
+          <tr><th>Press / release</th><td><code>160ms</code> / <code>420ms</code>, held <code>420ms</code> so type and rule finish together, then the record files</td><td>Same</td></tr>
+          <tr><th>Ink bleed</th><td><code>900ms</code>, continues into selected</td><td>Ease out</td></tr>
+          <tr><th>Pencil rule</th><td><code>420ms</code>, linear, starts on press, retracts if cancelled</td><td>Linear, so the keys can track it</td></tr>
+          <tr><th>Sub drawer pulls / pushes</th><td><code>420ms</code>, opens after a <code>180ms</code> hover</td><td>Same</td></tr>
+          <tr><th>Drawer pulls / pushes</th><td><code>560ms</code>, contents move with the front</td><td>Same</td></tr>
+          <tr><th>Preview replaces object</th><td>Old object out <code>120ms</code>, new object in <code>320ms</code>, never overlapped</td><td>Same</td></tr>
+          <tr><th>Figures 1 to 3 fade in</th><td><code>640ms</code>, each <code>90ms</code> after the last</td><td>Same</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="block">
+      <header><h3>Tokens</h3><p>Reskin a set by changing these. The structure stays the same.</p></header>
+      <div class="scroller"><table>
+        <thead><tr><th>Token</th><th>Value</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><th>Radius</th><td>Container and sub drawer <code>16</code>, sticker and note <code>4</code></td><td>Container from Material 3</td></tr>
+          <tr><th>Text</th><td><code>14</code> labels, <code>12</code> details, <code>10</code> capitals, <code>26</code> title</td><td>Used in both versions</td></tr>
+          <tr><th>Sticker</th><td>Height <code>24</code>, padding <code>8</code>, outline <code>1</code>, text <code>12</code></td><td>Used for drawer names and badges</td></tr>
+          <tr><th>Drawer</th><td>Width <code>280</code>, padding <code>4</code>, well <code>#D5DDD6</code>, cabinet edge <code>16</code>, front <code>48</code>, surface <code>#E6EBE5</code></td><td>Width is the Material 3 maximum. Front matches the row height</td></tr>
+          <tr><th>Structure</th><td>Three top choices, a separator, then one submenu holding the remaining seven by date. Sections stay available, and are shown under Configurations</td><td>Apple</td></tr>
+          <tr><th>Open and dismiss</th><td>Opens from the drawer front. Stays open while choosing. Pushes shut <code>300ms</code> after the pointer leaves the whole drawer, on outside click, or on <code>Esc</code></td><td>Apple, WAI-ARIA menu</td></tr>
+          <tr><th>Row height / gap</th><td><code>48</code> / <code>2</code></td><td>Material 3</td></tr>
+          <tr><th>Focus ring radius</th><td><code>12</code>, only seen when using a keyboard, as rows have no fill</td><td>Material 3 row radius</td></tr>
+          <tr><th>Row inset / slot gap</th><td><code>12</code> / <code>8</code></td><td>Material 3</td></tr>
+          <tr><th>Icon, section label height</th><td><code>20</code>, <code>32</code></td><td>Material 3</td></tr>
+          <tr><th>Separator</th><td><code>1</code>, inset <code>12</code>, margin <code>8</code></td><td>Apple, inset to the label edge</td></tr>
+          <tr><th>Submenu</th><td>A sub drawer that extends in place, its folder flap tipping open, edges aligned to the parent's icon and chevron, radius <code>16</code>, row inset <code>12</code>, no added padding, surface <code>#E6EBE5</code>, with no shadow or outline, chevron turns <code>90°</code>. Replaces the flyout, so no surfaces overlap</td><td>Design decision</td></tr>
+          <tr><th>Placement</th><td>Figures and object note scroll in the left column. Menu is fixed in a right column and never covers them</td><td>Reference film and poster</td></tr>
+          <tr><th>Type</th><td>Courier Prime for anything typed, in capitals for menu labels, drawer actions and stickers. Libre Baskerville capitals for labels</td><td>Reference film</td></tr>
+          <tr><th>Colour</th><td>Lightbox <code>#DDE4DD</code>, ink <code>#141310</code>, faded ink <code>#63635C</code>, note <code>#EEF0EA</code></td><td>Reference film</td></tr>
+          <tr><th>Keyboard</th><td><code>↑ ↓</code> move, <code>Home End</code> jump, <code>→ Enter Space</code> open or select, <code>← Esc</code> close, <code>⌥⌘1</code> shortcut</td><td>Apple, WAI-ARIA menu</td></tr>
+          <tr><th>Reduced motion</th><td>Letters stay in place with no strikes, and hover adds an underline</td><td></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ── Icons ─────────────────────────────────────────────────────────── */
+const svg = (d) => `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" aria-hidden="true">${d}</svg>`;
+const dot = (x, y) => `<circle cx="${x}" cy="${y}" r=".9" fill="currentColor" stroke="none"/>`;
+const ICON = {
+  four: svg(`<circle cx="10" cy="10" r="7.6"/>${dot(8,8)+dot(12,8)+dot(8,12)+dot(12,12)}`),
+  two: svg(`<circle cx="10" cy="10" r="7.6"/><circle cx="10" cy="10" r="5.2" opacity=".45"/>${dot(8.2,10)+dot(11.8,10)}`),
+  toggle: svg(`<rect x="2.2" y="7" width="15.6" height="6" rx="3" transform="rotate(-28 10 10)"/>${dot(10,10)}`),
+  shank: svg(`<circle cx="10" cy="8" r="5.8"/><path d="M8 13.5v2a2 2 0 0 0 4 0v-2"/>`),
+  dome: svg(`<path d="M3 13.5a7 7 0 0 1 14 0z"/><path d="M6.6 10.4a3.6 3.6 0 0 1 2.2-2" opacity=".6"/>`),
+  folder: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 15.5V5h5l1.6 2h8.4v8.5z"/><path class="flap" d="M2.5 15.5V8.5h15v7z" fill="var(--well)"/></svg>`,
+  chev: svg(`<path d="m8 5.5 4.5 4.5L8 14.5"/>`),
+  fragile: svg(`<path d="M6.5 3h7l-.6 4.6a2.9 2.9 0 0 1-5.8 0zM10 10.5V17M7 17h6"/>`),
+};
+
+/* ── Catalogue (invented for this prototype) ───────────────────────── */
+const ITEMS = {
+  star: { ink: '#8a6a2f', name: 'Cream star', img: 'star', no: 'SF.02.0114', mat: 'Casein', mm: 22, holes: 4, date: 'c. 1955', icon: 'four', kbd: '⌥⌘1', note: 'Moulded for a child\'s cardigan. The raised rim was meant to catch small fingers.' },
+  jade: { ink: '#3e7a5a', name: 'Jade flower', img: 'jade', no: 'SF.02.0207', mat: 'Glazed resin', mm: 24, holes: 4, date: 'c. 1962', icon: 'four', badge: 'Rare', note: 'Poured, then polished by hand. The glaze pools at the centre, so no two petals catch light alike.' },
+  apple: { ink: '#b3261e', name: 'Red apple', img: 'apple', no: 'SF.02.0341', mat: 'Acrylic', mm: 20, holes: 2, date: 'c. 1968', icon: 'two', note: 'A novelty button, sold by the card. The leaf is painted after moulding, in a second pass.' },
+  pewter: { ink: '#4d5358', name: 'Pewter swirl', img: 'pewter', no: 'SF.02.0418', mat: 'Cast pewter', mm: 20, holes: 0, date: 'c. 1890', icon: 'shank', note: 'Hung from a loop on the back, so it sits above the cloth. Handling has worn the high points brighter.' },
+  ceramic: { ink: '#8f3f5b', name: 'Glazed ceramic', img: 'ceramic', no: 'SF.02.0502', mat: 'Stoneware', mm: 26, holes: 2, date: 'c. 1925', icon: 'two', fragile: true, note: 'Stamped by hand, then fired. It chips before it scratches, so it is stored apart from the others.' },
+  black: { ink: '#141310', name: 'Black horn', img: 'black', no: 'SF.02.0611', mat: 'Buffalo horn', mm: 28, holes: 4, date: 'c. 1910', note: 'A coat button, pressed with a scrolled border. The rim is left plain to take the wear.' },
+  filigree: { ink: '#3a3d40', name: 'Silver filigree', img: 'filigree', no: 'SF.02.0655', mat: 'Silvered brass', mm: 23, holes: 0, date: 'c. 1870', note: 'Pierced so that the cloth shows through. Tarnish is left in the recesses, where it marks the pattern.' },
+  striped: { ink: '#27507a', name: 'Striped', img: 'striped', no: 'SF.02.0720', mat: 'Cellulose nitrate', mm: 11, holes: 2, date: '1924', icon: 'two', note: 'An early plastic with stripes laminated through its depth. It slowly breaks down, so it is kept in the open air.' },
+  sky: { ink: '#2f6f9f', name: 'Sky blue', img: 'sky', no: 'SF.02.0743', mat: 'Casein', mm: 13, holes: 2, date: '1946', icon: 'two', note: 'Plastic made from milk, in a colour chosen to outlast rationing. It softens if it is left to soak.' },
+  teal: { ink: '#2f7f78', name: 'Teal', img: 'teal', no: 'SF.02.0788', mat: 'Polyester', mm: 12, holes: 4, date: '1964', icon: 'four', note: 'A shirt button, stamped by the million. This one was never sewn on.' },
+};
+const group = (sub, items) => ({ sub, icon: 'folder', items });
+const HDRAWERS = [
+  { label: 'Top choices', list: [{ id: 'star' }, { id: 'ceramic' }, { id: 'jade' }] },
+  { label: 'By decade', list: ['filigree', 'pewter', 'black', 'striped', 'sky', 'teal', 'apple'].map((id) => ({ id, dated: 1 })) },
+  { label: 'By material', list: [group('Plastic', ['star', 'jade', 'apple', 'striped', 'sky', 'teal']), group('Metal', ['filigree', 'pewter']), group('Natural', ['black', 'ceramic'])] },
+  { label: 'By holes', list: [{ label: 'Sewn through' }, { id: 'star', plain: 1 }, { id: 'apple', plain: 1 }, { id: 'teal', plain: 1 }, { sep: 1 }, { label: 'Shank' }, { id: 'pewter', plain: 1 }, { id: 'filigree', plain: 1 }] },
+];
+const MENU = [
+  { id: 'star' }, { id: 'ceramic' }, { id: 'jade' }, { sep: 1 },
+  { sub: 'By decade', icon: 'folder', items: ['filigree', 'pewter', 'black', 'striped', 'sky', 'teal', 'apple'] },
+];
+
+/* ── Row: one structure, optional slots ────────────────────────────── */
+function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+/* A typist's rhythm, seeded by the text so a word is always typed the same way */
+function typedLetters(text) {
+  let seed = hash(text), t = 0;
+  const rand = () => (seed = Math.imul(seed ^ (seed >>> 15), 2654435761) >>> 0) / 4294967296;
+  return text.split(' ').map((w, n) => { if (n) t += 110; return `<span class="w">${[...w].map((c) => {
+    const at = t; t += 50 + rand() * rand() * 105;
+    return `<span class="l" style="--t:${Math.round(at)};--dy:${((rand() - .5) * .9).toFixed(2)}px;--press:${(.84 + rand() * .16).toFixed(2)}">${c}</span>`;
+  }).join('')}</span>`; }).join('');
+}
+
+function buildRow({ text, icon, kbd, meta, badge, trailIcon, submenu }) {
+  const row = document.createElement('div');
+  row.className = 'row'; row.setAttribute('role', 'menuitem'); row.tabIndex = -1;
+  row.setAttribute('aria-label', badge ? `${text}, ${badge}` : text);
+  if (kbd) row.setAttribute('aria-keyshortcuts', kbd.replace('⌥⌘', 'Alt+Meta+'));
+  if (submenu) { row.setAttribute('aria-haspopup', 'menu'); row.setAttribute('aria-expanded', 'false'); }
+  const sans = typedLetters(text);
+  let trail = '';
+  if (kbd) trail += `<span class="kbd">${kbd}</span>`;
+  if (meta) trail += `<span class="kbd">${meta}</span>`;
+  if (badge) trail += `<span class="badge">${badge}</span>`;
+  if (trailIcon) trail += ICON[trailIcon];
+  if (submenu) trail += ICON.chev;
+  row.innerHTML = `${icon ? `<span class="lead">${ICON[icon]}</span>` : ''}<span class="label" aria-hidden="true"><span class="sans">${sans}</span></span>${trail ? `<span class="trail" aria-hidden="true">${trail}</span>` : ''}`;
+  return row;
+}
+
+/* Ink never jumps: whatever a letter shows now, it eases from there into its next state */
+function settle(row, change) {
+  const letters = [...row.querySelectorAll('.l')];
+  const from = letters.map((l) => { const c = getComputedStyle(l); return { opacity: c.opacity, color: c.color }; });
+  change();
+  letters.forEach((l, i) => { const c = getComputedStyle(l); l.animate([from[i], { opacity: c.opacity, color: c.color }], { duration: 320, easing: 'cubic-bezier(.33,0,.2,1)' }); });
+}
+/* On press, any keys not yet struck speed up so each lands as the rule passes under it */
+const RULE_MS = 420;
+function catchUp(row) {
+  const sans = row.querySelector('.sans');
+  row.querySelectorAll('.l').forEach((l) => {
+    const strike = l.getAnimations().find((a) => a.animationName === 'strike');
+    if (!strike || strike.playState === 'finished') return;
+    const at = (l.offsetLeft + l.offsetWidth) / sans.offsetWidth * RULE_MS;
+    const { delay, duration } = strike.effect.getComputedTiming();
+    const soon = strike.currentTime + Math.max(0, at - duration * .3);
+    if (soon < delay) strike.effect.updateTiming({ delay: soon });
+  });
+}
+const endHover = (row) => { if (row.classList.contains('is-hover')) settle(row, () => row.classList.remove('is-hover')); };
+
+/* ── Interaction: shared by the live menu and the spec's live examples ─ */
+const coarse = (e) => e.pointerType && e.pointerType !== 'mouse';
+function rowsOf(menu) { return [...menu.children].flatMap((c) => c.classList.contains('row') ? [c] : c.classList.contains('wrap') ? [c.firstElementChild] : []); }
+
+function wireMenu(menu, { onPreview = () => {}, onCommit = () => {}, onEscape = () => {}, parent = null, closeSelf = null } = {}) {
+  const rows = rowsOf(menu);
+  const setHover = (row, focus) => {
+    rows.forEach((r) => { if (r !== row) { r.classList.remove('is-pressed'); endHover(r); } });
+    if (row) { row.classList.add('is-hover'); if (focus) row.focus({ preventScroll: true }); }
+    onPreview(row ? row.dataset.id : null);
+  };
+  if (!closeSelf) rows[0].tabIndex = 0;
+  const hold = new WeakMap();
+  const press = (row) => { row.classList.add('is-pressed'); hold.set(row, performance.now()); if (!row._sub) catchUp(row); };
+  /* A sub drawer opens straight away. A record is filed once its rule has finished drawing */
+  const release = (row, keyboard) => {
+    if (row._sub) { row.classList.remove('is-pressed'); if (row.classList.contains('is-open') && !keyboard) row._closeSub(); else row._openSub(keyboard); return; }
+    row._releasing = true;
+    setTimeout(() => {
+      row._releasing = false; onCommit(row.dataset.id); row.classList.remove('is-pressed');
+    }, Math.max(0, RULE_MS - (performance.now() - (hold.get(row) || 0))));
+  };
+  rows.forEach((row, i) => {
+    row.addEventListener('pointerenter', (e) => { if (coarse(e)) return; setHover(row, true); });
+    row.addEventListener('pointerleave', (e) => {
+      if (!row._releasing) row.classList.remove('is-pressed');
+      if (coarse(e)) return;
+      endHover(row); onPreview(null);
+    });
+    row.addEventListener('pointerdown', (e) => { if (e.button === 0) press(row); });
+    row.addEventListener('pointercancel', () => { row.classList.remove('is-pressed'); endHover(row); });
+    row.addEventListener('pointerup', (e) => {
+      if (!row.classList.contains('is-pressed')) return;
+      if (e.pointerType !== 'mouse') endHover(row);
+      release(row, false);
+    });
+    row.addEventListener('blur', () => { if (!row.matches(':hover')) { endHover(row); onPreview(null); } });
+    row.addEventListener('keydown', (e) => {
+      const go = (n) => { e.preventDefault(); e.stopPropagation(); setHover(rows[(n + rows.length) % rows.length], true); };
+      if (e.key === 'ArrowDown') go(i + 1);
+      else if (e.key === 'ArrowUp') go(i - 1);
+      else if (e.key === 'Home') go(0);
+      else if (e.key === 'End') go(rows.length - 1);
+      else if (e.key === 'ArrowRight' && row._sub) { e.preventDefault(); row._openSub(true); }
+      else if ((e.key === 'ArrowLeft' || e.key === 'Escape') && closeSelf) { e.preventDefault(); e.stopPropagation(); closeSelf(); }
+      else if (e.key === 'Escape') { e.preventDefault(); onEscape(); }
+      else if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); press(row); }
+    });
+    row.addEventListener('keyup', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && row.classList.contains('is-pressed')) release(row, true);
+    });
+  });
+  return { setHover, rows };
+}
+
+function fillMenu(menu, list, handlers) {
+  let open = null; let closeTimer = 0; let openTimer = 0;
+  const closeOpen = () => { if (open) open(); };
+  list.forEach((entry) => {
+    if (entry.label) { const l = document.createElement('div'); l.className = 'sec-label'; l.setAttribute('role', 'presentation'); l.textContent = entry.label; menu.append(l); return; }
+    if (entry.sep) { const s = document.createElement('div'); s.className = 'sep'; s.setAttribute('role', 'separator'); menu.append(s); return; }
+    if (entry.sub) {
+      const wrap = document.createElement('div'); wrap.className = 'wrap'; wrap.setAttribute('role', 'none');
+      const row = buildRow({ text: entry.sub, icon: entry.icon, submenu: true });
+      const sub = document.createElement('div'); sub.className = 'menu sub'; sub.setAttribute('role', 'menu'); sub.setAttribute('aria-label', entry.sub); sub.hidden = true;
+      wrap.append(row, sub); menu.append(wrap);
+      row._sub = sub;
+      let hideTimer = 0;
+      const pull = (from, to) => { sub.style.overflow = 'hidden'; sub.animate({ height: [from + 'px', to + 'px'] }, { duration: 420, easing: 'cubic-bezier(.33,0,.2,1)' }).onfinish = () => { sub.style.overflow = ''; }; };
+      const close = (refocus) => {
+        if (sub.hidden || sub.classList.contains('closing')) return;
+        row.classList.remove('is-open'); row.setAttribute('aria-expanded', 'false'); open = null;
+        sub.classList.add('closing');
+        pull(sub.offsetHeight, 0);
+        const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        hideTimer = setTimeout(() => { sub.hidden = true; sub.classList.remove('closing'); }, still ? 0 : 400);
+        if (refocus) row.focus();
+      };
+      row._openSub = (focusFirst) => {
+        if (open && !row.classList.contains('is-open')) open();
+        clearTimeout(closeTimer); clearTimeout(hideTimer);
+        const wasShut = sub.hidden || sub.classList.contains('closing');
+        sub.classList.remove('closing');
+        sub.hidden = false; row.classList.add('is-open'); row.setAttribute('aria-expanded', 'true'); open = () => close(false);
+        const c = wireOnce(sub); if (wasShut && !matchMedia('(prefers-reduced-motion: reduce)').matches) pull(0, sub.offsetHeight);
+        if (focusFirst) c.setHover(c.rows[0], true);
+      };
+      let wired = null;
+      const wireOnce = (el) => {
+        if (wired) return wired;
+        entry.items.forEach((id, n) => { const r = itemRow(id, true, true); r.style.setProperty('--n', n); el.append(r); });
+        return wired = wireMenu(el, { ...handlers, closeSelf: () => close(true) });
+      };
+      row.addEventListener('pointerenter', (e) => { if (coarse(e)) return; clearTimeout(closeTimer); clearTimeout(openTimer); openTimer = setTimeout(() => row._openSub(false), 180); });
+      row._closeSub = () => close(false);
+      row.addEventListener('pointerleave', () => clearTimeout(openTimer));
+      return;
+    }
+    menu.append(itemRow(entry.id, entry.plain, entry.dated));
+  });
+  const c = wireMenu(menu, handlers);
+  if (!handlers.keepSub) menu.addEventListener('pointerleave', (e) => { if (!coarse(e)) closeOpen(); });
+  menu._closeSub = closeOpen;
+  return c;
+}
+function itemRow(id, plain, dated) {
+  const it = ITEMS[id];
+  const row = dated
+    ? buildRow({ text: it.name, meta: it.date.replace('c. ', '') })
+    : buildRow({ text: it.name, icon: plain ? null : it.icon, kbd: it.kbd, badge: it.badge, trailIcon: it.fragile ? 'fragile' : null });
+  row.dataset.id = id;
+  if (id === current) row.classList.add('selected');
+  return row;
+}
+
+/* ── Fig. 2: plan and section, drawn from the record ───────────────── */
+/* The name repeats down the sheet, each time with letters missing and the rest spaced apart.
+   Seeded by the name, so an object's page always falls the same way */
+function wordplay(it) {
+  let seed = hash(it.no), t = 0;
+  const rand = () => (seed = Math.imul(seed ^ (seed >>> 15), 2654435761) >>> 0) / 4294967296;
+  const word = it.name.toLowerCase().replace(/[^a-z]/g, '');
+  const rows = [0, 2, 3, 6, 8, 11, 13, 14, 16, 18];
+  let html = '';
+  rows.forEach((row, i) => {
+    /* Sparse lines keep only a letter or two against the right margin. Full lines spread out across the sheet */
+    const full = i % 3 !== 1, reach = full ? 18 + rand() * 30 : 6;
+    let col = rand() < .5 ? 0 : Math.round(rand() * 3);
+    const letters = [...word].reverse();
+    letters.forEach((c) => {
+      if (rand() > (full ? .72 : .2) || col > 40) return;
+      html += `<span class="l" style="--row:${row};--col:${col};--t:${Math.round(t)};--dy:${((rand() - .5) * .9).toFixed(2)}px;--press:${(.84 + rand() * .16).toFixed(2)}">${c}</span>`;
+      col += 1 + Math.round(rand() * rand() * reach / word.length * 3); t += 28 + rand() * 40;
+    });
+  });
+  const back = [`${it.note} ${it.note}`, `${it.note} ${it.note}`, it.note].map((n) => `<p>${n}</p>`).join('');
+  return `<div class="ghost-text">${back}</div><div class="scatter">${html}</div>
+    <div class="mark when" style="top:${9 * 1.4 * 14 / 12}em">${it.date}<br>Drawer 02</div>`;
+}
+
+function drawing(it) {
+  const r = 58, cx = 108, cy = 66, top = 150;
+  const s = it.holes === 4 ? 13 : 15;
+  const holes = it.holes === 4 ? [[-s, -s], [s, -s], [-s, s], [s, s]] : it.holes === 2 ? [[-s, 0], [s, 0]] : [];
+  return `<svg class="drawing" viewBox="0 0 216 196" fill="none" stroke="currentColor" stroke-width=".8" role="img" aria-label="Plan and section of ${it.name}, ${it.mm} millimetres across">
+    <circle cx="${cx}" cy="${cy}" r="${r}"/><circle cx="${cx}" cy="${cy}" r="${r - 8}" stroke-width=".5"/>
+    <path d="M${cx - r - 8} ${cy}H${cx + r + 8}M${cx} ${cy - r - 6}V${cy + r + 6}" stroke-width=".5" stroke-dasharray="7 2 1 2"/>
+    ${holes.map(([x, y]) => `<circle cx="${cx + x}" cy="${cy + y}" r="4"/>`).join('')}
+    <path d="M${cx - r} ${top + 4}H${cx + r}V${top + 16}H${cx - r}Z"/>
+    <path d="${Array.from({ length: 18 }, (_, i) => `M${cx - r + i * 6.4} ${top + 16}l6 -12`).join('')}" stroke-width=".4"/>
+    ${it.holes ? `<path d="M${cx - s - 3} ${top + 4}v12M${cx - s + 3} ${top + 4}v12M${cx + s - 3} ${top + 4}v12M${cx + s + 3} ${top + 4}v12"/>` : `<path d="M${cx - 8} ${top + 16}v5a8 5 0 0 0 16 0v-5"/>`}
+    <path d="M${cx - r} ${top + 24}v10M${cx + r} ${top + 24}v10M${cx - r} ${top + 30}H${cx - 18}M${cx + 18} ${top + 30}H${cx + r}"/>
+    <path d="M${cx - r} ${top + 30}l6 -2v4zM${cx + r} ${top + 30}l-6 -2v4z" fill="currentColor" stroke="none"/>
+    <text x="${cx}" y="${top + 33}" text-anchor="middle" stroke="none">${it.mm.toFixed(1)}</text>
+  </svg>`;
+}
+
+/* ── The plate ─────────────────────────────────────────────────────── */
+const $ = (id) => document.getElementById(id);
+const recto = $('recto'), rectoMain = recto.querySelector('.main'), ghost = recto.querySelector('.ghost');
+let current = null, previewId = null;
+const src = (it) => `buttons/${it.img}.png`;
+const place = (img, it) => { img.hidden = false; img.src = src(it); img.style.width = it.mm * 6.4 + 'px'; };
+
+function commit(id) {
+  if (!id || id === current) return;
+  current = id; const it = ITEMS[id];
+  document.querySelectorAll('.plate .empty').forEach((e) => e.remove());
+  place(rectoMain, it); rectoMain.alt = it.name;
+  $('verso').innerHTML = drawing(it);
+  delete $('tag').dataset.empty;
+  $('tag').innerHTML = `<dl><dt>SUBJECT</dt><dd>${it.name}</dd><dt>MEDIUM</dt><dd>${it.mat}</dd><dt>UNITS</dt><dd>${it.mm} mm</dd><dt>DATE</dt><dd>${it.date}</dd><dt>FILE</dt><dd>${it.no}</dd></dl>`;
+  $('noteHead').textContent = 'Object note ' + it.no.slice(-3);
+  $('noteBody').textContent = it.note;
+  $('field').hidden = false; $('field').style.setProperty('--object-ink', it.ink); $('field').innerHTML = wordplay(it);
+  document.querySelectorAll('.live .row').forEach((r) => {
+    const on = r.dataset.id === id; if (on !== r.classList.contains('selected')) { if (r.classList.contains('is-pressed')) r.classList.toggle('selected', on); else settle(r, () => r.classList.toggle('selected', on)); }
+    if (on) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current');
+  });
+  preview(null);
+  for (const [el, cls, after = 0] of [[recto, 'drop'], [$('verso'), 'settle', 90], [$('tag'), 'settle', 180]]) {
+    el.style.setProperty('--after', after + 'ms'); el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  }
+}
+function preview(id) {
+  if (id === previewId) return;
+  previewId = id;
+  const show = id && id !== current;
+  if (show) place(ghost, ITEMS[id]);
+  recto.classList.toggle('previewing', !!show);
+  $('rectoCap').textContent = show ? `Viewing ${ITEMS[id].name}` : 'Fig. 1, object';
+}
+$('noteHead').textContent = 'Object note';
+$('noteBody').textContent = 'Nothing is out on the table. Pull the drawer open and choose an object to bring out its record.';
+
+const mainMenu = document.createElement('div');
+mainMenu.className = 'menu'; mainMenu.id = 'mainMenu'; mainMenu.setAttribute('role', 'menu'); mainMenu.setAttribute('aria-label', 'Buttons');
+
+/* One drawer: a front that pulls a tray. Both versions are built from this */
+function makeDrawer({ front, tray, menu, list, pullEl, pullText, onOpen = () => {} }) {
+  tray.append(menu); menu.hidden = true; menu.classList.add('live');
+  const isOpen = () => front.getAttribute('aria-expanded') === 'true';
+  /* Height is animated in pixels, then released so a sub drawer can extend the drawer further */
+  tray.addEventListener('transitionend', (e) => {
+    if (e.target !== tray || e.propertyName !== 'height') return;
+    if (isOpen()) tray.style.height = 'auto'; else menu.hidden = true;
+  });
+  /* If a sub drawer opens while the drawer is still sliding, release the height so nothing is clipped */
+  let slideHeight = 0;
+  new ResizeObserver(() => { if (isOpen() && tray.style.height !== 'auto' && menu.offsetHeight !== slideHeight) tray.style.height = 'auto'; }).observe(menu);
+  const set = (on, refocus) => {
+    if (on === isOpen()) return;
+    front.setAttribute('aria-expanded', on); pullEl.innerHTML = typedLetters(pullText(on));
+    if (on) {
+      onOpen();
+      menu.hidden = false;
+      slideHeight = menu.offsetHeight; tray.style.height = '0px'; void tray.offsetHeight; tray.style.height = slideHeight + 'px';
+      return;
+    }
+    menu.querySelectorAll('.is-hover').forEach((r) => r.classList.remove('is-hover'));
+    menu._closeSub(); preview(null);
+    tray.style.height = tray.offsetHeight + 'px'; void tray.offsetHeight; tray.style.height = '0px';
+    if (refocus) front.focus();
+  };
+  /* Choosing keeps the drawer open for comparing */
+  const wired = fillMenu(menu, list, { keepSub: true, onPreview: preview, onEscape: () => set(false, true), onCommit: commit });
+  pullEl.innerHTML = typedLetters(pullText(false));
+  front.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') front.classList.add('is-hover'); });
+  front.addEventListener('pointerleave', () => endHover(front));
+  front.addEventListener('focus', () => { if (document.body.classList.contains('kbd')) front.classList.add('is-hover'); });
+  front.addEventListener('blur', () => endHover(front));
+  front.addEventListener('click', () => { const on = !isOpen(); set(on); if (on && document.body.classList.contains('kbd')) wired.setHover(wired.rows[0], true); });
+  return { set, isOpen, front, wired };
+}
+/* A section closes only when the pointer leaves all of it, or on an outside click */
+function closeOnLeave(section, drawers) {
+  let timer = 0;
+  section.addEventListener('pointerenter', () => clearTimeout(timer));
+  section.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') timer = setTimeout(() => drawers.forEach((d) => d.set(false)), 300); });
+  document.addEventListener('pointerdown', (e) => { if (!section.contains(e.target) && !e.target.closest('.spec, .switch')) drawers.forEach((d) => d.set(false)); });
+}
+
+/* Version A: one vertical drawer on the right */
+const vertical = makeDrawer({ front: $('anchor'), tray: $('tray'), menu: mainMenu, list: MENU, pullEl: $('pullText'), pullText: (on) => on ? 'Close drawer' : 'Open drawer' });
+closeOnLeave($('colMenu'), [vertical]);
+
+/* Version B: a row of drawers side by side, one open at a time */
+const hDrawers = [];
+$('hRow').setAttribute('role', 'menubar'); $('hRow').setAttribute('aria-label', 'Drawers');
+HDRAWERS.forEach(({ label, list }) => {
+  const col = document.createElement('div'); col.className = 'drawer';
+  col.innerHTML = `<div class="tray"></div><button class="front" type="button" aria-haspopup="menu" aria-expanded="false"><span class="holder">${label}</span><span class="pull"></span></button>`;
+  $('hRow').append(col);
+  const menu = document.createElement('div'); menu.className = 'menu'; menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', label);
+  const d = makeDrawer({ front: col.querySelector('.front'), tray: col.querySelector('.tray'), menu, list, pullEl: col.querySelector('.pull'), pullText: (on) => on ? 'Close' : 'Open', onOpen: () => hDrawers.forEach((o) => o !== d && o.set(false)) });
+  hDrawers.push(d);
+  d.front.setAttribute('role', 'menuitem');
+  /* As in a menu bar, once one drawer is open, moving along the row opens the next */
+  d.front.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && hDrawers.some((o) => o.isOpen())) d.set(true); });
+  d.front.addEventListener('keydown', (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (step) { e.preventDefault(); hDrawers[(hDrawers.indexOf(d) + step + hDrawers.length) % hDrawers.length].front.focus(); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); d.set(true); d.wired.setHover(d.wired.rows[0], true); }
+  });
+});
+closeOnLeave($('hCabinet'), hDrawers);
+
+/* Switch between the two versions. The current object carries over */
+function setVersion(v) {
+  document.body.dataset.version = v;
+  document.querySelectorAll('.switch button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === v));
+  [vertical, ...hDrawers].forEach((d) => d.set(false));
+  history.replaceState(null, '', v === 'horizontal' ? '#horizontal' : '#vertical');
+}
+document.querySelectorAll('.switch button').forEach((b) => b.addEventListener('click', () => setVersion(b.dataset.v)));
+setVersion(location.hash === '#horizontal' ? 'horizontal' : 'vertical');
+addEventListener('pointerdown', () => document.body.classList.remove('kbd'), true);
+addEventListener('pointermove', () => document.body.classList.remove('kbd'), true);
+addEventListener('keydown', () => document.body.classList.add('kbd'), true);
+document.addEventListener('keydown', (e) => {
+  if (!(e.altKey && (e.metaKey || e.ctrlKey))) return;
+  const id = { Digit1: 'star' }[e.code];
+  if (id) { e.preventDefault(); commit(id); }
+});
+
+/* ── Specification ─────────────────────────────────────────────────── */
+function miniMenu(list, label) {
+  const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', label);
+  return [m, () => fillMenu(m, list, {})];
+}
+const CONFIGS = [
+  ['Single line of text', () => buildRow({ text: 'Black horn' })],
+  ['Left icon', () => buildRow({ text: 'Cream star', icon: 'four' })],
+  ['Right icon', () => buildRow({ text: 'Glazed ceramic', trailIcon: 'fragile' })],
+  ['Right shortcut', () => buildRow({ text: 'Pewter swirl', kbd: '⌥⌘3' })],
+  ['Right badge', () => buildRow({ text: 'Jade flower', badge: 'Rare' })],
+  ['Left icon and shortcut', () => buildRow({ text: 'Red apple', icon: 'two', kbd: '⌥⌘2' })],
+];
+CONFIGS.forEach(([title, make]) => {
+  const c = document.createElement('div'); c.className = 'config';
+  const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', title);
+  m.append(make()); c.innerHTML = `<h4>${title}</h4>`; c.append(m); $('configs').append(c);
+  wireMenu(m);
+});
+{ // Sections and submenu use the same assembler as the live menu
+  const a = document.createElement('div'); a.className = 'config'; a.innerHTML = '<h4>Sections</h4>';
+  const [m, fill] = miniMenu([{ label: 'Moulded' }, { id: 'star', plain: 1 }, { sep: 1 }, { label: 'Worked' }, { id: 'pewter', plain: 1 }], 'Sections');
+  a.append(m); $('configs').append(a); fill();
+  const b = document.createElement('div'); b.className = 'config'; b.innerHTML = '<h4>Submenu</h4>';
+  const [n, fill2] = miniMenu([{ sub: 'By decade', icon: 'folder', items: ['filigree', 'pewter', 'black', 'striped', 'sky', 'teal', 'apple'] }], 'Submenu');
+  b.append(n); $('configs').append(b); fill2();
+}
+
+[['Enabled', '', '<b>Aged.</b> Ink that has faded on the page. Quiet, so the list recedes and the objects lead.'],
+ ['Hover', 'is-hover', '<b>Typed.</b> Keys strike one at a time, unevenly, like a real machine. The object fades in above.'],
+ ['Pressed', 'is-pressed', '<b>Marked.</b> The letters sink, a rule draws beneath them, and the ink slowly bleeds and deepens.']
+].forEach(([title, cls, text]) => {
+  const s = document.createElement('div'); s.className = 'state'; s.setAttribute('aria-label', title);
+  s.innerHTML = `<h4>${title}</h4>`;
+  const m = document.createElement('div'); m.className = 'menu';
+  [buildRow({ text: 'Cream star', icon: 'four', kbd: '⌥⌘1' }), buildRow({ text: 'Jade flower', icon: 'four', badge: 'Rare' }), buildRow({ text: 'By decade', submenu: true })]
+    .forEach((r) => { r.removeAttribute('role'); r.removeAttribute('tabindex'); if (cls === 'is-pressed') r.classList.add(cls); if (cls === 'is-hover') r.querySelectorAll('.l').forEach((l, i, all) => { const at = Math.ceil(all.length * .6); l.classList.add(i < at ? 'done' : 'pending'); }); m.append(r); });
+  s.append(m);
+  const p = document.createElement('p'); p.innerHTML = text; s.append(p);
+  $('states').append(s);
+});
+
+/* Anatomy: three figures built from the real parts. Every number is measured from what is rendered */
+const stage = $('redline');
+const figures = [];
+function figure(title, parts, annotate) {
+  const f = document.createElement('figure'); f.className = 'fig';
+  f.innerHTML = `<figcaption>${title}</figcaption>`;
+  const body = document.createElement('div'); body.className = 'fig-body'; body.setAttribute('aria-hidden', 'true');
+  body.append(...parts); f.append(body); stage.append(f);
+  figures.push(() => annotate(rulers(body)));
+}
+function rulers(body) {
+  body.querySelectorAll('.m, .m-c, .m-t, .m-lines').forEach((n) => n.remove());
+  const o = body.getBoundingClientRect(), W = o.width;
+  const box = (el) => { const r = el.getBoundingClientRect(); return { x: r.left - o.left, y: r.top - o.top, w: r.width, h: r.height, r: r.right - o.left, b: r.bottom - o.top }; };
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'm-lines'); body.append(svg);
+  const line = (cat, x1, y1, x2, y2) => { const l = document.createElementNS(svg.namespaceURI, 'line'); l.setAttribute('class', `is-${cat}`); Object.entries({ x1, y1, x2, y2 }).forEach(([k, v]) => l.setAttribute(k, v)); svg.append(l); };
+  const num = (cat, value, x, y, align) => { const n = document.createElement('div'); n.className = `m-t is-${cat} at-${align}`; Object.assign(n.style, { left: x + 'px', top: y + 'px' }); n.textContent = value; body.append(n); };
+  const block = (cat, x, y, w, h) => { const n = document.createElement('div'); n.className = `m is-${cat}`; Object.assign(n.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' }); body.append(n); };
+  const left = (cat, value, ax, y) => { line(cat, ax, y, -24, y); num(cat, value, -30, y, 'left'); };
+  const right = (cat, value, ax, y) => { line(cat, ax, y, W + 24, y); num(cat, value, W + 30, y, 'right'); };
+  const top = (cat, value, x, ay) => { line(cat, x, ay, x, -12); num(cat, value, x, -22, 'center'); };
+  const bottom = (cat, value, x, ay) => { line(cat, x, ay, x, o.height + 12); num(cat, value, x, o.height + 22, 'center'); };
+  /* A size is a bracket that spans exactly what it measures */
+  const span = (value, x, y1, y2, side) => { line('size', x, y1, x, y2); line('size', x - 4, y1, x + 4, y1); line('size', x - 4, y2, x + 4, y2); num('size', value, x + (side === 'left' ? -8 : 8), (y1 + y2) / 2, side); };
+  const arc = (el, which) => {
+    const b = box(el), edge = `${which[0] === 'b' ? 'Bottom' : 'Top'}${which[1] === 'r' ? 'Right' : 'Left'}`, R = parseFloat(getComputedStyle(el)[`border${edge}Radius`]);
+    const n = document.createElement('div'); n.className = 'm-c is-radius';
+    Object.assign(n.style, { left: (which[1] === 'r' ? b.r - R : b.x) + 'px', top: (which[0] === 'b' ? b.b - R : b.y) + 'px', width: R + 'px', height: R + 'px', [`border${edge}Radius`]: R + 'px', [`border${which[0] === 'b' ? 'Bottom' : 'Top'}Width`]: '2px', [`border${which[1] === 'r' ? 'Right' : 'Left'}Width`]: '2px' });
+    body.append(n);
+    return { value: Math.round(R), x: which[1] === 'r' ? b.r : b.x, y: which[0] === 'b' ? b.b - R / 2 : b.y + R / 2, top: b.y, cx: which[1] === 'r' ? b.r - R / 2 : b.x + R / 2 };
+  };
+  return { box, block, left, right, top, bottom, span, arc, W, H: o.height, num };
+}
+const part = (cls, tag = 'div') => { const n = document.createElement(tag); n.className = cls; return n; };
+const plainRow = (o) => { const r = buildRow(o); r.removeAttribute('role'); r.removeAttribute('tabindex'); return r; };
+
+{ // Rows
+  const cab = part('cabinet'), menu = part('menu');
+  const lab = part('sec-label'); lab.textContent = 'Section';
+  const a = plainRow({ text: 'Item one', icon: 'four', kbd: '⌥⌘1' }), b = plainRow({ text: 'Item two', icon: 'four' }), sep = part('sep'), c = plainRow({ text: 'Item three', icon: 'folder', submenu: true });
+  menu.append(lab, a, b, sep, c);
+  figure('Rows', [cab, menu], ({ box, block, left, right, top, span, arc }) => {
+    const C = box(cab), M = box(menu), L = box(lab), A = box(a), B = box(b), S = box(sep), D = box(c), ic = box(a.querySelector('.lead')), tx = box(a.querySelector('.label')), tr = box(a.querySelector('.trail'));
+    block('padding', A.x, A.y, ic.x - A.x, A.h); top('padding', Math.round(ic.x - A.x), A.x + (ic.x - A.x) / 2, A.y);
+    top('size', Math.round(ic.w), ic.x + ic.w / 2, ic.y);
+    block('gap', ic.r, A.y, tx.x - ic.r, A.h); top('gap', Math.round(tx.x - ic.r), ic.r + (tx.x - ic.r) / 2, A.y);
+    block('padding', tr.r, A.y, A.r - tr.r, A.h); top('padding', Math.round(A.r - tr.r), tr.r + (A.r - tr.r) / 2, A.y);
+    span(Math.round(C.h), -12, C.y, C.b, 'left');
+    span(Math.round(L.h), -12, L.y, L.b, 'left');
+    span(Math.round(B.h), -12, B.y, B.b, 'left');
+    block('gap', A.x, A.b, A.w, B.y - A.b); right('gap', Math.round(B.y - A.b), A.r, A.b + 1);
+    block('margin', S.x, S.y - 8, S.w, 8); right('margin', 8, S.r, S.y - 4);
+    block('margin', S.x, S.b, S.w, 8); right('margin', 8, S.r, S.b + 8);
+    block('padding', M.x, D.b, M.w, M.b - D.b); right('padding', Math.round(M.b - D.b), M.r, D.b + 2);
+    const r = arc(cab, 'tr'); right('radius', r.value, r.x, r.y);
+  });
+}
+{ // Sub drawer
+  const menu = part('menu'), parent = plainRow({ text: 'Open folder', icon: 'folder', submenu: true }), wrap = part('wrap'), sub = part('menu sub');
+  parent.classList.add('is-open');
+  const rows = ['Item one', 'Item two', 'Item three'].map((text, i) => plainRow({ text, meta: String(1910 + i * 20) }));
+  sub.append(...rows); wrap.append(parent, sub); menu.append(wrap);
+  figure('Sub drawer', [menu], ({ box, block, left, right, span, arc }) => {
+    const M = box(menu), P = box(parent), S = box(sub), [r1, r2, r3] = rows.map(box);
+    const inner = box(rows[0].querySelector('.sans')), mid = box(rows[1].querySelector('.sans')), midLabel = box(rows[1].querySelector('.label')), midTrail = box(rows[1].querySelector('.trail'));
+    /* From the drawer edge to the text there are two steps: margin, then row inset */
+    block('margin', M.x + 4, r1.y, S.x - M.x - 4, r1.h); left('margin', Math.round(S.x - M.x - 4), M.x + 4, r1.y + r1.h / 2);
+    block('padding', r2.x, r2.y, mid.x - r2.x, r2.h); left('padding', Math.round(mid.x - r2.x), r2.x, r2.y + r2.h / 2);
+    /* The space between name and year is whatever is left over, then a fixed gap */
+    block('gap', midLabel.r, r2.y, midTrail.x - midLabel.r, r2.h); right('gap', Math.round(midTrail.x - midLabel.r), midTrail.x, r2.y + r2.h / 2);
+    block('fill', mid.r, r2.y, midLabel.r - mid.r, r2.h);
+    const n = document.createElement('div'); n.className = 'm-t is-fill at-center'; n.textContent = 'fills space'; Object.assign(n.style, { left: (mid.r + midLabel.r) / 2 + 'px', top: r2.y + r2.h / 2 + 'px' }); sub.closest('.fig-body').append(n);
+    block('gap', S.x, P.b, S.w, S.y - P.b); right('gap', Math.round(S.y - P.b), S.r, P.b + 1);
+    block('gap', r1.x, r1.b, r1.w, r2.y - r1.b); right('gap', Math.round(r2.y - r1.b), r1.r, r1.b + 1);
+    span(Math.round(r3.h), S.r + 12, r3.y, r3.b, 'right');
+    block('margin', S.x, S.b, S.w, M.b - S.b - 4); right('margin', Math.round(M.b - S.b - 4), S.r, S.b + 6);
+    const c = arc(sub, 'tl'); left('radius', c.value, c.x, c.y);
+  });
+}
+{ // Drawer front
+  const front = part('front'), hold = part('holder', 'span'), pull = part('pull', 'span');
+  hold.textContent = 'Label'; pull.textContent = 'Open drawer'; front.append(hold, pull);
+  figure('Drawer front', [front], ({ box, block, right, top, bottom, span, arc }) => {
+    const F = box(front), H = box(hold), P = box(pull), T = box(pull);
+    span(Math.round(F.h), -12, F.y, F.b, 'left');
+    block('padding', F.x + 1, F.y + 16, H.x - F.x - 1, F.h - 32); top('padding', Math.round(H.x - F.x - 1), F.x + (H.x - F.x) / 2, F.y + 16);
+    block('padding', P.r, F.y + 16, F.r - 1 - P.r, F.h - 32); top('padding', Math.round(F.r - 1 - P.r), P.r + (F.r - P.r) / 2, F.y + 16);
+    span(Math.round(H.h), H.r + 12, H.y, H.b, 'right');
+    block('padding', H.x + 1, H.y + 1, 8, H.h - 2); bottom('padding', 8, H.x + 5, H.b);
+    const a = arc(hold, 'tr'); top('radius', a.value, a.cx, a.top);
+    const c = arc(front, 'br'); right('radius', c.value, c.x, c.y);
+  });
+}
+const drawRedlines = () => figures.forEach((draw) => draw());
+
+function start() { drawRedlines(); }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
+start();
+addEventListener('resize', start);
+</script>
+</body>
+</html>

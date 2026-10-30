@@ -93,6 +93,7 @@
     <button role="tab" id="tab-week2" aria-controls="week2-panel" aria-selected="false" tabindex="-1">Week 2</button>
     <button role="tab" id="tab-week3" aria-controls="week3-panel" aria-selected="false" tabindex="-1">Week 3</button>
     <button role="tab" id="tab-week4" aria-controls="week4-panel" aria-selected="false" tabindex="-1">Week 4</button>
+    <button role="tab" id="tab-week6" aria-controls="week6-panel" aria-selected="false" tabindex="-1">Week 6</button>
   </nav>
   <a class="checklist-link" href="design-checklist/" aria-label="Design checklist" title="Design checklist"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m6 8 1.5 1.5L10 7M12 8h6m-12 7 1.5 1.5L10 14m2 1h6"/></svg></a>
   </div>
@@ -113,6 +114,10 @@
   <section id="week4-panel" role="tabpanel" aria-labelledby="tab-week4" hidden>
     <h2>Week 4 <span>Sliders · Matter of Fact, Quirky & Futuristic</span></h2>
     <div class="grid" id="week4"></div>
+  </section>
+  <section id="week6-panel" role="tabpanel" aria-labelledby="tab-week6" hidden>
+    <h2>Week 6 <span>Menus · Archival</span></h2>
+    <div class="grid" id="week6"></div>
   </section>
 </main>
 
@@ -159,6 +164,10 @@
     { dir: "dutch-auction", name: "Dutch Auction", desc: "Futuristic · A silver flower-auction clock with an editable neon price on smoked glass, a glowing tick ring, and a crimson needle. Stepped and continuous." },
   ];
 
+  const week6 = [
+    { dir: "archival-menu", name: "Archival Menu", desc: "Archival · A drawer of buttons on a lightbox. Labels type out key by key, ink slowly bleeds on press, and each object brings out its own typed record. Vertical and horizontal versions." },
+  ];
+
   function render(id, week, list) {
   const grid = document.getElementById(id);
   for (const p of list) {
@@ -180,6 +189,7 @@
     grid.appendChild(card);
   }
   }
+  render("week6", "week6", week6);
   render("week4", "week4", week4);
   render("week3", "week3", week3);
   render("week2", "week2", week2);
