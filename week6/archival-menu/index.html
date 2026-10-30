@@ -10,19 +10,19 @@
 <style>
   :root {
     /* Colour */
-    --paper: #e8e4dc; --note: rgba(250,247,240,.28); --ink: #1c1a17; --ink-read: #3a3731; --ink-2: #66625a; --graphite: #2f2d28;
-    --rule: rgba(28,26,23,.2);
-    --slate: #47443e;
+    --paper: #ebe7dd; --note: transparent; --ink: #352e80; --ink-read: #443c94; --ink-2: #5e56a0; --graphite: #4a4398; --line: rgba(74,67,152,.55); --line-soft: rgba(74,67,152,.32);
+    --rule: var(--line-soft);
+    --slate: #4a4398;
     /* One scale for everything. Values follow the Material 3 menu. Radius: 16 container, 12 row, 4 small */
-    --r: 16px; --r-row: 12px; --r-paper: 4px;
+    --r: 0px; --r-row: 0px; --r-paper: 0px;
     --t-label: 14px; --t-meta: 12px; --t-caps: 12px; --t-title: 26px;
     /* Menu geometry: Material 3 redlines */
     --menu-w: 280px; --menu-pad: 4px;
-    --surface: rgba(248,245,238,.56); --well: rgba(244,240,232,.42); --flap: #e2ded5; --ink-shadow: rgba(40,36,30,.14); --pull: .9s; --pull-ease: cubic-bezier(.5,0,.15,1);
+    --surface: transparent; --well: rgba(235,231,221,.97); --flap: #ebe7dd; --ink-shadow: rgba(40,36,30,.14); --pull: .9s; --pull-ease: cubic-bezier(.5,0,.15,1);
     --row-h: 48px; --row-r: var(--r-row); --front-h: 48px; --row-gap: 2px; --row-x: 12px; --row-inner: 8px;
     --icon: 20px; --label-h: 32px; --sep-y: 8px; --sub-w: 296px; --sub-overlap: 4px;
     /* Motion */
-    --soft: cubic-bezier(.33,0,.2,1); --bleed-time: .9s; --bleed: 0 0 .3px currentColor; --ink-on: #2c2a25;
+    --soft: cubic-bezier(.33,0,.2,1); --bleed-time: .9s; --bleed: 0 0 .3px currentColor; --ink-on: #2f2878;
     --ease: cubic-bezier(.22,.8,.24,1);
     --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .1 0 0 0 .8 -.28'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -260,10 +260,65 @@
     /* Typing is the hover signal, so without it the label is underlined instead */
     .row.is-hover .sans { box-shadow: 0 1px 0 currentColor; }
   }
+
+  /* ── Ledger: thin lines on continuous-form paper. Solid for columns, dashed for divisions, dotted for rows ── */
+  .sheet { padding-left: 48px; }
+  body[data-version="horizontal"] .sheet { padding-left: 48px; }
+  .holes { position: fixed; z-index: 1; left: 10px; top: 0; bottom: 0; width: 16px; pointer-events: none; background: radial-gradient(circle, #f4f1e9 0 3.5px, rgba(60,54,110,.55) 3.6px 4.4px, transparent 4.6px) 0 8px / 16px 34px repeat-y; }
+  .margin-line { position: fixed; z-index: 1; left: 34px; top: 0; bottom: 0; width: 1px; background: var(--line); pointer-events: none; }
+  .plate { gap: 0; padding: 0; border-top: 1px solid var(--line); border-bottom: 1px dashed var(--line); }
+  .tile { border-left: 1px solid var(--line-soft); }
+  .tile:first-child { border-left: 0; }
+  .tile::before { display: none; }
+  .tile-cap { left: 8px; }
+  .view::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, rgba(235,231,221,.5) .8px, transparent 1.1px) 0 0 / 3px 3px; }
+  .view img { filter: url(#scan); }
+  .backsheet img, .ghost-object { filter: url(#scan); }
+  .drawing { width: 200px; }
+  .tag { transform: none; box-shadow: none; padding: 8px 0; border-block: 1px dashed var(--line); }
+  .tag::before { display: none; }
+  .scatter .l { color: var(--ink); }
+
+  /* Same structure and motion as before: the front is pulled forward and the tray follows. Only the drawing changes */
+  .cabinet { background: none; border: 0; border-top: 1px solid var(--line); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .hrow-cab .cabinet { border-top: 0; }
+  /* Opening carries its momentum, and only just slows at the end */
+  .drawer:has(> .front[aria-expanded="true"]) { --pull-ease: cubic-bezier(.45,.05,.4,1); }
+  .hrow { gap: 0; counter-reset: drawer; }
+  .hrow .drawer { counter-increment: drawer; border-left: 1px solid var(--line-soft); }
+  .hrow .drawer:first-child { border-left: 0; }
+  .front { height: var(--front-h); padding: 0 8px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .front:hover .holder, .front[aria-expanded="true"] .holder { color: var(--ink); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
+  .tray { border: 0; background: var(--well); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .tray:has(.menu:not([hidden])) { box-shadow: inset 1px 0 var(--line-soft), inset -1px 0 var(--line-soft), inset 0 -1px var(--line); }
+  .holder { height: auto; padding: 0; border: 0; border-radius: 0; background: none; line-height: 1.2; }
+  .hrow .holder::before { content: counter(drawer, decimal-leading-zero) " —— "; color: var(--ink-2); }
+  .badge { height: auto; padding: 0; border: 0; background: none; line-height: 1.2; }
+  .badge::before { content: "["; } .badge::after { content: "]"; }
+  .menu { background: none; }
+  .menu > .row + .row, .menu > .wrap, .menu.sub > .row + .row { box-shadow: 0 -1px 0 transparent; background-image: linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 3px 1px; background-repeat: repeat-x; background-position: 0 -1px; }
+  .menu > .row + .row, .menu.sub > .row + .row { background-position: 0 0; }
+  .menu > .wrap { background-position: 0 0; }
+  .sep { height: 0; background: none; border-top: 1px dashed var(--line); }
+  .menu.sub { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-left: 1px dotted var(--line); }
+  .config .menu, .state .menu { border-top: 1px dashed var(--line-soft); }
+  .spec { border-top: 1px dashed var(--line); }
+  table th, table td { border-top: 1px dotted var(--line-soft); }
+  .fig-body .menu { box-shadow: inset 0 0 0 1px var(--line-soft); }
+  @media (max-width: 860px) { .holes, .margin-line { display: none; } .sheet, body[data-version="horizontal"] .sheet { padding-left: 24px; } }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="scan" color-interpolation-filters="sRGB">
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer result="tone"><feFuncR type="linear" slope="1.5" intercept="-.2"/><feFuncG type="linear" slope="1.5" intercept="-.2"/><feFuncB type="linear" slope="1.5" intercept="-.2"/></feComponentTransfer>
+    <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="11" result="noise"/>
+    <feColorMatrix in="noise" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 4 -2.1" result="specks"/>
+    <feComposite in="specks" in2="tone" operator="atop" result="worn"/>
+    <feMerge result="mixed"><feMergeNode in="tone"/><feMergeNode in="worn"/></feMerge>
+    <feComponentTransfer in="mixed"><feFuncR type="table" tableValues=".2 .46 .92"/><feFuncG type="table" tableValues=".16 .4 .9"/><feFuncB type="table" tableValues=".52 .72 .87"/></feComponentTransfer>
+  </filter>
   <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
     <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="8" result="n"/>
     <feColorMatrix in="n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6 -1.3" result="tooth"/>
@@ -273,6 +328,7 @@
   </filter>
 </svg>
 <div class="backsheet" id="backsheet" aria-hidden="true"></div>
+<div class="holes" aria-hidden="true"></div><div class="margin-line" aria-hidden="true"></div>
 <div class="sheet">
   <header class="bar">
     <a href="../../#week6">← Back to Week 6</a>
@@ -318,12 +374,12 @@
       <div class="scroller"><table>
         <thead><tr><th>State</th><th>What is happening</th><th>Motion</th><th>Typography</th><th>Colour</th></tr></thead>
         <tbody>
-          <tr><th>Enabled</th><td>The record is in storage</td><td>None. Stored things are still</td><td>Courier Prime capitals, as typed on an index card</td><td>Faded ink, <code>#66625A</code>, so the list sits behind the objects</td></tr>
-          <tr><th>Hover / focus</th><td>Someone is typing the record up</td><td>Keys strike one at a time, in an uneven human rhythm, with a small soft impact</td><td>Each letter lands slightly off the baseline with uneven ink, as on a real machine</td><td>Reading ink, <code>#3A3731</code>, at 84–100% density per letter</td></tr>
-          <tr><th>Pressed</th><td>The record is marked</td><td>Sinks <code>0.6px</code> while a rule draws left to right. Any keys not yet struck speed up and land as it passes</td><td>Same letters, same place, same weight. Ink slowly bleeds at the edges</td><td>Slowly deepens from <code>#3A3731</code> to <code>#2C2A25</code>. Nothing new is introduced</td></tr>
+          <tr><th>Enabled</th><td>The record is in storage</td><td>None. Stored things are still</td><td>Courier Prime capitals, as typed on an index card</td><td>Faded ink, <code>#5E56A0</code>, so the list sits behind the objects</td></tr>
+          <tr><th>Hover / focus</th><td>Someone is typing the record up</td><td>Keys strike one at a time, in an uneven human rhythm, with a small soft impact</td><td>Each letter lands slightly off the baseline with uneven ink, as on a real machine</td><td>Reading ink, <code>#443C94</code>, at 84–100% density per letter</td></tr>
+          <tr><th>Pressed</th><td>The record is marked</td><td>Sinks <code>0.6px</code> while a rule draws left to right. Any keys not yet struck speed up and land as it passes</td><td>Same letters, same place, same weight. Ink slowly bleeds at the edges</td><td>Slowly deepens from <code>#443C94</code> to <code>#2F2878</code>. Nothing new is introduced</td></tr>
           <tr><th>Selected</th><td>It is out on the table</td><td>The rule stays, the three figures fade in from left to right, then the sheet is typed</td><td>The bled ink stays, with the hairline rule beneath</td><td>Full ink against faded neighbours. Nothing is selected until you choose</td></tr>
-          <tr><th>Wordplay</th><td>A sheet has been typed about the object, and its note shows through from the back</td><td>Each letter strikes in turn, as on hover</td><td>The name repeats with letters missing and the rest spaced apart, on the monospaced grid</td><td>Ink takes the object's own colour, so the colour still comes only from the object</td></tr>
-          <tr><th>Menu</th><td>The drawer is pulled open, used, and pushed shut</td><td>The front travels and the contents move with it, emerging from under the cabinet</td><td>A typed card names the drawer. Open drawer and Close drawer are typed key by key, like every label</td><td>Translucent vellum, so what is beneath shows through</td></tr>
+          <tr><th>Wordplay</th><td>A sheet has been typed about the object, and its note shows through from the back</td><td>Each letter strikes in turn, as on hover</td><td>The name repeats with letters missing and the rest spaced apart, on the monospaced grid</td><td>Violet ink, the only colour on the page</td></tr>
+          <tr><th>Menu</th><td>The drawer is pulled open, used, and pushed shut</td><td>The front stays still, and the contents slide out from beneath it</td><td>A typed card names the drawer. Open drawer and Close drawer are typed key by key, like every label</td><td>Paper colour with thin ledger lines</td></tr>
           <tr><th>Submenu</th><td>A smaller drawer is pulled from inside the first</td><td>It extends beneath its row and pushes the front further out. Nothing overlaps</td><td>Same row, name left, year right, sorted oldest first</td><td>Stays faded. A drawer is opened, never selected, so it takes no rule</td></tr>
         </tbody>
       </table></div>
@@ -333,7 +389,7 @@
       <header><h3>Anatomy and spacing</h3><p>In pixels.</p></header>
       <div class="scroller">
         <ul class="legend" aria-label="Colour key">
-          <li class="is-padding">Padding</li><li class="is-margin">Margin</li><li class="is-gap">Gap</li><li class="is-size">Size</li><li class="is-radius">Corner radius</li><li class="is-fill">Fills space</li>
+          <li class="is-padding">Padding</li><li class="is-margin">Margin</li><li class="is-gap">Gap</li><li class="is-size">Size</li><li class="is-fill">Fills space</li>
         </ul>
         <div class="figures" id="redline"></div>
       </div>
@@ -373,21 +429,20 @@
       <div class="scroller"><table>
         <thead><tr><th>Token</th><th>Value</th><th>Source</th></tr></thead>
         <tbody>
-          <tr><th>Radius</th><td>Container and sub drawer <code>16</code>, sticker and note <code>4</code></td><td>Container from Material 3</td></tr>
+          <tr><th>Lines</th><td>Solid for columns, dashed for divisions, dotted for rows, all 1px. No corners and no fills</td><td>Ledger reference</td></tr>
           <tr><th>Text</th><td><code>14</code> labels, <code>12</code> details, <code>10</code> capitals, <code>26</code> title</td><td>Used in both versions</td></tr>
-          <tr><th>Sticker</th><td>Height <code>24</code>, padding <code>8</code>, outline <code>1</code>, text <code>12</code></td><td>Used for drawer names and badges</td></tr>
-          <tr><th>Drawer</th><td>Width <code>280</code>, padding <code>4</code>, translucent well, cabinet edge <code>16</code>, front <code>48</code>, vellum surface</td><td>Vertical width is the Material 3 maximum. Horizontal drawers share the page width equally, like the figures above. Front matches the row height</td></tr>
+          <tr><th>Label</th><td>Drawer number and rule, badge in brackets, text 12</td><td>Ledger reference</td></tr>
+          <tr><th>Drawer</th><td>Vertical width <code>280</code>, horizontal drawers share the page. Padding <code>4</code>, front <code>48</code>. The front is pulled forward and the tray follows</td><td>Material 3 sizes</td></tr>
           <tr><th>Structure</th><td>Three top choices, a separator, then a sub drawer for each century, so no list runs long. Sections stay available, and are shown under Configurations</td><td>Apple</td></tr>
           <tr><th>Open and dismiss</th><td>Opens from the drawer front. Stays open while choosing. Pushes shut <code>300ms</code> after the pointer leaves the whole drawer, on outside click, or on <code>Esc</code></td><td>Apple, WAI-ARIA menu</td></tr>
           <tr><th>Row height / gap</th><td><code>48</code> / <code>2</code></td><td>Material 3</td></tr>
-          <tr><th>Focus ring radius</th><td><code>12</code>, only seen when using a keyboard, as rows have no fill</td><td>Material 3 row radius</td></tr>
           <tr><th>Row inset / slot gap</th><td><code>12</code> / <code>8</code></td><td>Material 3</td></tr>
           <tr><th>Icon, section label height</th><td><code>20</code>, <code>32</code></td><td>Material 3</td></tr>
           <tr><th>Separator</th><td><code>1</code>, inset <code>12</code>, margin <code>8</code></td><td>Apple, inset to the label edge</td></tr>
           <tr><th>Submenu</th><td>A sub drawer that extends in place, its folder flap tipping open, edges aligned to the parent's icon and chevron, radius <code>16</code>, row inset <code>12</code>, no added padding, vellum surface, with no shadow or outline, chevron turns <code>90°</code>. Replaces the flyout, so no surfaces overlap</td><td>Design decision</td></tr>
           <tr><th>Placement</th><td>Figures and object note scroll in the left column. Menu is fixed in a right column and never covers them</td><td>Reference film and poster</td></tr>
           <tr><th>Type</th><td>Courier Prime throughout, in capitals for menu labels, drawer actions, stickers and headings</td><td>Reference film</td></tr>
-          <tr><th>Colour</th><td>Paper <code>#E8E4DC</code>, ink <code>#1C1A17</code>, faded ink <code>#66625A</code>, translucent vellum over the page</td><td>Reference film</td></tr>
+          <tr><th>Colour</th><td>Paper <code>#EBE7DD</code>, violet ink <code>#352E80</code>, faded ink <code>#5E56A0</code></td><td>Ledger reference</td></tr>
           <tr><th>Keyboard</th><td><code>↑ ↓</code> move, <code>Home End</code> jump, <code>→ Enter Space</code> open or select, <code>← Esc</code> close, <code>⌥⌘1</code> shortcut</td><td>Apple, WAI-ARIA menu</td></tr>
           <tr><th>Reduced motion</th><td>Letters stay in place with no strikes, and hover adds an underline</td><td></td></tr>
         </tbody>
@@ -638,7 +693,7 @@ function drawing(it) {
   const r = 58, cx = 108, cy = 66, top = 150;
   const s = it.holes === 4 ? 13 : 15;
   const holes = it.holes === 4 ? [[-s, -s], [s, -s], [-s, s], [s, s]] : it.holes === 2 ? [[-s, 0], [s, 0]] : [];
-  return `<svg class="drawing" viewBox="0 0 216 196" fill="none" stroke="currentColor" stroke-width="1.15" role="img" aria-label="Plan and section of ${it.name}, ${it.mm} millimetres across">
+  return `<svg class="drawing" viewBox="0 0 216 196" fill="none" stroke="currentColor" stroke-width=".8" role="img" aria-label="Plan and section of ${it.name}, ${it.mm} millimetres across">
     <circle cx="${cx}" cy="${cy}" r="${r}"/><circle class="dots" cx="${cx}" cy="${cy}" r="${r - 8}"/>
     <path d="M${cx - r - 8} ${cy}H${cx + r + 8}M${cx} ${cy - r - 6}V${cy + r + 6}" class="dots"/>
     ${holes.map(([x, y]) => `<circle cx="${cx + x}" cy="${cy + y}" r="4"/>`).join('')}
@@ -747,7 +802,7 @@ function closeOnLeave(section, drawers) {
 $('backsheet').innerHTML = Object.values(ITEMS).map((it) => `<div><p>${it.note} ${it.note}</p><img src="buttons/${it.img}.png" alt=""><p>${it.no} ${it.mat} ${it.date}. ${it.note}</p></div>`).join('');
 
 /* Version A: one vertical drawer on the right */
-const vertical = makeDrawer({ front: $('anchor'), tray: $('tray'), menu: mainMenu, list: MENU, pullEl: $('pullText'), pullText: (on) => on ? 'Close drawer' : 'Open drawer' });
+const vertical = makeDrawer({ front: $('anchor'), tray: $('tray'), menu: mainMenu, list: MENU, pullEl: $('pullText'), pullText: (on) => on ? '[-]' : '[+]' });
 closeOnLeave($('colMenu'), [vertical]);
 
 /* Version B: a row of drawers side by side, one open at a time */
@@ -758,7 +813,7 @@ HDRAWERS.forEach(({ label, list }) => {
   col.innerHTML = `<div class="tray"></div><button class="front" type="button" aria-haspopup="menu" aria-expanded="false"><span class="holder">${label}</span><span class="pull"></span></button>`;
   $('hRow').append(col);
   const menu = document.createElement('div'); menu.className = 'menu'; menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', label);
-  const d = makeDrawer({ front: col.querySelector('.front'), tray: col.querySelector('.tray'), menu, list, pullEl: col.querySelector('.pull'), pullText: (on) => on ? 'Close' : 'Open', onOpen: () => hDrawers.forEach((o) => o !== d && o.set(false)) });
+  const d = makeDrawer({ front: col.querySelector('.front'), tray: col.querySelector('.tray'), menu, list, pullEl: col.querySelector('.pull'), pullText: (on) => on ? '[-]' : '[+]', onOpen: () => hDrawers.forEach((o) => o !== d && o.set(false)) });
   hDrawers.push(d);
   d.front.setAttribute('role', 'menuitem');
   /* As in a menu bar, once one drawer is open, moving along the row opens the next */
@@ -885,7 +940,6 @@ const plainRow = (o) => { const r = buildRow(o); r.removeAttribute('role'); r.re
     block('margin', S.x, S.y - 8, S.w, 8); right('margin', 8, S.r, S.y - 4);
     block('margin', S.x, S.b, S.w, 8); right('margin', 8, S.r, S.b + 8);
     block('padding', M.x, D.b, M.w, M.b - D.b); right('padding', Math.round(M.b - D.b), M.r, D.b + 2);
-    const r = arc(cab, 'tr'); right('radius', r.value, r.x, r.y);
   });
 }
 { // Sub drawer
@@ -907,7 +961,6 @@ const plainRow = (o) => { const r = buildRow(o); r.removeAttribute('role'); r.re
     block('gap', r1.x, r1.b, r1.w, r2.y - r1.b); right('gap', Math.round(r2.y - r1.b), r1.r, r1.b + 1);
     span(Math.round(r3.h), S.r + 12, r3.y, r3.b, 'right');
     block('margin', S.x, S.b, S.w, M.b - S.b - 4); right('margin', Math.round(M.b - S.b - 4), S.r, S.b + 6);
-    const c = arc(sub, 'tl'); left('radius', c.value, c.x, c.y);
   });
 }
 { // Drawer front
@@ -920,8 +973,6 @@ const plainRow = (o) => { const r = buildRow(o); r.removeAttribute('role'); r.re
     block('padding', P.r, F.y + 16, F.r - 1 - P.r, F.h - 32); top('padding', Math.round(F.r - 1 - P.r), P.r + (F.r - P.r) / 2, F.y + 16);
     span(Math.round(H.h), H.r + 12, H.y, H.b, 'right');
     block('padding', H.x + 1, H.y + 1, 8, H.h - 2); bottom('padding', 8, H.x + 5, H.b);
-    const a = arc(hold, 'tr'); top('radius', a.value, a.cx, a.top);
-    const c = arc(front, 'br'); right('radius', c.value, c.x, c.y);
   });
 }
 const drawRedlines = () => figures.forEach((draw) => draw());
