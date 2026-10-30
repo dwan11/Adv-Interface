@@ -41,12 +41,11 @@
   .sheet { padding: 16px calc(var(--menu-w) + 72px) 48px 24px; }
   /* The menu has its own column on the right and stays there while the page scrolls beside it */
   .rail { position: fixed; z-index: 7; top: 16px; right: 12px; width: calc(var(--menu-w) + 24px); max-height: calc(100vh - 16px); padding: 0 12px 28px; overflow-y: auto; }
-  .bar { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; padding-bottom: 12px; font: 400 var(--t-caps)/1.3 "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+  .bar { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; font: 400 var(--t-caps)/1.3 "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
   .bar a { color: inherit; text-underline-offset: 3px; }
   :focus-visible { outline: 2px solid var(--slate); outline-offset: 2px; }
 
   /* ── Plate: objects laid flat on a lightbox and photographed from above ── */
-  .bar-end { display: flex; justify-content: space-between; gap: 12px; }
   .switch { display: flex; gap: 12px; }
   .switch button { appearance: none; border: 0; padding: 0; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink-2); cursor: pointer; text-underline-offset: 3px; }
   .switch button[aria-pressed="true"] { color: var(--ink); text-decoration: underline; }
@@ -88,7 +87,7 @@
   .ghost-text { position: absolute; top: 40px; right: 0; width: min(100%, 44ch); transform: scaleX(-1); font-size: var(--t-label); line-height: 1.4; color: var(--ink); opacity: .13; }
   .ghost-text p { margin: 0 0 24px; }
   .scatter { position: absolute; inset: 0; }
-  .scatter .l { position: absolute; top: calc(var(--row) * 1.4em); right: calc(var(--col) * 1ch); font-size: var(--t-label); line-height: 1; color: var(--object-ink); animation: strike .17s var(--soft) both; animation-delay: calc(var(--t) * 1ms); }
+  .scatter .l { position: absolute; top: calc(var(--row) * 1.4em); right: calc(var(--col) * 1ch); font-size: var(--t-label); line-height: 1; color: var(--object-ink); animation: strike .12s var(--soft) both; animation-delay: calc(var(--t) * 1ms); }
   .mark { position: absolute; font-size: var(--t-meta); line-height: 1.3; }
   .mark.when { right: 0; text-align: right; }
   .col-menu { position: relative; width: 100%; }
@@ -145,7 +144,7 @@
   .l { display: inline-block; }
   /* Hover: the page clears, then each key strikes. Letters land at once, with a small soft impact,
      an uneven rhythm, and the slight misalignment and uneven ink of a real machine */
-  .row.is-hover .l, .front.is-hover .l { animation: clear .14s var(--soft) forwards, strike .17s var(--soft) forwards; animation-delay: 0ms, calc(var(--t) * 1ms + 140ms); color: var(--ink-read); }
+  .row.is-hover .l, .front.is-hover .l { animation: clear .08s var(--soft) forwards, strike .12s var(--soft) forwards; animation-delay: 0ms, calc(var(--t) * 1ms + 70ms); color: var(--ink-read); }
   @keyframes clear { to { opacity: 0; } }
   @keyframes strike { 0% { opacity: 0; transform: translateY(-1.8px); } 30% { opacity: 1; transform: translateY(.5px); } 100% { opacity: var(--press); transform: translateY(var(--dy)); } }
   .row.is-hover .lead, .row.is-hover .trail { color: var(--ink-read); }
@@ -178,6 +177,7 @@
 
   /* ── Poster footer ──────────────────────────────────────────────── */
   .note { padding: 12px 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .note h1 { margin: 0 0 8px; font: 400 var(--t-caps)/1.3 "Libre Baskerville", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; }
   .note p { max-width: 38ch; margin: 0; line-height: 1.3; }
 
@@ -241,8 +241,6 @@
   @media (max-width: 720px) {
     .plate { grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-rows: 240px; }
     .tile { overflow: hidden; }
-    .bar { grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .bar-end { grid-column: 1 / -1; }
     .view { transform: scale(.72); }
     .tag { transform: rotate(-1.2deg) scale(.8); }
   }
@@ -263,8 +261,7 @@
 <div class="sheet">
   <header class="bar">
     <a href="../../#week6">← Back to Week 6</a>
-    <span>Buttons, 1870–1964</span>
-    <span class="bar-end">10 objects<span class="switch" role="group" aria-label="Version"><button type="button" data-v="vertical">Vertical</button><button type="button" data-v="horizontal">Horizontal</button></span></span>
+    <span class="bar-end"><span class="switch" role="group" aria-label="Version"><button type="button" data-v="vertical">Vertical</button><button type="button" data-v="horizontal">Horizontal</button></span></span>
   </header>
 
   <main>
@@ -291,7 +288,7 @@
 
   <div class="lower">
     <section class="note" aria-label="Object note">
-      <h1 id="noteHead">Object note</h1>
+      <h1 class="sr-only">Archival Menu</h1>
       <p id="noteBody"></p>
     </section>
     <div class="field" id="field" aria-hidden="true" hidden></div>
@@ -354,13 +351,13 @@
       <div class="scroller"><table>
         <thead><tr><th>Moment</th><th>Timing</th><th>Curve</th></tr></thead>
         <tbody>
-          <tr><th>Label clears on hover</th><td><code>140ms</code></td><td><code>cubic-bezier(.33,0,.2,1)</code></td></tr>
-          <tr><th>Key strike</th><td><code>170ms</code> impact, each key <code>50–155ms</code> after the last, <code>110ms</code> more between words</td><td>Same</td></tr>
+          <tr><th>Label clears on hover</th><td><code>80ms</code></td><td><code>cubic-bezier(.33,0,.2,1)</code></td></tr>
+          <tr><th>Key strike</th><td><code>120ms</code> impact, each key <code>30–48ms</code> after the last, <code>50ms</code> more between words</td><td>Same</td></tr>
           <tr><th>Leaving, at any point</th><td><code>320ms</code>, from wherever the ink is</td><td>Same</td></tr>
           <tr><th>Press / release</th><td><code>160ms</code> / <code>420ms</code>, held <code>420ms</code> so type and rule finish together, then the record files</td><td>Same</td></tr>
           <tr><th>Ink bleed</th><td><code>900ms</code>, continues into selected</td><td>Ease out</td></tr>
           <tr><th>Pencil rule</th><td><code>420ms</code>, linear, starts on press, retracts if cancelled</td><td>Linear, so the keys can track it</td></tr>
-          <tr><th>Sub drawer pulls / pushes</th><td><code>900ms</code>, opens after a <code>180ms</code> hover</td><td>Same as the drawer</td></tr>
+          <tr><th>Sub drawer pulls / pushes</th><td><code>900ms</code>, opens after hovering for <code>180ms</code>, and only once the pointer has moved onto it</td><td>Same as the drawer</td></tr>
           <tr><th>Drawer pulls / pushes</th><td><code>900ms</code>, contents move with the front</td><td><code>cubic-bezier(.5,0,.15,1)</code>, slow to start with a long settle</td></tr>
           <tr><th>Preview replaces object</th><td>Old object out <code>120ms</code>, new object in <code>320ms</code>, never overlapped</td><td>Same</td></tr>
           <tr><th>Figures 1 to 3 fade in</th><td><code>640ms</code>, each <code>90ms</code> after the last</td><td>Same</td></tr>
@@ -444,8 +441,8 @@ function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0)
 function typedLetters(text) {
   let seed = hash(text), t = 0;
   const rand = () => (seed = Math.imul(seed ^ (seed >>> 15), 2654435761) >>> 0) / 4294967296;
-  return text.split(' ').map((w, n) => { if (n) t += 110; return `<span class="w">${[...w].map((c) => {
-    const at = t; t += 50 + rand() * rand() * 105;
+  return text.split(' ').map((w, n) => { if (n) t += 50; return `<span class="w">${[...w].map((c) => {
+    const at = t; t += 30 + rand() * 18;
     return `<span class="l" style="--t:${Math.round(at)};--dy:${((rand() - .5) * .9).toFixed(2)}px;--press:${(.84 + rand() * .16).toFixed(2)}">${c}</span>`;
   }).join('')}</span>`; }).join('');
 }
@@ -493,6 +490,12 @@ const endHover = (row) => { if (row.classList.contains('is-hover')) settle(row, 
 const coarse = (e) => e.pointerType && e.pointerType !== 'mouse';
 function rowsOf(menu) { return [...menu.children].flatMap((c) => c.classList.contains('row') ? [c] : c.classList.contains('wrap') ? [c.firstElementChild] : []); }
 
+/* When a drawer slides under a still pointer the browser reports a hover. Only real movement counts */
+let lastPointer = null;
+addEventListener('pointermove', (e) => { lastPointer = [e.clientX, e.clientY]; });
+addEventListener('pointerdown', (e) => { lastPointer = [e.clientX, e.clientY]; }, true);
+const reallyMoved = (e) => !lastPointer || lastPointer[0] !== e.clientX || lastPointer[1] !== e.clientY;
+
 function wireMenu(menu, { onPreview = () => {}, onCommit = () => {}, onEscape = () => {}, parent = null, closeSelf = null } = {}) {
   const rows = rowsOf(menu);
   const setHover = (row, focus) => {
@@ -512,7 +515,7 @@ function wireMenu(menu, { onPreview = () => {}, onCommit = () => {}, onEscape = 
     }, Math.max(0, RULE_MS - (performance.now() - (hold.get(row) || 0))));
   };
   rows.forEach((row, i) => {
-    row.addEventListener('pointerenter', (e) => { if (coarse(e)) return; setHover(row, true); });
+    row.addEventListener('pointermove', (e) => { if (coarse(e) || row.classList.contains('is-hover') || !reallyMoved(e)) return; setHover(row, true); });
     row.addEventListener('pointerleave', (e) => {
       if (!row._releasing) row.classList.remove('is-pressed');
       if (coarse(e)) return;
@@ -582,9 +585,9 @@ function fillMenu(menu, list, handlers) {
         entry.items.forEach((id, n) => { const r = itemRow(id, true, true); r.style.setProperty('--n', n); el.append(r); });
         return wired = wireMenu(el, { ...handlers, closeSelf: () => close(true) });
       };
-      row.addEventListener('pointerenter', (e) => { if (coarse(e)) return; clearTimeout(closeTimer); clearTimeout(openTimer); openTimer = setTimeout(() => row._openSub(false), 180); });
+      row.addEventListener('pointermove', (e) => { if (coarse(e) || row._tried || !reallyMoved(e)) return; row._tried = true; clearTimeout(closeTimer); clearTimeout(openTimer); openTimer = setTimeout(() => row._openSub(false), 180); });
       row._closeSub = () => close(false);
-      row.addEventListener('pointerleave', () => clearTimeout(openTimer));
+      row.addEventListener('pointerleave', () => { row._tried = false; clearTimeout(openTimer); });
       return;
     }
     menu.append(itemRow(entry.id, entry.plain, entry.dated));
@@ -621,7 +624,7 @@ function wordplay(it) {
     letters.forEach((c) => {
       if (rand() > (full ? .72 : .2) || col > 40) return;
       html += `<span class="l" style="--row:${row};--col:${col};--t:${Math.round(t)};--dy:${((rand() - .5) * .9).toFixed(2)}px;--press:${(.84 + rand() * .16).toFixed(2)}">${c}</span>`;
-      col += 1 + Math.round(rand() * rand() * reach / word.length * 3); t += 28 + rand() * 40;
+      col += 1 + Math.round(rand() * rand() * reach / word.length * 3); t += 16 + rand() * 14;
     });
   });
   const back = [`${it.note} ${it.note}`, `${it.note} ${it.note}`, it.note].map((n) => `<p>${n}</p>`).join('');
@@ -661,7 +664,6 @@ function commit(id) {
   $('verso').innerHTML = drawing(it);
   delete $('tag').dataset.empty;
   $('tag').innerHTML = `<dl><dt>SUBJECT</dt><dd>${it.name}</dd><dt>MEDIUM</dt><dd>${it.mat}</dd><dt>UNITS</dt><dd>${it.mm} mm</dd><dt>DATE</dt><dd>${it.date}</dd><dt>FILE</dt><dd>${it.no}</dd></dl>`;
-  $('noteHead').textContent = 'Object note ' + it.no.slice(-3);
   $('noteBody').textContent = it.note;
   $('field').hidden = false; $('field').style.setProperty('--object-ink', it.ink); $('field').innerHTML = wordplay(it);
   document.querySelectorAll('.live .row').forEach((r) => {
@@ -681,8 +683,6 @@ function preview(id) {
   recto.classList.toggle('previewing', !!show);
   $('rectoCap').textContent = show ? `Viewing ${ITEMS[id].name}` : 'Fig. 1, object';
 }
-$('noteHead').textContent = 'Object note';
-$('noteBody').textContent = 'Nothing is out on the table. Pull the drawer open and choose an object to bring out its record.';
 
 const mainMenu = document.createElement('div');
 mainMenu.className = 'menu'; mainMenu.id = 'mainMenu'; mainMenu.setAttribute('role', 'menu'); mainMenu.setAttribute('aria-label', 'Buttons');
@@ -709,6 +709,7 @@ function makeDrawer({ front, tray, menu, list, pullEl, pullText, onOpen = () => 
       return;
     }
     menu.querySelectorAll('.is-hover').forEach((r) => r.classList.remove('is-hover'));
+    menu.querySelectorAll('.row').forEach((r) => { r._tried = false; });
     menu._closeSub(); preview(null);
     tray.style.height = tray.offsetHeight + 'px'; void tray.offsetHeight; tray.style.height = '0px';
     if (refocus) front.focus();
