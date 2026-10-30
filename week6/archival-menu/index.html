@@ -53,11 +53,10 @@
   /* Version B: drawers side by side under one cabinet edge. The row keeps its height, so an open
      drawer floats over the page below on a temporary surface, and nothing moves */
   .hcabinet { display: none; position: relative; z-index: 5; margin-top: 4px; }
-  .hrow { display: grid; grid-template-columns: repeat(4, minmax(0, var(--menu-w))); gap: 12px; align-items: start; grid-auto-rows: var(--front-h); }
+  .hrow { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; align-items: start; grid-auto-rows: var(--front-h); }
   .hrow .drawer { z-index: 1; }
   .hrow .drawer:has(.front[aria-expanded="true"]) { z-index: 2; filter: drop-shadow(0 2px 3px rgba(30,34,30,.14)) drop-shadow(0 14px 24px rgba(30,34,30,.2)); }
   .hrow .tray > .menu { width: 100%; flex: none; }
-  .hrow-cab { max-width: calc(var(--menu-w) * 4 + 36px); }
   body[data-version="horizontal"] .hcabinet { display: block; }
   body[data-version="horizontal"] .rail { display: none; }
   body[data-version="horizontal"] .sheet { padding-right: 24px; }
@@ -377,7 +376,7 @@
           <tr><th>Radius</th><td>Container and sub drawer <code>16</code>, sticker and note <code>4</code></td><td>Container from Material 3</td></tr>
           <tr><th>Text</th><td><code>14</code> labels, <code>12</code> details, <code>10</code> capitals, <code>26</code> title</td><td>Used in both versions</td></tr>
           <tr><th>Sticker</th><td>Height <code>24</code>, padding <code>8</code>, outline <code>1</code>, text <code>12</code></td><td>Used for drawer names and badges</td></tr>
-          <tr><th>Drawer</th><td>Width <code>280</code>, padding <code>4</code>, well <code>#D5DDD6</code>, cabinet edge <code>16</code>, front <code>48</code>, surface <code>#E6EBE5</code></td><td>Width is the Material 3 maximum. Front matches the row height</td></tr>
+          <tr><th>Drawer</th><td>Width <code>280</code>, padding <code>4</code>, well <code>#D5DDD6</code>, cabinet edge <code>16</code>, front <code>48</code>, surface <code>#E6EBE5</code></td><td>Vertical width is the Material 3 maximum. Horizontal drawers share the page width equally, like the figures above. Front matches the row height</td></tr>
           <tr><th>Structure</th><td>Three top choices, a separator, then a sub drawer for each century, so no list runs long. Sections stay available, and are shown under Configurations</td><td>Apple</td></tr>
           <tr><th>Open and dismiss</th><td>Opens from the drawer front. Stays open while choosing. Pushes shut <code>300ms</code> after the pointer leaves the whole drawer, on outside click, or on <code>Esc</code></td><td>Apple, WAI-ARIA menu</td></tr>
           <tr><th>Row height / gap</th><td><code>48</code> / <code>2</code></td><td>Material 3</td></tr>
