@@ -10,7 +10,7 @@
 <style>
   :root {
     /* Colour */
-    --paper: #e8e4dc; --note: rgba(248,245,238,.62); --ink: #1c1a17; --ink-read: #3a3731; --ink-2: #66625a; --graphite: #47443e;
+    --paper: #e8e4dc; --note: rgba(250,247,240,.28); --ink: #1c1a17; --ink-read: #3a3731; --ink-2: #66625a; --graphite: #2f2d28;
     --rule: rgba(28,26,23,.2);
     --slate: #47443e;
     /* One scale for everything. Values follow the Material 3 menu. Radius: 16 container, 12 row, 4 small */
@@ -18,7 +18,7 @@
     --t-label: 14px; --t-meta: 12px; --t-caps: 12px; --t-title: 26px;
     /* Menu geometry: Material 3 redlines */
     --menu-w: 280px; --menu-pad: 4px;
-    --surface: rgba(246,243,236,.66); --well: rgba(240,236,228,.5); --flap: #e2ded5; --ink-shadow: rgba(40,36,30,.14); --pull: .9s; --pull-ease: cubic-bezier(.5,0,.15,1);
+    --surface: rgba(248,245,238,.56); --well: rgba(244,240,232,.42); --flap: #e2ded5; --ink-shadow: rgba(40,36,30,.14); --pull: .9s; --pull-ease: cubic-bezier(.5,0,.15,1);
     --row-h: 48px; --row-r: var(--r-row); --front-h: 48px; --row-gap: 2px; --row-x: 12px; --row-inner: 8px;
     --icon: 20px; --label-h: 32px; --sep-y: 8px; --sub-w: 296px; --sub-overlap: 4px;
     /* Motion */
@@ -34,7 +34,7 @@
     -webkit-font-smoothing: antialiased;
   }
   /* Only a very fine photographic grain. The material comes from translucency, not from texture */
-  body::before { content: ""; position: fixed; inset: 0; z-index: 20; opacity: .16; mix-blend-mode: multiply; background: var(--grain); pointer-events: none; }
+  body::before { content: ""; position: fixed; inset: 0; z-index: 20; opacity: .3; mix-blend-mode: multiply; background: var(--grain); pointer-events: none; }
   .sheet { padding: 16px calc(var(--menu-w) + 72px) 48px 24px; }
   /* The menu has its own column on the right and stays there while the page scrolls beside it */
   .rail { position: fixed; z-index: 7; top: 16px; right: 12px; width: calc(var(--menu-w) + 24px); max-height: calc(100vh - 16px); padding: 0 12px 28px; overflow-y: auto; }
@@ -58,6 +58,14 @@
   body[data-version="horizontal"] .rail { display: none; }
   body[data-version="horizontal"] .sheet { padding-right: 24px; }
   body[data-version="horizontal"] .plate { grid-auto-rows: 260px; }
+  /* The back of the sheet shows through the whole page, mirrored, as on thin printed paper */
+  .backsheet { position: fixed; inset: 0; z-index: -1; overflow: hidden; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 24px; padding: 40px 24px; transform: scaleX(-1); opacity: .085; pointer-events: none; font-size: var(--t-label); line-height: 1.35; filter: blur(.35px); }
+  .backsheet p { margin: 0 0 16px; }
+  .backsheet img { display: block; width: 38%; margin: 0 0 16px; filter: grayscale(1); }
+  /* A sheet of vellum lies behind each figure, never over it. No outline: its edges fade into the page */
+  .tile::before { content: ""; position: absolute; pointer-events: none; -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); mask-composite: intersect; }
+  .tile::before { inset: 36px 12% 18px 6%; transform: rotate(-2.2deg); background: rgba(255,252,245,.22); }
+  .tile .tag { z-index: 3; }
   /* Product above, text below */
   .plate { padding: 12px 0; display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0,1fr)); grid-auto-rows: 300px; }
   .tile { position: relative; display: grid; place-items: center; }
@@ -96,11 +104,11 @@
   .col-menu { width: var(--menu-w); }
 
   /* Record: a light paper note, pinned to the page */
-  .tag { position: relative; width: 216px; padding: 24px 12px 12px; border-radius: var(--r-paper); background: var(--note); font-size: var(--t-meta); line-height: 1.3; color: var(--ink); transform: rotate(-1.2deg); box-shadow: inset 0 0 0 1px var(--rule); }
+  .tag { position: relative; width: 216px; padding: 24px 12px 12px; border-radius: var(--r-paper); background: var(--note); font-size: var(--t-meta); line-height: 1.3; color: var(--ink-read); transform: rotate(-1.2deg); box-shadow: inset 0 0 0 1px rgba(28,26,23,.1); }
   .tag[data-empty] { display: none; }
   .tag::before { content: ""; position: absolute; left: 50%; top: 9px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--ink-2); box-shadow: 0 2px 2px rgba(30,34,30,.3); }
   .tag dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; }
-  .tag dt { font-weight: 700; }
+  .tag dt { font-weight: 400; }
   .tag dd { margin: 0; }
 
   /* ── Menu system ────────────────────────────────────────────────── */
@@ -110,7 +118,7 @@
   .menu { position: relative; width: var(--menu-w); padding: var(--menu-pad); display: flex; flex-direction: column; gap: var(--row-gap); background: var(--well); }
   .drawer { position: relative; }
   .cabinet { position: relative; z-index: 2; height: 16px; background: var(--surface); border: 1px solid var(--rule); border-bottom-color: rgba(20,19,16,.34); border-radius: var(--r) var(--r) 0 0; }
-  .cabinet, .front, .tray, .menu.sub, .tag { -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+  .cabinet, .front, .tray, .menu.sub { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
   .tray { display: flex; flex-direction: column; justify-content: flex-end; height: 0; overflow: hidden; border-inline: 1px solid var(--rule); background: var(--well); transition: height var(--pull) var(--pull-ease); }
   #mainMenu { width: 100%; flex: none; }
   .front { appearance: none; position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; height: var(--front-h); padding: 0 16px; border: 1px solid var(--rule); border-radius: 0 0 var(--r) var(--r); background: var(--surface); font: inherit; color: var(--ink); cursor: pointer; }
@@ -258,12 +266,13 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
     <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="8" result="n"/>
-    <feColorMatrix in="n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 -1.7" result="tooth"/>
+    <feColorMatrix in="n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6 -1.3" result="tooth"/>
     <feComposite in="SourceGraphic" in2="tooth" operator="in" result="broken"/>
     <feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3" result="wobble"/>
     <feDisplacementMap in="broken" in2="wobble" scale="1.6"/>
   </filter>
 </svg>
+<div class="backsheet" id="backsheet" aria-hidden="true"></div>
 <div class="sheet">
   <header class="bar">
     <a href="../../#week6">← Back to Week 6</a>
@@ -629,7 +638,7 @@ function drawing(it) {
   const r = 58, cx = 108, cy = 66, top = 150;
   const s = it.holes === 4 ? 13 : 15;
   const holes = it.holes === 4 ? [[-s, -s], [s, -s], [-s, s], [s, s]] : it.holes === 2 ? [[-s, 0], [s, 0]] : [];
-  return `<svg class="drawing" viewBox="0 0 216 196" fill="none" stroke="currentColor" stroke-width="1" role="img" aria-label="Plan and section of ${it.name}, ${it.mm} millimetres across">
+  return `<svg class="drawing" viewBox="0 0 216 196" fill="none" stroke="currentColor" stroke-width="1.15" role="img" aria-label="Plan and section of ${it.name}, ${it.mm} millimetres across">
     <circle cx="${cx}" cy="${cy}" r="${r}"/><circle class="dots" cx="${cx}" cy="${cy}" r="${r - 8}"/>
     <path d="M${cx - r - 8} ${cy}H${cx + r + 8}M${cx} ${cy - r - 6}V${cy + r + 6}" class="dots"/>
     ${holes.map(([x, y]) => `<circle cx="${cx + x}" cy="${cy + y}" r="4"/>`).join('')}
@@ -733,6 +742,9 @@ function closeOnLeave(section, drawers) {
   section.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') timer = setTimeout(() => drawers.forEach((d) => d.set(false)), 300); });
   document.addEventListener('pointerdown', (e) => { if (!section.contains(e.target) && !e.target.closest('.spec, .switch')) drawers.forEach((d) => d.set(false)); });
 }
+
+/* The sheet behind: the archive's notes and objects, always faintly there */
+$('backsheet').innerHTML = Object.values(ITEMS).map((it) => `<div><p>${it.note} ${it.note}</p><img src="buttons/${it.img}.png" alt=""><p>${it.no} ${it.mat} ${it.date}. ${it.note}</p></div>`).join('');
 
 /* Version A: one vertical drawer on the right */
 const vertical = makeDrawer({ front: $('anchor'), tray: $('tray'), menu: mainMenu, list: MENU, pullEl: $('pullText'), pullText: (on) => on ? 'Close drawer' : 'Open drawer' });
