@@ -280,16 +280,18 @@
   .scatter .l { color: var(--ink); }
 
   /* Same structure and motion as before: the front is pulled forward and the tray follows. Only the drawing changes */
-  .cabinet { background: none; border: 0; border-top: 1px solid var(--line); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .cabinet { border: 0; border-top: 1px solid var(--line); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .hrow-cab .cabinet { border-top: 0; }
+  /* Drawers are solid paper: nothing on the page shows through them */
+  .cabinet, .front, .tray, .menu.sub { background: var(--paper); }
   /* Opening carries its momentum, and only just slows at the end */
   .drawer:has(> .front[aria-expanded="true"]) { --pull-ease: cubic-bezier(.45,.05,.4,1); }
   .hrow { gap: 0; counter-reset: drawer; }
   .hrow .drawer { counter-increment: drawer; border-left: 1px solid var(--line-soft); }
   .hrow .drawer:first-child { border-left: 0; }
-  .front { height: var(--front-h); padding: 0 8px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .front { height: var(--front-h); padding: 0 8px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .front:hover .holder, .front[aria-expanded="true"] .holder { color: var(--ink); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
-  .tray { border: 0; background: var(--well); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .tray { border: 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .tray:has(.menu:not([hidden])) { box-shadow: inset 1px 0 var(--line-soft), inset -1px 0 var(--line-soft), inset 0 -1px var(--line); }
   .holder { height: auto; padding: 0; border: 0; border-radius: 0; background: none; line-height: 1.2; }
   .hrow .holder::before { content: counter(drawer, decimal-leading-zero) " —— "; color: var(--ink-2); }
@@ -300,7 +302,7 @@
   .menu > .row + .row, .menu.sub > .row + .row { background-position: 0 0; }
   .menu > .wrap { background-position: 0 0; }
   .sep { height: 0; background: none; border-top: 1px dashed var(--line); }
-  .menu.sub { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-left: 1px dotted var(--line); }
+  .menu.sub { -webkit-backdrop-filter: none; backdrop-filter: none; border-left: 1px dotted var(--line); }
   .config .menu, .state .menu { border-top: 1px dashed var(--line-soft); }
   .spec { border-top: 1px dashed var(--line); }
   table th, table td { border-top: 1px dotted var(--line-soft); }
