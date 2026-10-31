@@ -18,11 +18,11 @@
     --t-label: 14px; --t-meta: 12px; --t-caps: 12px; --t-title: 26px;
     /* Menu geometry: Material 3 redlines */
     --menu-w: 280px; --menu-pad: 4px;
-    --surface: transparent; --well: rgba(235,231,221,.97); --flap: #ebe7dd; --ink-shadow: rgba(40,36,30,.14); --pull: .9s; --pull-ease: cubic-bezier(.5,0,.15,1);
+    --surface: transparent; --well: rgba(235,231,221,.97); --flap: #ebe7dd; --ink-shadow: rgba(40,36,30,.14); --pull: .36s; --pull-ease: cubic-bezier(.5,0,.15,1);
     --row-h: 48px; --row-r: var(--r-row); --front-h: 48px; --row-gap: 2px; --row-x: 12px; --row-inner: 8px;
     --icon: 20px; --label-h: 32px; --sep-y: 8px; --sub-w: 296px; --sub-overlap: 4px;
     /* Motion */
-    --soft: cubic-bezier(.33,0,.2,1); --bleed-time: .9s; --bleed: 0 0 .3px currentColor; --ink-on: #2f2878;
+    --soft: cubic-bezier(.33,0,.2,1); --bleed-time: .4s; --bleed: 0 0 .3px currentColor; --ink-on: #2f2878;
     --ease: cubic-bezier(.22,.8,.24,1);
     --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .1 0 0 0 .8 -.28'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -74,11 +74,11 @@
   .view img { position: absolute; display: block; height: auto; mix-blend-mode: multiply; filter: saturate(.62) contrast(.92) sepia(.1) drop-shadow(0 0 14px rgba(40,36,30,.22)); }
   /* A preview replaces the object: the old one leaves first, then the new one appears */
   .view .ghost { opacity: 0; transition: opacity .12s var(--soft); pointer-events: none; }
-  .previewing .ghost { opacity: 1; transition: opacity .32s var(--soft) .1s; }
+  .previewing .ghost { opacity: 1; transition: opacity .2s var(--soft) .06s; }
   .previewing .main { opacity: 0; }
   .main { transition: opacity .12s var(--soft); }
-  .drop .main { animation: settle .64s var(--soft) backwards; }
-  .settle { animation: settle .64s var(--soft) both; animation-delay: var(--after, 0ms); }
+  .drop .main { animation: settle .32s var(--soft) backwards; }
+  .settle { animation: settle .32s var(--soft) both; animation-delay: var(--after, 0ms); }
   @keyframes settle { from { opacity: 0; } to { opacity: 1; } }
   /* Nothing is out on the table yet */
   .empty { position: absolute; width: 24px; height: 24px; background: linear-gradient(var(--rule),var(--rule)) center / 100% 1px no-repeat, linear-gradient(var(--rule),var(--rule)) center / 1px 100% no-repeat; }
@@ -136,21 +136,21 @@
   }
   /* Focus follows the pointer here, so the ring is shown for keyboard use only */
   body:not(.kbd) .row:focus-visible { outline: none; }
-  .lead { flex: none; width: var(--icon); height: var(--icon); color: var(--ink-2); transition: color .56s var(--soft); }
+  .lead { flex: none; width: var(--icon); height: var(--icon); color: var(--ink-2); transition: color .28s var(--soft); }
   .lead svg, .trail svg { display: block; width: var(--icon); height: var(--icon); }
   .label { position: relative; flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; }
-  .trail { flex: none; display: flex; align-items: center; color: var(--ink-2); position: relative; transition: color .56s var(--soft); }
+  .trail { flex: none; display: flex; align-items: center; color: var(--ink-2); position: relative; transition: color .28s var(--soft); }
   .trail svg { transition: transform .18s var(--ease); }
   .kbd { font-size: var(--t-meta); }
   
   /* Enabled: ink that has faded with age */
-  .sans { position: relative; display: inline-block; white-space: nowrap; text-transform: uppercase; font-size: var(--t-label); color: var(--ink-2); transition: transform .42s var(--soft), text-shadow .42s var(--soft); }
+  .sans { position: relative; display: inline-block; white-space: nowrap; text-transform: uppercase; font-size: var(--t-label); color: var(--ink-2); transition: transform .24s var(--soft), text-shadow .42s var(--soft); }
   .w { display: inline-block; margin-right: .5em; }
   .w:last-child { margin-right: 0; }
   .l { display: inline-block; }
   /* Hover: the page clears, then each key strikes. Letters land at once, with a small soft impact,
      an uneven rhythm, and the slight misalignment and uneven ink of a real machine */
-  .row.is-hover .l, .front.is-hover .l { animation: clear .08s var(--soft) forwards, strike .12s var(--soft) forwards; animation-delay: 0ms, calc(var(--t) * 1ms + 70ms); color: var(--ink-read); }
+  .row.is-hover .l, .front.is-hover .l { animation: clear .08s var(--soft) forwards, strike .12s var(--soft) forwards; animation-delay: 0ms, calc(var(--t) * 1ms + 30ms); color: var(--ink-read); }
   @keyframes clear { to { opacity: 0; } }
   @keyframes strike { 0% { opacity: 0; transform: translateY(-1.8px); } 30% { opacity: 1; transform: translateY(.5px); } 100% { opacity: var(--press); transform: translateY(var(--dy)); } }
   .row.is-hover .lead, .row.is-hover .trail { color: var(--ink-read); }
@@ -160,12 +160,12 @@
   /* Pressed: pressure on paper. The letters sink at once, then the ink slowly bleeds outward and darkens */
   .row.is-pressed .sans, .selected .sans { color: var(--ink-on); text-shadow: var(--bleed); }
   .row.is-pressed .sans { transform: translateY(.6px); transition: transform .16s var(--soft), text-shadow var(--bleed-time) ease-out; }
-  .selected .sans { transition: transform .42s var(--soft), text-shadow var(--bleed-time) ease-out; }
+  .selected .sans { transition: transform .24s var(--soft), text-shadow var(--bleed-time) ease-out; }
   .row.is-pressed .l, .selected .l, .row.is-pressed .lead, .selected .lead, .row.is-pressed .trail, .selected .trail { color: var(--ink-on); transition: color var(--bleed-time) ease-out; }
   /* Selected: on file. The bled ink stays against faded neighbours, and so does the rule */
   .selected.is-hover .l { animation: none; color: var(--ink-on); }
   .selected.is-hover .lead, .selected.is-hover .trail { color: var(--ink-on); }
-  .sans::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .42s linear; }
+  .sans::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .24s linear; }
   .row.is-pressed .sans::after, .selected .sans::after { transform: none; }
   /* A drawer is only opened, never selected, so it takes no rule */
   .row[aria-haspopup] .sans::after { display: none; }
@@ -282,6 +282,10 @@
   /* Same structure and motion as before: the front is pulled forward and the tray follows. Only the drawing changes */
   .cabinet { border: 0; border-top: 1px solid var(--line); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .hrow-cab .cabinet { border-top: 0; }
+  /* A tall drawer scrolls inside itself, so several can stay open side by side */
+  .hrow .tray { max-height: 58vh; justify-content: safe flex-end; }
+  .hrow .tray.settled { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .drawer:has(> .front[aria-expanded="true"]) { z-index: 3; }
   /* Drawers are solid paper: nothing on the page shows through them */
   .cabinet, .front, .tray, .menu.sub { background: var(--paper); }
   /* Opening carries its momentum, and only just slows at the end */
@@ -413,15 +417,15 @@
         <thead><tr><th>Moment</th><th>Timing</th><th>Curve</th></tr></thead>
         <tbody>
           <tr><th>Label clears on hover</th><td><code>80ms</code></td><td><code>cubic-bezier(.33,0,.2,1)</code></td></tr>
-          <tr><th>Key strike</th><td><code>120ms</code> impact, each key <code>30–48ms</code> after the last, <code>50ms</code> more between words</td><td>Same</td></tr>
+          <tr><th>Key strike</th><td><code>120ms</code> impact, each key <code>14–24ms</code> after the last, <code>24ms</code> more between words</td><td>Same</td></tr>
           <tr><th>Leaving, at any point</th><td><code>320ms</code>, from wherever the ink is</td><td>Same</td></tr>
-          <tr><th>Press / release</th><td><code>160ms</code> / <code>420ms</code>, held <code>420ms</code> so type and rule finish together, then the record files</td><td>Same</td></tr>
-          <tr><th>Ink bleed</th><td><code>900ms</code>, continues into selected</td><td>Ease out</td></tr>
-          <tr><th>Pencil rule</th><td><code>420ms</code>, linear, starts on press, retracts if cancelled</td><td>Linear, so the keys can track it</td></tr>
-          <tr><th>Sub drawer pulls / pushes</th><td><code>900ms</code>, opens after hovering for <code>180ms</code>, and only once the pointer has moved onto it</td><td>Same as the drawer</td></tr>
-          <tr><th>Drawer pulls / pushes</th><td><code>900ms</code>, contents move with the front</td><td><code>cubic-bezier(.5,0,.15,1)</code>, slow to start with a long settle</td></tr>
-          <tr><th>Preview replaces object</th><td>Old object out <code>120ms</code>, new object in <code>320ms</code>, never overlapped</td><td>Same</td></tr>
-          <tr><th>Figures 1 to 3 fade in</th><td><code>640ms</code>, each <code>90ms</code> after the last</td><td>Same</td></tr>
+          <tr><th>Press / release</th><td><code>160ms</code> / <code>240ms</code>, held <code>240ms</code> so type and rule finish together, then the record files</td><td>Same</td></tr>
+          <tr><th>Ink bleed</th><td><code>400ms</code>, continues into selected</td><td>Ease out</td></tr>
+          <tr><th>Pencil rule</th><td><code>240ms</code>, linear, starts on press, retracts if cancelled</td><td>Linear, so the keys can track it</td></tr>
+          <tr><th>Sub drawer pulls / pushes</th><td><code>320ms</code>, on click. Opening one leaves the others open</td><td>Same as the drawer</td></tr>
+          <tr><th>Drawer pulls / pushes</th><td><code>360ms</code>, contents move with the front</td><td><code>cubic-bezier(.45,.05,.4,1)</code>, carries through and just slows at the end</td></tr>
+          <tr><th>Preview replaces object</th><td>Old object out <code>120ms</code>, new object in <code>200ms</code>, never overlapped</td><td>Same</td></tr>
+          <tr><th>Figures 1 to 3 fade in</th><td><code>320ms</code>, each <code>50ms</code> after the last</td><td>Same</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -436,7 +440,7 @@
           <tr><th>Label</th><td>Drawer number and rule, badge in brackets, text 12</td><td>Ledger reference</td></tr>
           <tr><th>Drawer</th><td>Vertical width <code>280</code>, horizontal drawers share the page. Padding <code>4</code>, front <code>48</code>. The front is pulled forward and the tray follows</td><td>Material 3 sizes</td></tr>
           <tr><th>Structure</th><td>Three top choices, a separator, then a sub drawer for each century, so no list runs long. Sections stay available, and are shown under Configurations</td><td>Apple</td></tr>
-          <tr><th>Open and dismiss</th><td>Opens from the drawer front. Stays open while choosing. Pushes shut <code>300ms</code> after the pointer leaves the whole drawer, on outside click, or on <code>Esc</code></td><td>Apple, WAI-ARIA menu</td></tr>
+          <tr><th>Open and dismiss</th><td>Opens and shuts from its own front. Several drawers and folders can stay open together for comparing, and a tall drawer scrolls inside itself, up to <code>58%</code> of the screen. <code>Esc</code> shuts the current drawer</td><td>Apple, WAI-ARIA menu</td></tr>
           <tr><th>Row height / gap</th><td><code>48</code> / <code>2</code></td><td>Material 3</td></tr>
           <tr><th>Row inset / slot gap</th><td><code>12</code> / <code>8</code></td><td>Material 3</td></tr>
           <tr><th>Icon, section label height</th><td><code>20</code>, <code>32</code></td><td>Material 3</td></tr>
@@ -501,8 +505,8 @@ function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0)
 function typedLetters(text) {
   let seed = hash(text), t = 0;
   const rand = () => (seed = Math.imul(seed ^ (seed >>> 15), 2654435761) >>> 0) / 4294967296;
-  return text.split(' ').map((w, n) => { if (n) t += 50; return `<span class="w">${[...w].map((c) => {
-    const at = t; t += 30 + rand() * 18;
+  return text.split(' ').map((w, n) => { if (n) t += 24; return `<span class="w">${[...w].map((c) => {
+    const at = t; t += 14 + rand() * 10;
     return `<span class="l" style="--t:${Math.round(at)};--dy:${((rand() - .5) * .9).toFixed(2)}px;--press:${(.84 + rand() * .16).toFixed(2)}">${c}</span>`;
   }).join('')}</span>`; }).join('');
 }
@@ -532,7 +536,7 @@ function settle(row, change) {
   letters.forEach((l, i) => { const c = getComputedStyle(l); l.animate([from[i], { opacity: c.opacity, color: c.color }], { duration: 320, easing: 'cubic-bezier(.33,0,.2,1)' }); });
 }
 /* On press, any keys not yet struck speed up so each lands as the rule passes under it */
-const RULE_MS = 420;
+const RULE_MS = 240;
 function catchUp(row) {
   const sans = row.querySelector('.sans');
   row.querySelectorAll('.l').forEach((l) => {
@@ -608,8 +612,8 @@ function wireMenu(menu, { onPreview = () => {}, onCommit = () => {}, onEscape = 
 }
 
 function fillMenu(menu, list, handlers) {
-  let open = null; let closeTimer = 0; let openTimer = 0;
-  const closeOpen = () => { if (open) open(); };
+  const openSubs = new Set();
+  const closeOpen = () => [...openSubs].forEach((close) => close());
   list.forEach((entry) => {
     if (entry.label) { const l = document.createElement('div'); l.className = 'sec-label'; l.setAttribute('role', 'presentation'); l.textContent = entry.label; menu.append(l); return; }
     if (entry.sep) { const s = document.createElement('div'); s.className = 'sep'; s.setAttribute('role', 'separator'); menu.append(s); return; }
@@ -620,22 +624,22 @@ function fillMenu(menu, list, handlers) {
       wrap.append(row, sub); menu.append(wrap);
       row._sub = sub;
       let hideTimer = 0;
-      const pull = (from, to) => { sub.style.overflow = 'hidden'; sub.animate({ height: [from + 'px', to + 'px'] }, { duration: 900, easing: 'cubic-bezier(.5,0,.15,1)' }).onfinish = () => { sub.style.overflow = ''; }; };
+      const pull = (from, to) => { sub.style.overflow = 'hidden'; sub.animate({ height: [from + 'px', to + 'px'] }, { duration: 320, easing: 'cubic-bezier(.45,.05,.4,1)' }).onfinish = () => { sub.style.overflow = ''; }; };
+      const closeQuiet = () => close(false);
       const close = (refocus) => {
         if (sub.hidden || sub.classList.contains('closing')) return;
-        row.classList.remove('is-open'); row.setAttribute('aria-expanded', 'false'); open = null;
+        row.classList.remove('is-open'); row.setAttribute('aria-expanded', 'false'); openSubs.delete(closeQuiet);
         sub.classList.add('closing');
         pull(sub.offsetHeight, 0);
         const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-        hideTimer = setTimeout(() => { sub.hidden = true; sub.classList.remove('closing'); }, still ? 0 : 880);
+        hideTimer = setTimeout(() => { sub.hidden = true; sub.classList.remove('closing'); }, still ? 0 : 300);
         if (refocus) row.focus();
       };
       row._openSub = (focusFirst) => {
-        if (open && !row.classList.contains('is-open')) open();
-        clearTimeout(closeTimer); clearTimeout(hideTimer);
+        clearTimeout(hideTimer);
         const wasShut = sub.hidden || sub.classList.contains('closing');
         sub.classList.remove('closing');
-        sub.hidden = false; row.classList.add('is-open'); row.setAttribute('aria-expanded', 'true'); open = () => close(false);
+        sub.hidden = false; row.classList.add('is-open'); row.setAttribute('aria-expanded', 'true'); openSubs.add(closeQuiet);
         const c = wireOnce(sub); if (wasShut && !matchMedia('(prefers-reduced-motion: reduce)').matches) pull(0, sub.offsetHeight);
         if (focusFirst) c.setHover(c.rows[0], true);
       };
@@ -645,9 +649,7 @@ function fillMenu(menu, list, handlers) {
         entry.items.forEach((id, n) => { const r = itemRow(id, true, true); r.style.setProperty('--n', n); el.append(r); });
         return wired = wireMenu(el, { ...handlers, closeSelf: () => close(true) });
       };
-      row.addEventListener('pointermove', (e) => { if (coarse(e) || row._tried || !reallyMoved(e)) return; row._tried = true; clearTimeout(closeTimer); clearTimeout(openTimer); openTimer = setTimeout(() => row._openSub(false), 180); });
       row._closeSub = () => close(false);
-      row.addEventListener('pointerleave', () => { row._tried = false; clearTimeout(openTimer); });
       return;
     }
     menu.append(itemRow(entry.id, entry.plain, entry.dated));
@@ -683,7 +685,7 @@ function wordplay(it) {
     letters.forEach((c) => {
       if (rand() > (full ? .72 : .2) || col > 40) return;
       html += `<span class="l" style="--row:${row};--col:${col};--t:${Math.round(t)};--dy:${((rand() - .5) * .9).toFixed(2)}px;--press:${(.84 + rand() * .16).toFixed(2)}">${c}</span>`;
-      col += 1 + Math.round(rand() * rand() * reach / word.length * 3); t += 16 + rand() * 14;
+      col += 1 + Math.round(rand() * rand() * reach / word.length * 3); t += 8 + rand() * 6;
     });
   });
   const back = [`${it.note} ${it.note}`, `${it.note} ${it.note}`, it.note].map((n) => `<p>${n}</p>`).join('');
@@ -735,7 +737,7 @@ function commit(id, chosen) {
   $('noteBody').textContent = it.note;
   $('field').hidden = false; $('field').style.setProperty('--object-ink', it.ink); $('field').innerHTML = wordplay(it);
   preview(null);
-  for (const [el, cls, after = 0] of [[recto, 'drop'], [$('verso'), 'settle', 90], [$('tag'), 'settle', 180]]) {
+  for (const [el, cls, after = 0] of [[recto, 'drop'], [$('verso'), 'settle', 50], [$('tag'), 'settle', 100]]) {
     el.style.setProperty('--after', after + 'ms'); el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
   }
 }
@@ -758,7 +760,7 @@ function makeDrawer({ front, tray, menu, list, pullEl, pullText, onOpen = () => 
   /* Height is animated in pixels, then released so a sub drawer can extend the drawer further */
   tray.addEventListener('transitionend', (e) => {
     if (e.target !== tray || e.propertyName !== 'height') return;
-    if (isOpen()) tray.style.height = 'auto'; else { menu.hidden = true; front.parentElement.classList.remove('closing'); }
+    if (isOpen()) { tray.style.height = 'auto'; tray.classList.add('settled'); } else { menu.hidden = true; front.parentElement.classList.remove('closing'); }
   });
   /* If a sub drawer opens while the drawer is still sliding, release the height so nothing is clipped */
   let slideHeight = 0;
@@ -770,16 +772,15 @@ function makeDrawer({ front, tray, menu, list, pullEl, pullText, onOpen = () => 
     front.parentElement.classList.toggle('closing', !on);
     if (on) {
       onOpen();
-      menu.hidden = false;
-      slideHeight = menu.offsetHeight; tray.style.height = '0px'; void tray.offsetHeight; tray.style.height = slideHeight + 'px';
+      menu.hidden = false; setTimeout(() => { if (isOpen()) tray.classList.add('settled'); }, 420);
+      slideHeight = menu.offsetHeight; tray.style.height = '0px'; void tray.offsetHeight; tray.style.height = Math.min(slideHeight, parseFloat(getComputedStyle(tray).maxHeight) || slideHeight) + 'px';
       return;
     }
     menu.querySelectorAll('.is-hover').forEach((r) => r.classList.remove('is-hover'));
-    menu.querySelectorAll('.row').forEach((r) => { r._tried = false; });
-    menu._closeSub(); preview(null);
+    menu._closeSub(); preview(null); tray.classList.remove('settled'); tray.scrollTop = 0;
     tray.style.height = tray.offsetHeight + 'px'; void tray.offsetHeight; tray.style.height = '0px';
     /* The end of the slide also has a timer, in case the browser never reports it */
-    setTimeout(() => { if (!isOpen()) { menu.hidden = true; front.parentElement.classList.remove('closing'); } }, 1000);
+    setTimeout(() => { if (!isOpen()) { menu.hidden = true; front.parentElement.classList.remove('closing'); } }, 420);
     if (refocus) front.focus();
   };
   /* Choosing keeps the drawer open for comparing */
@@ -793,21 +794,14 @@ function makeDrawer({ front, tray, menu, list, pullEl, pullText, onOpen = () => 
   return { set, isOpen, front, wired };
 }
 /* A section closes only when the pointer leaves all of it, or on an outside click */
-function closeOnLeave(section, drawers) {
-  let timer = 0;
-  section.addEventListener('pointerenter', () => clearTimeout(timer));
-  section.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') timer = setTimeout(() => drawers.forEach((d) => d.set(false)), 300); });
-  document.addEventListener('pointerdown', (e) => { if (!section.contains(e.target) && !e.target.closest('.spec, .switch')) drawers.forEach((d) => d.set(false)); });
-}
 
 /* The sheet behind: the archive's notes and objects, always faintly there */
 $('backsheet').innerHTML = Object.values(ITEMS).map((it) => `<div><p>${it.note} ${it.note}</p><img src="buttons/${it.img}.png" alt=""><p>${it.no} ${it.mat} ${it.date}. ${it.note}</p></div>`).join('');
 
 /* Version A: one vertical drawer on the right */
 const vertical = makeDrawer({ front: $('anchor'), tray: $('tray'), menu: mainMenu, list: MENU, pullEl: $('pullText'), pullText: (on) => on ? '[-]' : '[+]' });
-closeOnLeave($('colMenu'), [vertical]);
 
-/* Version B: a row of drawers side by side, one open at a time */
+/* Version B: a row of drawers side by side. Any number can be open at once */
 const hDrawers = [];
 $('hRow').setAttribute('role', 'menubar'); $('hRow').setAttribute('aria-label', 'Drawers');
 HDRAWERS.forEach(({ label, list }) => {
@@ -815,18 +809,15 @@ HDRAWERS.forEach(({ label, list }) => {
   col.innerHTML = `<div class="tray"></div><button class="front" type="button" aria-haspopup="menu" aria-expanded="false"><span class="holder">${label}</span><span class="pull"></span></button>`;
   $('hRow').append(col);
   const menu = document.createElement('div'); menu.className = 'menu'; menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', label);
-  const d = makeDrawer({ front: col.querySelector('.front'), tray: col.querySelector('.tray'), menu, list, pullEl: col.querySelector('.pull'), pullText: (on) => on ? '[-]' : '[+]', onOpen: () => hDrawers.forEach((o) => o !== d && o.set(false)) });
+  const d = makeDrawer({ front: col.querySelector('.front'), tray: col.querySelector('.tray'), menu, list, pullEl: col.querySelector('.pull'), pullText: (on) => on ? '[-]' : '[+]' });
   hDrawers.push(d);
   d.front.setAttribute('role', 'menuitem');
-  /* As in a menu bar, once one drawer is open, moving along the row opens the next */
-  d.front.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && hDrawers.some((o) => o.isOpen())) d.set(true); });
   d.front.addEventListener('keydown', (e) => {
     const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
     if (step) { e.preventDefault(); hDrawers[(hDrawers.indexOf(d) + step + hDrawers.length) % hDrawers.length].front.focus(); }
     if (e.key === 'ArrowDown') { e.preventDefault(); d.set(true); d.wired.setHover(d.wired.rows[0], true); }
   });
 });
-closeOnLeave($('hCabinet'), hDrawers);
 
 /* Switch between the two versions. The current object carries over */
 function setVersion(v) {
