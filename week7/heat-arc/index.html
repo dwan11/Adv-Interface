@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Heat Arc Toolbar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&display=swap">
+<style>
+  :root {
+    /* Purple from the widget board: lilac surface, plum ink */
+    --page: #ebe6f0;
+    --ink: #3d1043;
+    --cream: #f9e9f9;      /* lilac: tiles, light text on heat */
+    --blue: #5a1c5f;       /* plum: icons, labels, accents */
+    /* The heat spectrum: one family of purples, layered like a heat map (image 4) */
+    --core: #1e0622;
+    --hot: #e7a6ee;
+    --ice: #f3c9f7;
+    --violet: #b04ad0;
+
+    --trigger: 60px;
+    --spring: ease-out;
+    --spring-dur: .8s;
+    --stagger: 36ms;
+    --close: cubic-bezier(.5, 0, .75, .2);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); background: var(--page);
+    font: 500 14px/1.45 "Inter Tight", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 72px; }
+  .back { font-size: 13px; opacity: .75; text-decoration: none; }
+  .back:hover { opacity: 1; }
+  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin: 18px 0 18px; }
+  h1 { margin: 0; font-weight: 700; font-size: 44px; letter-spacing: -.03em; line-height: 1; }
+  .eyebrow { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; opacity: .75; margin-bottom: 8px; }
+  .tone { margin: 0; max-width: 440px; opacity: .9; }
+
+  /* ---------- Stage: the poster ---------- */
+  .stage {
+    position: relative; height: 580px; border-radius: 22px; overflow: hidden; isolation: isolate;
+    background:
+      radial-gradient(40% 55% at 12% 18%, #c9cdea 0%, transparent 70%),
+      radial-gradient(38% 50% at 85% 12%, #e8d3ea 0%, transparent 70%),
+      radial-gradient(45% 55% at 78% 92%, #f2bfd9 0%, transparent 70%),
+      radial-gradient(40% 50% at 22% 95%, #f6d6c6 0%, transparent 72%),
+      radial-gradient(60% 60% at 50% 50%, #e4dcef 0%, transparent 80%),
+      #e6e1ee;
+  }
+  .poster {
+    position: absolute; inset: 22px 26px; margin: 0; pointer-events: none; user-select: none;
+    font: 700 clamp(40px, 6.6vw, 70px)/.94 "Inter Tight", sans-serif; letter-spacing: -.035em;
+    color: #fff; opacity: .5; text-align: justify; text-align-last: justify; hyphens: none;
+  }
+  .stage::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .28; mix-blend-mode: multiply;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .1 0 0 0 0 .35 0 0 0 .7 -.2'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .status {
+    position: absolute; top: 18px; right: 18px; z-index: 2; box-shadow: 0 4px 14px -6px rgba(90,28,95,.3);
+    padding: 7px 14px; border-radius: 999px; background: var(--cream); color: var(--blue);
+    font: 600 12px "Inter Tight", sans-serif; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+  }
+
+  /* ---------- Dock ---------- */
+  .dock { position: absolute; bottom: 70px; width: var(--trigger); height: var(--trigger); z-index: 1; }
+  .stage[data-align="center"] .dock { left: calc(50% - var(--trigger) / 2); }
+  .stage[data-align="left"] .dock { left: 60px; }
+  .stage[data-align="right"] .dock { right: 60px; }
+
+  /* Bud: the heat source */
+  .trigger {
+    position: absolute; inset: 0; z-index: 2; border: 0; padding: 0; border-radius: 50%; cursor: pointer; color: var(--cream);
+    background: radial-gradient(circle, var(--core) 0 16%, #46124b 24%, var(--hot) 31%, var(--blue) 40% 64%, var(--ice) 82%, var(--violet) 100%);
+    box-shadow: 0 0 0 0 rgba(176, 74, 208, 0), 0 10px 24px -10px rgba(30, 6, 34, .7);
+    transition: transform .32s cubic-bezier(.3,1.6,.5,1), box-shadow .5s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .trigger::before { /* the core breathes */
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle, rgba(231,166,238,.0) 30%, rgba(243,201,247,.55) 48%, rgba(231,166,238,0) 62%);
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%, 100% { transform: scale(.82); opacity: .4; } 50% { transform: scale(1.08); opacity: 1; } }
+  .trigger:hover, .trigger.is-hover { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(243, 201, 247, .25), 0 0 34px 8px rgba(176, 74, 208, .45); }
+  .trigger:active, .trigger.is-press { transform: scale(.92); transition-duration: .08s; }
+  .trigger:focus-visible { outline: 2px solid var(--blue); outline-offset: 5px; }
+  .trigger.flare { animation: flare .9s ease-out; }
+  @keyframes flare { 0% { box-shadow: 0 0 0 0 rgba(243,201,247,.9), 0 0 0 0 rgba(176,74,208,.8); } 100% { box-shadow: 0 0 0 26px rgba(243,201,247,0), 0 0 60px 26px rgba(176,74,208,0); } }
+  .trigger svg { position: absolute; inset: 0; margin: auto; width: 24px; height: 24px; transition: opacity .2s, transform .4s cubic-bezier(.3,1.5,.5,1); }
+  .trigger .face-x { opacity: 0; transform: rotate(-90deg) scale(.6); }
+  .open .trigger .face-tool { opacity: 0; transform: rotate(90deg) scale(.6); }
+  .open .trigger .face-x { opacity: 1; transform: none; }
+  .trigger.pop .face-tool { animation: pop .55s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes pop { 0% { transform: scale(.3); } 100% { transform: none; } }
+
+  /* ---------- Arc of tiles ---------- */
+  .arc { position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 1; }
+  .arc > svg { position: absolute; overflow: visible; pointer-events: none; }
+  .tile {
+    transform-box: view-box; transform-origin: 0 0;
+    transform: rotate(0deg) scale(.3); opacity: 0;
+    transition: transform .26s var(--close) calc(var(--oc) * 22ms), opacity .14s linear calc(var(--oc) * 22ms + .1s);
+  }
+  .open .tile {
+    transform: rotate(var(--a)) scale(1); opacity: 1;
+    transition: transform var(--spring-dur) var(--spring) calc(var(--o) * var(--stagger)), opacity .18s ease-out calc(var(--o) * var(--stagger));
+  }
+  .static .tile { transform: rotate(var(--a)); opacity: 1; transition: none; }
+  .tile.flying { transform: rotate(var(--a)) scale(1) !important; opacity: 1; transition: opacity .12s !important; }
+  .tile:focus { outline: none; }
+
+  .lift { transform-box: view-box; transform-origin: 0 var(--c); transition: transform .5s cubic-bezier(.25,1.45,.4,1); }
+  .shape { pointer-events: visiblePainted; cursor: pointer; }
+  .base { fill: var(--cream); }
+  .core { transform-box: view-box; transform-origin: 0 var(--c); animation: core 2.6s ease-in-out infinite; }
+  @keyframes core { 0%, 100% { transform: scale(.86); } 50% { transform: scale(1.14); } }
+  .warm, .heat, .halo, .pulse { opacity: 0; transition: opacity .35s ease-out; pointer-events: none; }
+  .halo-1 { fill: var(--violet); filter: url(#halo-sm); }
+  .halo-2 { fill: #6c2a72; filter: url(#halo-lg); }
+  .rim { fill: none; stroke: rgba(255,255,255,.55); stroke-width: 1; pointer-events: none; transition: stroke .3s; }
+  .pulse { fill: none; stroke: var(--ice); stroke-width: 2; transform-box: fill-box; transform-origin: 50% 60%; }
+  .glyph { transition: transform .4s cubic-bezier(.3,1.6,.5,1); }
+  .icon { fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: stroke .25s; }
+  .label { fill: var(--blue); font: 700 10.5px "Inter Tight", sans-serif; letter-spacing: .09em; text-transform: uppercase; transition: fill .25s; }
+  .ring { fill: none; stroke: var(--blue); stroke-width: 2; opacity: 0; pointer-events: none; }
+  .tip { opacity: 0; transition: opacity .16s; pointer-events: none; }
+  .tip rect { fill: var(--cream); }
+  .tip text { fill: var(--blue); font: 700 11px "Inter Tight", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* States. Heat rises from cream (enabled) to warm (hover) to hot (pressed) to a living heat map (selected) */
+  .tile.is-hover .lift { transform: translateY(-7px) scale(1.05); }
+  .tile.is-hover .warm { opacity: 1; }
+  .tile.is-hover .halo { opacity: .4; }
+  .tile.is-hover:not(.is-sel) .halo-1 { opacity: 0; }
+  .tile.is-hover .glyph { transform: scale(1.08); }
+  .tile.is-hover .tip, .tile:focus-visible .tip { opacity: 1; transition-delay: .25s; }
+  .tile.is-press .lift { transform: translateY(1px) scale(.93); transition-duration: .12s; }
+  .tile.is-press .heat { opacity: .92; transition-duration: .12s; }
+  .tile.is-press .icon { stroke: var(--cream); }
+  .tile.is-press .label { fill: var(--cream); }
+  .tile.is-sel .lift { transform: translateY(-4px) scale(1.13); }
+  .tile.is-sel.is-hover .lift { transform: translateY(-8px) scale(1.17); }
+  .tile.is-sel.is-press .lift { transform: translateY(-2px) scale(1.06); }
+  .tile.is-sel .heat { opacity: 1; }
+  .tile.is-sel .halo { opacity: 1; animation: glow 2.6s ease-in-out infinite; }
+  .tile.is-sel .rim { stroke: rgba(243,201,247,.9); }
+  .tile.is-sel .icon { stroke: var(--cream); }
+  .tile.is-sel .label { fill: var(--cream); }
+  .tile:focus-visible .ring { opacity: 1; }
+  .tile.fire .pulse { animation: pulse .8s cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes glow { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+  @keyframes pulse { 0% { opacity: .95; transform: scale(1); stroke-width: 3; } 100% { opacity: 0; transform: scale(1.7); stroke-width: .5; } }
+
+  /* ---------- Controls ---------- */
+  .controls { display: flex; flex-wrap: wrap; gap: 14px 28px; margin: 18px 2px 0; }
+  .ctl { display: flex; align-items: center; gap: 10px; }
+  .ctl > span { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+  .pills { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--cream); box-shadow: inset 0 0 0 1px rgba(90,28,95,.16); }
+  .pills button { border: 0; background: none; font: 600 13px "Inter Tight", sans-serif; color: var(--blue); padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background-color .15s, color .15s; }
+  .pills button:hover { background: rgba(90,28,95,.1); }
+  .pills button[aria-pressed="true"] { background: var(--blue); color: var(--cream); }
+  .pills button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* ---------- Sheet ---------- */
+  h2 { font-weight: 700; font-size: 26px; letter-spacing: -.02em; margin: 60px 0 6px; }
+  .sub { margin: 0 0 18px; opacity: .85; max-width: 680px; }
+  .sheet { display: grid; grid-template-columns: 110px repeat(4, minmax(0, 1fr)); gap: 10px; align-items: center; }
+  .colh { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; text-align: center; }
+  .rowh { font-size: 13px; }
+  .cell { display: grid; place-items: center; height: 160px; padding: 8px; border-radius: 16px; background: rgba(249,233,249,.45); box-shadow: inset 0 0 0 1px rgba(90,28,95,.08); }
+  .cell svg { width: 100%; height: 100%; overflow: visible; }
+  .cell .trigger { position: relative; inset: auto; width: 60px; height: 60px; cursor: default; }
+  .cell .trigger svg { width: 24px; height: 24px; }
+  .strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .frame { display: grid; grid-template-rows: 1fr auto; gap: 6px; place-items: center; height: 210px; padding: 8px; border-radius: 16px; background: rgba(249,233,249,.45); box-shadow: inset 0 0 0 1px rgba(90,28,95,.08); }
+  .frame svg { width: 100%; height: 100%; overflow: visible; }
+  .frame span { font-size: 12px; color: #8c6a91; }
+  .frame span b { color: var(--ink); font-weight: 600; }
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 8px; }
+  .note { background: rgba(249,233,249,.6); color: #5d4462; box-shadow: inset 0 0 0 1px rgba(90,28,95,.08); border-radius: 16px; padding: 16px 18px; }
+  .note h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--blue); }
+  .note ul { margin: 0; padding-left: 18px; font-size: 13px; }
+  code { font: 12px ui-monospace, Menlo, monospace; background: rgba(90,28,95,.08); padding: 1px 5px; border-radius: 5px; }
+  .swatches { display: flex; gap: 6px; margin-top: 8px; }
+  .swatches i { width: 28px; height: 28px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+
+  @media (max-width: 720px) {
+    h1 { font-size: 34px; }
+    .stage { height: 520px; }
+    .stage[data-align="left"] .dock { left: 30px; }
+    .stage[data-align="right"] .dock { right: 30px; }
+    .sheet { grid-template-columns: 56px repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .cell { height: 100px; padding: 4px; }
+    .cell .trigger { transform: scale(.7); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile, .open .tile { transform: rotate(var(--a)) scale(1); transition: opacity .15s linear; }
+    .lift, .glyph, .trigger, .trigger svg { transition-duration: .01s !important; }
+    .trigger::before, .tile.is-sel .halo, .core { animation: none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="coreGrad">
+      <stop offset=".16" stop-color="#1e0622"/><stop offset=".24" stop-color="#46124b"/><stop offset=".31" stop-color="#e7a6ee"/>
+      <stop offset=".4" stop-color="#5a1c5f"/><stop offset=".64" stop-color="#5a1c5f"/><stop offset=".82" stop-color="#f3c9f7"/><stop offset="1" stop-color="#b04ad0"/>
+    </radialGradient>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.6"/></filter>
+    <filter id="halo-sm" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="halo-lg" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <a class="back" href="../../index.html">← Advanced Interface</a>
+  <header>
+    <div>
+      <div class="eyebrow">Week 7 · Toolbar · Set 2</div>
+      <h1>Heat Arc</h1>
+    </div>
+    <p class="tone"><strong>Tone:</strong> charged, kinetic, warm-blooded. Soft lilac triangles fan out of a glowing plum core, and every touch heats a tile up, layer by layer, like a heat map.
+      <strong>Function:</strong> pick one tool from a small set without leaving the canvas.</p>
+  </header>
+
+  <section class="stage" id="stage" data-align="center" data-content="icon" aria-label="Toolbar prototype">
+    <p class="poster" aria-hidden="true">Every tool rests cool until you touch it. Then it warms, glows, runs hot, and the heat travels home to the core that holds it.</p>
+    <div class="status" id="status" role="status">Tap the core</div>
+    <div class="dock" id="dock">
+      <div class="arc" id="arc" role="toolbar" aria-label="Tools" aria-orientation="horizontal" inert></div>
+      <button class="trigger" id="trigger" aria-expanded="false" aria-controls="arc" aria-label="Open tools">
+        <svg class="face-tool" id="faceTool" viewBox="0 0 24 24" aria-hidden="true"></svg>
+        <svg class="face-x" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <div class="controls">
+    <div class="ctl"><span>Align</span>
+      <div class="pills" data-key="align">
+        <button data-v="left">Left</button><button data-v="center" aria-pressed="true">Center</button><button data-v="right">Right</button>
+      </div></div>
+    <div class="ctl"><span>Button</span>
+      <div class="pills" data-key="content">
+        <button data-v="icon" aria-pressed="true">Icon</button><button data-v="text">Text</button><button data-v="both">Icon + text</button>
+      </div></div>
+    <div class="ctl"><span>Tools</span>
+      <div class="pills" data-key="count">
+        <button data-v="3">3</button><button data-v="4">4</button><button data-v="5" aria-pressed="true">5</button>
+      </div></div>
+  </div>
+
+  <h2>States</h2>
+  <p class="sub">Each state adds heat. Enabled is cool lilac. Hover warms the tile with a pale orchid rim and lifts it outward. Press fills it with heat. Selected grows the tile into a living heat map: dark core, bright orchid ring, plum body, pale rim and a violet halo that breathes.</p>
+  <div class="sheet" id="sheet"></div>
+
+  <h2>Selecting: melt and return</h2>
+  <p class="sub">Tiles leave the core as circles and flow into rounded triangles as they fan out. Choosing one reverses it: the triangle melts back into a round heat ball, the ball sinks into the core, the other tiles round off and fold away, and the core flares with the new tool.</p>
+  <div class="strip" id="strip"></div>
+
+  <h2>System</h2>
+  <div class="notes">
+    <div class="note"><h3>Structure</h3>
+      <ul><li>Core: 60 px heat-map circle, shows the current tool</li>
+      <li>Tiles: separate rounded triangles, tip toward the core, outer edge following the arc</li>
+      <li>Depth 80 (icon, text) · 92 (icon + text); 10 px gaps</li>
+      <li>Icons and labels stay upright</li></ul></div>
+    <div class="note"><h3>Alignment</h3>
+      <ul><li><strong>Center</strong>: arc up to 160° over the core</li>
+      <li><strong>Left</strong>: core in the left corner, 100° sweep clockwise</li>
+      <li><strong>Right</strong>: mirrored</li>
+      <li>Radius grows so each outer edge keeps ~95 px</li></ul></div>
+    <div class="note"><h3>Colour</h3>
+      <ul><li>Base: lavender page, lilac tiles, plum ink</li>
+      <li>Heat: dark core → orchid ring → plum body → pale rim → violet halo, all one purple spectrum</li></ul>
+      <div class="swatches"><i style="background:#ebe6f0"></i><i style="background:#f9e9f9"></i><i style="background:#5a1c5f"></i><i style="background:#1e0622"></i><i style="background:#e7a6ee"></i><i style="background:#6c2a72"></i><i style="background:#f3c9f7"></i><i style="background:#b04ad0"></i></div></div>
+    <div class="note"><h3>Motion</h3>
+      <ul><li>Open: tiles fan out of the core on a spring (k 210, c 17), 36 ms apart</li>
+      <li>Open: each tile leaves the core as a circle and flows into a rounded triangle (620 ms)</li><li>Select: heat floods in and the triangle melts into a circle (320 ms), the ball sinks into the core (380 ms, ease-in), the others round off and fold, and the core flares with the new tool</li>
+      <li>Selected tile and core breathe on a 2.6 s cycle</li></ul></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const TOOLS = [
+    { label: 'Add',   icon: '<path d="M12 5v14M5 12h14"/>' },
+    { label: 'Voice', icon: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>' },
+    { label: 'Photo', icon: '<rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9.5" cy="9.5" r="1.5"/><path d="M20 15.5l-4.5-4.5L6 20"/>' },
+    { label: 'List',  icon: '<rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/>' },
+    { label: 'Brush', icon: '<path d="M19.5 4.5a1.8 1.8 0 0 1 0 2.6l-7.4 7.4-2.6-2.6 7.4-7.4a1.8 1.8 0 0 1 2.6 0z"/><path d="M9.3 13.9c-1.9 0-3.3 1.3-3.3 3.1 0 1.1-.7 1.9-2 2.3 1 .5 2.2.7 3.3.7 2.3 0 4-1.6 4-3.6"/>' },
+  ];
+  const CORE = '<circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7.5"/>';
+  const DEPTH = { icon: 80, text: 80, both: 92 };
+  const EDGE = { icon: 92, text: 100, both: 104 };
+  const GAP = 10;
+
+  const state = { align: 'center', content: 'icon', count: 5, open: false, selected: -1, busy: false };
+  const $ = (id) => document.getElementById(id);
+  const stage = $('stage'), arc = $('arc'), trigger = $('trigger'), dock = $('dock'), status = $('status'), faceTool = $('faceTool');
+
+  function springEasing(k = 210, c = 17) {
+    let x = 0, v = 0, t = 0; const dt = 1 / 240, pts = [0];
+    while (t < 2) { v += (k * (1 - x) - c * v) * dt; x += v * dt; t += dt; pts.push(x); if (Math.abs(1 - x) < .0015 && Math.abs(v) < .02) break; }
+    const step = Math.max(1, Math.floor(pts.length / 48));
+    const out = pts.filter((_, i) => i % step === 0).map((p) => +p.toFixed(4)); out.push(1);
+    return { easing: `linear(${out.join(',')})`, dur: Math.round(t * 1000) };
+  }
+  if (CSS.supports('transition-timing-function', 'linear(0, 1)')) {
+    const s = springEasing();
+    document.documentElement.style.setProperty('--spring', s.easing);
+    document.documentElement.style.setProperty('--spring-dur', s.dur + 'ms');
+  } else document.documentElement.style.setProperty('--spring', 'cubic-bezier(.3,1.45,.5,1)');
+
+  /* ---- Geometry: 0° = up, clockwise ---- */
+  const rad = (d) => d * Math.PI / 180, deg = (r) => r * 180 / Math.PI;
+  const f = (n) => +n.toFixed(2);
+  const pt = (r, a) => [r * Math.sin(rad(a)), -r * Math.cos(rad(a))];
+
+  function layout(align, content, n) {
+    const span = align === 'center' ? Math.min(36 * n, 160) : 100;
+    const step = span / n;
+    const depth = DEPTH[content];
+    const ro = Math.max(150, (EDGE[content] + GAP) / rad(step));
+    const ri = ro - depth;
+    let angles;
+    if (align === 'center') angles = [...Array(n)].map((_, i) => (i - (n - 1) / 2) * step);
+    else if (align === 'left') angles = [...Array(n)].map((_, i) => -2 + step * (i + .5));
+    else angles = [...Array(n)].map((_, i) => -98 + step * (i + .5));
+    const order = angles.map((_, i) => align === 'center' ? Math.abs(i - (n - 1) / 2) : align === 'left' ? i : n - 1 - i);
+    return { step, ro, ri, depth, angles, order, rc: ri + depth * .6 };
+  }
+
+  /* A soft triangle (tip toward the core, outer edge bowed along the arc) and a circle, written with the
+     same 12 quadratic segments so the tile can morph between them: m = 0 triangle, m = 1 circle */
+  function triSegs(g) {
+    const hh = g.step / 2 - deg(GAP / 2 / g.ro);
+    const V = [[0, -g.ri], pt(g.ro, -hh), pt(g.ro, hh)];
+    const R = [18, 26, 26];
+    const C = [(V[0][0] + V[1][0] + V[2][0]) / 3, (V[0][1] + V[1][1] + V[2][1]) / 3];
+    const sag = g.ro * (1 - Math.cos(rad(hh)));
+    const B = [0, sag * 1.6, 0]; // only the outer edge bows, to sit on the arc
+    const unit = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [dx / l, dy / l]; };
+    const s = [], e = [];
+    V.forEach((v, i) => {
+      const p = V[(i + 2) % 3], n = V[(i + 1) % 3];
+      const up = unit(v, p), un = unit(v, n);
+      s[i] = [v[0] + up[0] * R[i], v[1] + up[1] * R[i]];
+      e[i] = [v[0] + un[0] * R[i], v[1] + un[1] * R[i]];
+    });
+    const raw = [];
+    for (let i = 0; i < 3; i++) {
+      const j = (i + 1) % 3, a = e[i], b = s[j];
+      const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      let nx = -(b[1] - a[1]), ny = b[0] - a[0]; const l = Math.hypot(nx, ny); nx /= l; ny /= l;
+      if ((m[0] - C[0]) * nx + (m[1] - C[1]) * ny < 0) { nx = -nx; ny = -ny; }
+      raw.push([a, [m[0] + nx * B[i], m[1] + ny * B[i]], b]);
+      raw.push([b, V[j], e[j]]);
+    }
+    // split every quadratic in half so no circle segment spans more than ~60°
+    const segs = [];
+    raw.forEach(([p0, c, p1]) => {
+      const mid = [(p0[0] + 2 * c[0] + p1[0]) / 4, (p0[1] + 2 * c[1] + p1[1]) / 4];
+      segs.push([[(p0[0] + c[0]) / 2, (p0[1] + c[1]) / 2], mid]);
+      segs.push([[(c[0] + p1[0]) / 2, (c[1] + p1[1]) / 2], p1]);
+    });
+    return { start: e[0], segs };
+  }
+  function circSegs(g, tri) {
+    const cx = 0, cy = -g.rc, r = g.depth * .37;
+    const pts = [tri.start, ...tri.segs.map((q) => q[1])];
+    let prev = Math.atan2(pts[0][1] - cy, pts[0][0] - cx);
+    const ang = [prev];
+    for (let k = 1; k < pts.length; k++) {
+      let a = Math.atan2(pts[k][1] - cy, pts[k][0] - cx);
+      while (a - prev > Math.PI) a -= 2 * Math.PI;
+      while (a - prev < -Math.PI) a += 2 * Math.PI;
+      ang.push(a); prev = a;
+    }
+    const at = (a, rr) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+    return {
+      start: at(ang[0], r),
+      segs: tri.segs.map((_, k) => { const a0 = ang[k], a1 = ang[k + 1]; return [at((a0 + a1) / 2, r / Math.cos((a1 - a0) / 2)), at(a1, r)]; }),
+    };
+  }
+  function shapeD(g, m = 0) {
+    if (!g._tri) { g._tri = triSegs(g); g._circ = circSegs(g, g._tri); }
+    const A = g._tri, Bc = g._circ, L = (p, q) => `${f(p[0] + (q[0] - p[0]) * m)} ${f(p[1] + (q[1] - p[1]) * m)}`;
+    let d = `M${L(A.start, Bc.start)}`;
+    A.segs.forEach((q, k) => { d += `Q${L(q[0], Bc.segs[k][0])} ${L(q[1], Bc.segs[k][1])}`; });
+    return d + 'Z';
+  }
+  const softTriangle = (g) => shapeD(g, 0);
+
+  let uid = 0;
+  /* Gradients live in the tile's own (pointing-up) space, so one set serves every tile */
+  /* Heat map: the tile's own outline repeated smaller and smaller around its centre, so every
+     colour band follows the shape like contour lines (image 4), then softened together */
+  const HEAT = [[1, '#b04ad0'], [.9, '#f3c9f7'], [.8, '#6c2a72'], [.5, '#e7a6ee'], [.37, '#46124b'], [.25, '#1e0622']];
+  const WARM = [[1, '#d7a3e4'], [.88, '#ecd0f2'], [.76, '#f5e2f7'], [.6, '#f9e9f9']];
+  const rings = (d, g, list) => list.map(([k, c]) =>
+    `<path data-m d="${d}" fill="${c}" transform="translate(0 ${f(-g.rc)}) scale(${k}) translate(0 ${f(g.rc)})"/>`).join('');
+  const defs = () => '';
+
+  function tileMarkup(g, t, i, content, o) {
+    const id = o.id + '-' + i, a = g.angles[i], d = shapeD(g, o.morph || 0);
+    const maxO = Math.max(...g.order);
+    const cls = (o.state || '') + (i === o.selected ? ' is-sel' : '');
+    let content_ = '';
+    if (content === 'icon') content_ = `<g class="glyph"><g class="icon" transform="translate(-12 -12)">${t.icon}</g></g>`;
+    else if (content === 'text') content_ = `<g class="glyph"><text class="label" text-anchor="middle" y="4">${t.label}</text></g>`;
+    else content_ = `<g class="glyph"><g class="icon" transform="translate(-11 -21) scale(.92)">${t.icon}</g><text class="label" text-anchor="middle" y="17">${t.label}</text></g>`;
+    let tip = '';
+    if (content === 'icon' && !o.static) {
+      const w = t.label.length * 8.4 + 22;
+      tip = `<g class="tip" transform="translate(0 ${f(-g.ro - 30)}) rotate(${f(-a)})"><rect x="${f(-w / 2)}" y="-13" width="${f(w)}" height="26" rx="13"/><text text-anchor="middle" y="4">${t.label}</text></g>`;
+    }
+    const role = o.static ? '' : `role="button" tabindex="-1" aria-label="${t.label}" aria-pressed="${i === o.selected}"`;
+    const extra = o.style ? ';' + o.style : '';
+    return `<g class="tile ${cls}" data-i="${i}" ${role} style="--a:${f(a)}deg;--o:${g.order[i]};--oc:${maxO - g.order[i]}${extra}">
+      <clipPath id="clip-${id}"><path data-m d="${d}"/></clipPath>
+      <g class="lift" style="--c:${f(-g.rc)}px${o.travel ? `;transform:${o.travel}` : ''}">
+        <g class="halo"><path data-m class="halo-2" d="${d}"/><path data-m class="halo-1" d="${d}"/></g>
+        <path data-m class="shape base" d="${d}"/>
+        <g class="warm" clip-path="url(#clip-${id})"><g filter="url(#soft)">${rings(d, g, WARM)}</g></g>
+        <g class="heat" clip-path="url(#clip-${id})"><g filter="url(#soft)">${rings(d, g, HEAT.slice(0, 3))}<g class="core">${rings(d, g, HEAT.slice(3))}</g></g></g>
+        <path data-m class="rim" d="${d}"/>
+        <path data-m class="pulse" d="${d}"/>
+        <path data-m class="ring" d="${d}" transform="translate(0 ${f(-g.rc)}) scale(1.12) translate(0 ${f(g.rc)})"/>
+        <g transform="translate(0 ${f(-g.rc)}) rotate(${f(-a)})">${content_}</g>
+        ${tip}
+      </g></g>`;
+  }
+
+  /* ---- Live toolbar ---- */
+  let g = null;
+  const tiles = () => [...arc.querySelectorAll('.tile')];
+  const mark = (i, cls, on) => { const t = arc.querySelector(`.tile[data-i="${i}"]`); t && t.classList.toggle(cls, on); };
+  function build() {
+    g = layout(state.align, state.content, state.count);
+    const S = Math.ceil(g.ro + 90), id = 'a' + (uid++);
+    stage.dataset.align = state.align;
+    if (state.selected >= state.count) state.selected = -1;
+    arc.innerHTML = `<svg viewBox="${-S} ${-S} ${2 * S} ${2 * S}" width="${2 * S}" height="${2 * S}" style="left:${-S}px;top:${-S}px">${defs(g, id)}${
+      TOOLS.slice(0, state.count).map((t, i) => tileMarkup(g, t, i, state.content, { id, selected: state.selected, morph: 1 })).join('')}</svg>`;
+    tiles().forEach((el) => {
+      const i = +el.dataset.i;
+      el._m = 1; el._paths = [...el.querySelectorAll('[data-m]')];
+      el.addEventListener('pointerenter', () => !state.busy && mark(i, 'is-hover', true));
+      el.addEventListener('pointerleave', () => { mark(i, 'is-hover', false); mark(i, 'is-press', false); });
+      el.addEventListener('pointerdown', () => !state.busy && mark(i, 'is-press', true));
+      el.addEventListener('pointerup', () => mark(i, 'is-press', false));
+      el.addEventListener('pointercancel', () => mark(i, 'is-press', false));
+      el.addEventListener('click', () => choose(i));
+    });
+    paintTrigger(false);
+  }
+
+  function paintTrigger(pop) {
+    const t = TOOLS[state.selected];
+    faceTool.innerHTML = `<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t ? t.icon : CORE}</g>`;
+    trigger.setAttribute('aria-label', (state.open ? 'Close tools' : 'Open tools') + (t ? ` (current: ${t.label})` : ''));
+    if (pop) {
+      trigger.classList.remove('pop', 'flare'); void trigger.offsetWidth; trigger.classList.add('pop', 'flare');
+    }
+  }
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3), easeInOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, easeIn = (t) => t * t * t;
+  function setMorph(el, m) { el._m = m; const d = shapeD(g, m); el._paths.forEach((p) => p.setAttribute('d', d)); }
+  function morph(el, to, dur, delay = 0, ease = easeOut) {
+    const from = el._m, token = (el._tok = (el._tok || 0) + 1);
+    if (reduced) dur = 1;
+    const t0 = performance.now() + delay;
+    (function step(now) {
+      if (el._tok !== token) return;
+      const t = Math.min(1, Math.max(0, (now - t0) / dur));
+      setMorph(el, from + (to - from) * ease(t));
+      if (t < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }
+
+  function setOpen(open, { focus = false } = {}) {
+    state.open = open;
+    // circle → rounded triangle as each tile fans out; back to a circle as it folds home
+    tiles().forEach((el) => {
+      if (el.classList.contains('flying')) return;
+      if (open) morph(el, 0, 620, +el.style.getPropertyValue('--o') * 36 + 40, easeOut);
+      else morph(el, 1, 200, 0, easeIn);
+    });
+    stage.classList.toggle('open', open);
+    arc.inert = !open;
+    trigger.setAttribute('aria-expanded', open);
+    paintTrigger(false);
+    if (open) {
+      status.textContent = 'Choose a tool';
+      if (focus) setTimeout(() => focusTile(Math.max(0, state.selected)), 120);
+    } else if (focus) trigger.focus();
+  }
+
+  function replay() {
+    const wasOpen = state.open;
+    build();
+    if (wasOpen) { stage.classList.remove('open'); void arc.offsetWidth; requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.add('open'))); }
+  }
+
+  function focusTile(i) {
+    const list = tiles();
+    list.forEach((s, j) => s.setAttribute('tabindex', j === i ? 0 : -1));
+    list[i] && list[i].focus();
+  }
+
+  /* Select: the triangle melts into a round heat ball, the ball travels down into the core,
+     the other tiles round off and fold away, and the core flares with the new tool */
+  function choose(i) {
+    if (state.busy) return;
+    state.busy = true;
+    const hadFocus = arc.contains(document.activeElement);
+    state.selected = i;
+    status.textContent = `${TOOLS[i].label} · hot`;
+    tiles().forEach((el, j) => {
+      el.classList.toggle('is-sel', j === i);
+      el.classList.remove('is-press');
+      el.setAttribute('aria-pressed', j === i);
+    });
+    const el = arc.querySelector(`.tile[data-i="${i}"]`), lift = el.querySelector('.lift');
+    el.classList.remove('fire'); void el.getBoundingClientRect(); el.classList.add('fire');
+    morph(el, 1, 320, 0, easeInOut);
+    const T = reduced ? 0 : 320, D = reduced ? 1 : 380, endScale = 30 / (g.depth * .37);
+    setTimeout(() => {
+      el.classList.add('flying');
+      setOpen(false, { focus: hadFocus });
+      const t0 = performance.now();
+      lift.style.transition = 'none';
+      (function travel(now) {
+        const t = Math.min(1, (now - t0) / D), e = easeIn(t);
+        lift.style.transform = `translateY(${f(g.rc * e)}px) scale(${f(1.13 + (endScale - 1.13) * e)})`;
+        if (t < 1) requestAnimationFrame(travel);
+        else {
+          el.style.opacity = 0;
+          paintTrigger(true);
+          setTimeout(() => { state.busy = false; build(); }, 260);
+        }
+      })(t0);
+    }, T);
+  }
+
+  trigger.addEventListener('click', (e) => { if (!state.busy) setOpen(!state.open, { focus: e.detail === 0 }); });
+  arc.addEventListener('keydown', (e) => {
+    const list = tiles(), i = list.indexOf(document.activeElement), n = list.length;
+    const map = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: n - 1 };
+    if (e.key in map) { e.preventDefault(); focusTile((map[e.key] + n) % n); }
+    else if ((e.key === 'Enter' || e.key === ' ') && i >= 0) { e.preventDefault(); choose(i); }
+    else if (e.key === 'Escape') { e.preventDefault(); setOpen(false, { focus: true }); }
+  });
+  trigger.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.open) setOpen(false); });
+  document.addEventListener('pointerdown', (e) => {
+    if (state.open && !state.busy && !dock.contains(e.target) && !e.target.closest('.controls')) setOpen(false);
+  });
+  document.querySelectorAll('.pills').forEach((group) => {
+    group.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b || state.busy) return;
+      group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      const key = group.dataset.key;
+      state[key] = key === 'count' ? +b.dataset.v : b.dataset.v;
+      replay();
+    });
+  });
+
+  /* ---- States sheet ---- */
+  function buildSheet() {
+    const cols = ['Enabled', 'Hover', 'Pressed', 'Selected'];
+    const st = ['', 'is-hover', 'is-press', ''];
+    let html = '<div></div>' + cols.map((c) => `<div class="colh">${c}</div>`).join('');
+    [['icon', 'Icon'], ['text', 'Text'], ['both', 'Icon + text']].forEach(([content, name]) => {
+      const gg = { ...layout('center', content, 5) };
+      gg.angles = [0]; gg.order = [0];
+      const hh = gg.step / 2;
+      const w = 2 * gg.ro * Math.sin(rad(hh)) + 70, top = -gg.ro - 34, h = gg.depth + 70;
+      html += `<div class="rowh">${name}</div>`;
+      cols.forEach((_, c) => {
+        const id = 's' + (uid++);
+        html += `<div class="cell"><svg class="static" viewBox="${f(-w / 2)} ${f(top)} ${f(w)} ${f(h)}" aria-hidden="true">${defs(gg, id)}${tileMarkup(gg, TOOLS[4], 0, content, { id, static: true, state: st[c], selected: c === 3 ? 0 : -1 })}</svg></div>`;
+      });
+    });
+    html += '<div class="rowh">Core</div>';
+    ['', 'is-hover', 'is-press'].forEach((c) => {
+      html += `<div class="cell"><span class="trigger ${c}" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2">${CORE}</g></svg></span></div>`;
+    });
+    html += `<div class="cell"><span class="trigger" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span></div>`;
+    $('sheet').innerHTML = html;
+
+    // Selecting, frame by frame (center, five tools, the middle one chosen)
+    const gs = layout('center', 'icon', 5), sel = 2, tools = TOOLS.slice(0, 5);
+    const S = gs.ro + 40, endScale = 30 / (gs.depth * .37);
+    const frames = [
+      ['Pick', '0 ms', { m: 0 }],
+      ['Melt', '160 ms', { m: .5 }],
+      ['Ball', '320 ms', { m: 1 }],
+      ['Return', '550 ms', { m: 1, travel: .6, fold: .6 }],
+      ['Land', '700 ms', { land: true }],
+    ];
+    $('strip').innerHTML = frames.map(([name, time, fr]) => {
+      const id = 'f' + (uid++);
+      let body = '';
+      if (!fr.land) tools.forEach((t, i) => {
+        const isSel = i === sel;
+        const o = { id, static: true, selected: isSel ? i : -1, morph: isSel ? fr.m : (fr.fold ? 1 : 0) };
+        if (isSel && fr.travel) { const e = fr.travel; o.travel = `translateY(${f(gs.rc * e)}px) scale(${f(1.13 + (endScale - 1.13) * e)})`; }
+        if (!isSel && fr.fold) o.style = `transform:rotate(${f(gs.angles[i] * (1 - fr.fold))}deg) scale(${f(1 - .7 * fr.fold)});opacity:${f(1 - fr.fold)}`;
+        body += tileMarkup(gs, t, i, 'icon', o);
+      });
+      const face = fr.land ? tools[sel].icon : '<path d="M7 7l10 10M17 7L7 17"/>';
+      body += `<circle r="30" fill="url(#coreGrad)"/><g transform="translate(-12 -12)" fill="none" stroke="#f9e9f9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${face}</g>`;
+      return `<div class="frame"><svg class="static" viewBox="${f(-S)} ${f(-S)} ${f(2 * S)} ${f(S + 44)}" aria-hidden="true">${body}</svg><span><b>${name}</b> · ${time}</span></div>`;
+    }).join('');
+  }
+
+  build();
+  buildSheet();
+})();
+</script>
+</body>
+</html>
