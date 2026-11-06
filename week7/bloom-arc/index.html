@@ -9,22 +9,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">
 <style>
   :root {
-    /* Colour, taken from the Material You widget board (image 3) */
-    --plum: #5a1c5f;        /* dark widgets: clock, step pill */
+    /* Colour, taken from the widget board (image 3) */
+    --plum: #5a1c5f;
     --plum-hover: #6c2a72;
     --plum-press: #46124b;
-    --lilac: #f9e9f9;       /* widget surface */
-    --lilac-hover: #f2d8f4;
-    --orchid: #e7a6ee;      /* the "+" chip */
-    --orchid-press: #dc92e5;
+    --lilac: #f9e9f9;
+    --lilac-hover: #f1d5f3;
+    --orchid: #e7a6ee;
     --ink: #3d1043;
     --ink-soft: #8c6a91;
     --hair: rgba(90, 28, 95, .16);
     --page: #ebe6f0;
 
-    /* Geometry */
     --trigger: 56px;
-    --gap: 3px;
 
     /* Motion */
     --spring: ease-out;      /* replaced by a sampled spring in JS */
@@ -48,9 +45,9 @@
   .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 4px; }
   .tone { margin: 0; max-width: 420px; color: var(--ink-soft); }
 
-  /* ---------- Stage: the blurred bloom backdrop ---------- */
+  /* ---------- Stage ---------- */
   .stage {
-    position: relative; height: 540px; border-radius: 28px; overflow: hidden;
+    position: relative; height: 560px; border-radius: 28px; overflow: hidden;
     background:
       radial-gradient(40% 55% at 12% 18%, #c9cdea 0%, transparent 70%),
       radial-gradient(38% 50% at 85% 12%, #e8d3ea 0%, transparent 70%),
@@ -60,7 +57,7 @@
       #e6e1ee;
     isolation: isolate;
   }
-  .stage::after { /* fine grain, like a soft photograph */
+  .stage::after {
     content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: multiply;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .1 0 0 0 0 .35 0 0 0 .7 -.2'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -71,7 +68,7 @@
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
 
-  /* ---------- Dock: trigger + arc share one centre ---------- */
+  /* ---------- Dock: bud + arc share one centre ---------- */
   .dock { position: absolute; bottom: 64px; width: var(--trigger); height: var(--trigger); z-index: 1; }
   .stage[data-align="center"] .dock { left: calc(50% - var(--trigger) / 2); }
   .stage[data-align="left"] .dock { left: 56px; }
@@ -91,61 +88,63 @@
   .trigger .face-x { opacity: 0; transform: rotate(-90deg) scale(.6); }
   .open .trigger .face-tool { opacity: 0; transform: rotate(90deg) scale(.6); }
   .open .trigger .face-x { opacity: 1; transform: none; }
-  .trigger.pop .face-tool { animation: pop .5s cubic-bezier(.3,1.6,.5,1); }
-  @keyframes pop { 0% { transform: scale(.4); } 100% { transform: none; } }
+  .landing .trigger .face-tool, .landing .trigger .face-x { opacity: 0; transition-duration: .12s; }
+  .trigger.pop .face-tool { animation: pop .55s cubic-bezier(.3,1.6,.5,1); }
+  .trigger.pop { animation: squish .55s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes pop { 0% { transform: scale(.3); } 100% { transform: none; } }
+  @keyframes squish { 0% { transform: scale(1.14, .9); } 100% { transform: none; } }
 
-  /* ---------- Arc ---------- */
-  .arc { position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 1;
-         filter: drop-shadow(0 10px 18px rgba(90, 28, 95, .16)) drop-shadow(0 2px 3px rgba(90, 28, 95, .10)); }
-  .arc .seg {
-    position: absolute; left: 0; top: 0; width: 0; height: 0;
+  /* ---------- Arc: one liquid band ---------- */
+  .arc { position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 1; }
+  .arc > svg, .cell svg, .frame svg { overflow: visible; filter: drop-shadow(0 10px 18px rgba(90, 28, 95, .16)) drop-shadow(0 2px 3px rgba(90, 28, 95, .10)); }
+  .arc > svg { position: absolute; pointer-events: none; }
+
+  .piece, .pc {
+    transform-box: view-box; transform-origin: 0 0;
     transform: rotate(0deg) scale(.36); opacity: 0;
     transition:
       transform .26s var(--close) calc(var(--oc) * 22ms),
       opacity .14s linear calc(var(--oc) * 22ms + .1s);
   }
-  .open .arc .seg {
+  .open .piece, .open .pc {
     transform: rotate(var(--a)) scale(1); opacity: 1;
     transition:
       transform var(--spring-dur) var(--spring) calc(var(--o) * var(--stagger)),
       opacity .18s ease-out calc(var(--o) * var(--stagger));
   }
+  .piece.flying, .pc.flying { transform: rotate(var(--a)) scale(1) !important; opacity: 1 !important; transition: none !important; }
+  .static .piece, .static .pc { transform: rotate(var(--a)); opacity: 1; transition: none; }
 
-  /* A segment is a <button> with no box of its own; the painted sector is its hit area */
-  .seg { border: 0; padding: 0; margin: 0; background: none; font: inherit; color: inherit; pointer-events: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .seg:focus { outline: none; }
-  .seg svg { position: absolute; overflow: visible; pointer-events: none; }
-  .seg .hit { pointer-events: visiblePainted; }
-  .body { transform-box: view-box; transform-origin: 0 var(--mid-neg); transition: transform .34s cubic-bezier(.3,1.5,.5,1); }
-  .shape { fill: var(--lilac); stroke: var(--lilac); stroke-width: 8; stroke-linejoin: round; transition: fill .18s, stroke .18s; }
-  .sheen { fill: url(#sheen); pointer-events: none; }
-  .rim { fill: none; stroke: var(--hair); stroke-width: 1; stroke-linecap: round; }
-  .icon { fill: none; stroke: var(--plum); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke .18s; }
+  .bud-blob { fill: var(--plum); }
+  .band { fill: var(--lilac); transition: fill .2s; }
+  .lift { transform-box: view-box; transform-origin: 0 var(--mid); transition: transform .38s cubic-bezier(.3,1.5,.5,1); }
+  .hit { fill: transparent; pointer-events: visiblePainted; cursor: pointer; }
+  .pc:focus { outline: none; }
+  .ring { fill: none; stroke: var(--plum); stroke-width: 1.5; opacity: 0; }
+  .icon { fill: none; stroke: var(--plum); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke .2s; }
   .glyph { transform-box: fill-box; transform-origin: center; transition: transform .34s cubic-bezier(.3,1.6,.5,1); }
-  .label { fill: var(--ink); font: 500 12px Figtree, system-ui, sans-serif; letter-spacing: .02em; transition: fill .18s; }
-  .notch { fill: var(--plum); transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); transition: transform .3s cubic-bezier(.3,1.6,.5,1); }
-  .ring { fill: none; stroke: var(--plum); stroke-width: 2; opacity: 0; }
+  .label { fill: var(--ink); font: 500 12px Figtree, system-ui, sans-serif; letter-spacing: .02em; transition: fill .2s; }
   .tip { opacity: 0; transition: opacity .16s; pointer-events: none; }
   .tip rect { fill: var(--plum); }
   .tip text { fill: var(--lilac); font: 500 12px Figtree, system-ui, sans-serif; }
+  .bud-face { fill: none; stroke: var(--lilac); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* States: 1 Enabled (above) · 2 Hover · 3 Pressed · plus Selected */
-  .seg:hover .body, .seg.is-hover .body { transform: translateY(-5px); }
-  .seg:hover .shape, .seg.is-hover .shape { fill: var(--lilac-hover); stroke: var(--lilac-hover); }
-  .seg:hover .glyph, .seg.is-hover .glyph { transform: scale(1.1); }
-  .seg:hover .tip, .seg.is-hover .tip, .seg:focus-visible .tip { opacity: 1; transition-delay: .25s; }
-  .seg:active .body, .seg.is-press .body { transform: translateY(1px) scale(.96); transition-duration: .09s; }
-  .seg:active .shape, .seg.is-press .shape { fill: var(--orchid); stroke: var(--orchid); }
-  .seg:active .glyph, .seg.is-press .glyph { transform: scale(.92); }
-  .seg[aria-pressed="true"] .shape { fill: var(--plum); stroke: var(--plum); }
-  .seg[aria-pressed="true"]:hover .shape { fill: var(--plum-hover); stroke: var(--plum-hover); }
-  .seg[aria-pressed="true"]:active .shape { fill: var(--plum-press); stroke: var(--plum-press); }
-  .seg[aria-pressed="true"] .icon { stroke: var(--lilac); }
-  .seg[aria-pressed="true"] .label { fill: var(--lilac); }
-  .seg[aria-pressed="true"] .rim { stroke: rgba(249,233,249,.22); }
-  .seg[aria-pressed="true"] .sheen { opacity: .35; }
-  .seg[aria-pressed="true"] .notch { transform: scaleY(1); }
-  .seg:focus-visible .ring { opacity: 1; }
+  /* States: Enabled (above) · Hover · Pressed · Selected.
+     The goo layer (.piece) and the content layer (.pc) get the same class, so the band bulges with its content */
+  .is-hover .lift { transform: translateY(-6px); }
+  .piece.is-hover .band { fill: var(--lilac-hover); }
+  .pc.is-hover .glyph { transform: scale(1.1); }
+  .pc.is-hover .tip, .pc:focus-visible .tip { opacity: 1; transition-delay: .25s; }
+  .is-press .lift { transform: translateY(2px) scale(.95); transition-duration: .09s; }
+  .piece.is-press .band { fill: var(--orchid); }
+  .pc.is-press .glyph { transform: scale(.9); }
+  .piece.is-sel .band { fill: var(--plum); }
+  .piece.is-sel.is-hover .band { fill: var(--plum-hover); }
+  .piece.is-sel.is-press .band { fill: var(--plum-press); }
+  .pc.is-sel .icon { stroke: var(--lilac); }
+  .pc.is-sel .label { fill: var(--lilac); }
+  .pc.is-sel .ring { stroke: var(--lilac); }
+  .pc:focus-visible .ring { opacity: .9; }
 
   /* ---------- Controls ---------- */
   .controls { display: flex; flex-wrap: wrap; gap: 14px 28px; margin: 18px 2px 0; }
@@ -159,47 +158,47 @@
 
   /* ---------- Specimen sheet (the drawing) ---------- */
   h2 { font-weight: 500; font-size: 20px; margin: 56px 0 6px; }
-  .sub { margin: 0 0 18px; color: var(--ink-soft); max-width: 640px; }
-  .sheet { display: grid; grid-template-columns: 110px repeat(4, 1fr); gap: 10px; align-items: center; }
-  .sheet .colh { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); text-align: center; }
-  .sheet .rowh { font-size: 13px; color: var(--ink); }
-  .cell { display: grid; place-items: center; height: 120px; border-radius: 18px; background: rgba(249,233,249,.45); box-shadow: inset 0 0 0 1px rgba(90,28,95,.08); }
-  .cell svg { overflow: visible; filter: drop-shadow(0 6px 10px rgba(90,28,95,.12)); }
+  .sub { margin: 0 0 18px; color: var(--ink-soft); max-width: 680px; }
+  .sheet { display: grid; grid-template-columns: 110px repeat(4, minmax(0, 1fr)); gap: 10px; align-items: center; }
+  .colh { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); text-align: center; }
+  .rowh { font-size: 13px; color: var(--ink); }
+  .cell, .frame { display: grid; place-items: center; height: 150px; padding: 10px; border-radius: 18px; background: rgba(249,233,249,.45); box-shadow: inset 0 0 0 1px rgba(90,28,95,.08); }
+  .cell svg, .frame svg { width: 100%; height: 100%; }
   .cell .trigger { position: relative; inset: auto; width: 56px; height: 56px; cursor: default; }
-  .cell .seg { pointer-events: none; cursor: default; display: block; }
-  .cell .seg svg { position: static; display: block; }
+  .strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+  .frame { height: 170px; grid-template-rows: 1fr auto; gap: 6px; }
+  .frame span { font-size: 12px; color: var(--ink-soft); }
+  .frame span b { color: var(--ink); font-weight: 500; }
 
   .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 8px; }
   .note { background: rgba(249,233,249,.55); border-radius: 18px; padding: 16px 18px; box-shadow: inset 0 0 0 1px rgba(90,28,95,.08); }
   .note h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
-  .note p, .note ul { margin: 0; color: #5d4462; font-size: 13px; }
-  .note ul { padding-left: 18px; }
+  .note ul { margin: 0; padding-left: 18px; color: #5d4462; font-size: 13px; }
   code { font: 12px ui-monospace, Menlo, monospace; background: rgba(90,28,95,.07); padding: 1px 5px; border-radius: 5px; }
 
   @media (max-width: 720px) {
-    .stage { height: 480px; }
+    .stage { height: 500px; }
     .stage[data-align="left"] .dock { left: 28px; }
     .stage[data-align="right"] .dock { right: 28px; }
-    .sheet { grid-template-columns: 64px repeat(4, minmax(0, 1fr)); gap: 6px; }
-    .cell { height: 96px; }
-    .cell svg { width: 100%; height: auto; max-height: 84px; }
-    .cell .trigger { transform: scale(.8); }
+    .sheet { grid-template-columns: 56px repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .cell { height: 96px; padding: 6px; }
+    .cell .trigger { transform: scale(.75); }
+    .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .arc .seg, .open .arc .seg { transform: rotate(var(--a)) scale(1); transition: opacity .15s linear; }
-    .body, .glyph, .notch, .trigger, .trigger svg { transition-duration: .01s !important; }
+    .piece, .pc, .open .piece, .open .pc { transform: rotate(var(--a)) scale(1); transition: opacity .15s linear; }
+    .lift, .glyph, .trigger, .trigger svg { transition-duration: .01s !important; }
   }
 </style>
 </head>
 <body>
-<!-- Shared paint servers for every segment -->
+<!-- Goo: blur then a hard alpha threshold, so touching shapes flow into one liquid body and pinch apart like a drop -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <radialGradient id="sheen" cx="0" cy="0" r="260" gradientUnits="userSpaceOnUse">
-      <stop offset=".25" stop-color="#fff" stop-opacity=".55"/>
-      <stop offset=".5" stop-color="#fff" stop-opacity=".12"/>
-      <stop offset=".75" stop-color="#fff" stop-opacity="0"/>
-    </radialGradient>
+    <filter id="goo" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+      <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/>
+    </filter>
   </defs>
 </svg>
 
@@ -210,7 +209,7 @@
       <div class="eyebrow">Week 7 · Toolbar · Set 1</div>
       <h1>Bloom Arc</h1>
     </div>
-    <p class="tone"><strong>Tone:</strong> soft, playful, unhurried. The tools are folded inside one round bud and fan open above it like petals.
+    <p class="tone"><strong>Tone:</strong> soft, liquid, playful. One round bud pours out a single bent pill of tools; choosing one pinches it off like a drop of water and lets it fall back into the bud.
       <strong>Function:</strong> pick one tool from a small set without leaving the canvas.</p>
   </header>
 
@@ -241,29 +240,33 @@
   </div>
 
   <h2>States</h2>
-  <p class="sub">One sector shape carries every button type. Hover lifts the petal outward, press pushes it in and flushes it orchid, and the chosen tool turns plum with a small notch pointing back at the bud.</p>
+  <p class="sub">The toolbar is one continuous pill bent around the bud, with no seams. Hover swells a tool outward like a bead of water, press dents it in and flushes it orchid, and the current tool is plum inside the band.</p>
   <div class="sheet" id="sheet"></div>
+
+  <h2>Selecting: the drop</h2>
+  <p class="sub">Choosing a tool cuts it out of the band. Its sides pinch in, the liquid neck stretches and snaps, the two cut ends recoil into rounded tips, and the freed drop falls back into the bud, which becomes that tool.</p>
+  <div class="strip" id="strip"></div>
 
   <h2>System</h2>
   <div class="notes">
     <div class="note"><h3>Structure</h3>
-      <ul><li>Bud: 56 px round trigger, shows the current tool</li>
-      <li>Arc: n sectors around the bud's centre, 3 px seams</li>
-      <li>Band: 52 icon · 48 text · 64 icon + text</li>
-      <li>Rim line 9 px in from the inner edge</li></ul></div>
+      <ul><li>Bud: 56 px circle, shows the current tool</li>
+      <li>Band: one pill bent around the bud's centre, fully round ends (radius = half the band)</li>
+      <li>Band depth: 52 icon · 48 text · 64 icon + text</li>
+      <li>Each tool owns an equal slice; no dividers</li></ul></div>
     <div class="note"><h3>Alignment</h3>
-      <ul><li><strong>Center</strong>: arc spans up to 160° symmetric over the bud</li>
-      <li><strong>Left</strong>: bud in the left corner, arc sweeps 100° clockwise to the right</li>
+      <ul><li><strong>Center</strong>: arc up to 160°, symmetric over the bud</li>
+      <li><strong>Left</strong>: bud in the left corner, arc sweeps 100° clockwise</li>
       <li><strong>Right</strong>: mirrored</li>
-      <li>Radius grows so each petal keeps ~70 px of arc</li></ul></div>
+      <li>Radius grows so each slice keeps ~70 px of arc</li></ul></div>
     <div class="note"><h3>Motion</h3>
-      <ul><li>Open: petals start folded at 12 o'clock at 36% scale and fan to their angles on a spring (k 210, c 17), 34 ms apart, from the middle outward</li>
-      <li>Close: they sweep back into the bud in 260 ms, ease-in</li>
-      <li>Hover 5 px lift · press 96% · selection closes after 280 ms</li></ul></div>
+      <ul><li>Open: slices fold out of the bud and fan to their angles on a spring (k 210, c 17), 34 ms apart</li>
+      <li>Liquid: blur 8 + alpha threshold, so slices merge and split like water</li>
+      <li>Cut: pinch 0–250 ms, rise with a stretched neck 150–450 ms, ends snap back 360–580 ms, drop falls into the bud 520–920 ms</li></ul></div>
     <div class="note"><h3>Keys</h3>
       <ul><li><code>Enter</code>/<code>Space</code> on the bud opens</li>
       <li><code>←</code> <code>→</code> move along the arc, <code>Home</code>/<code>End</code></li>
-      <li><code>Esc</code> or a tap outside closes and returns focus</li></ul></div>
+      <li><code>Enter</code>/<code>Space</code> chooses, <code>Esc</code> closes</li></ul></div>
   </div>
 </div>
 
@@ -277,24 +280,28 @@
     { id: 'brush', label: 'Brush', icon: '<path d="M19.5 4.5a1.8 1.8 0 0 1 0 2.6l-7.4 7.4-2.6-2.6 7.4-7.4a1.8 1.8 0 0 1 2.6 0z"/><path d="M9.3 13.9c-1.9 0-3.3 1.3-3.3 3.1 0 1.1-.7 1.9-2 2.3 1 .5 2.2.7 3.3.7 2.3 0 4-1.6 4-3.6"/>' },
   ];
   const STAR = '<path d="M12 3.5l2.5 5.3 5.8.7-4.3 4 1.1 5.7L12 16.4l-5.1 2.8 1.1-5.7-4.3-4 5.8-.7z"/>';
+  const X = '<path d="M7 7l10 10M17 7L7 17"/>';
   const BAND = { icon: 52, text: 48, both: 64 };
   const ARCLEN = { icon: 64, text: 70, both: 74 };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const state = { align: 'center', content: 'icon', count: 5, open: false, selected: -1 };
+  const state = { align: 'center', content: 'icon', count: 5, open: false, selected: -1, busy: false };
   const $ = (id) => document.getElementById(id);
   const stage = $('stage'), arc = $('arc'), trigger = $('trigger'), dock = $('dock'), status = $('status'), faceTool = $('faceTool');
 
-  /* ---- Spring → CSS linear() easing ---- */
+  /* ---- Easing ---- */
+  const clamp = (x) => Math.min(1, Math.max(0, x));
+  const inOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const easeIn = (t) => t * t * t;
+  const backOut = (t) => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
   function springEasing(k = 210, c = 17) {
     let x = 0, v = 0, t = 0; const dt = 1 / 240, pts = [0];
     while (t < 2) {
-      v += (k * (1 - x) - c * v) * dt; x += v * dt; t += dt;
-      pts.push(x);
+      v += (k * (1 - x) - c * v) * dt; x += v * dt; t += dt; pts.push(x);
       if (Math.abs(1 - x) < .0015 && Math.abs(v) < .02) break;
     }
     const step = Math.max(1, Math.floor(pts.length / 48));
-    const out = pts.filter((_, i) => i % step === 0).map((p) => +p.toFixed(4));
-    out.push(1);
+    const out = pts.filter((_, i) => i % step === 0).map((p) => +p.toFixed(4)); out.push(1);
     return { easing: `linear(${out.join(',')})`, dur: Math.round(t * 1000) };
   }
   if (CSS.supports('transition-timing-function', 'linear(0, 1)')) {
@@ -305,16 +312,29 @@
     document.documentElement.style.setProperty('--spring', 'cubic-bezier(.3,1.45,.5,1)');
   }
 
-  /* ---- Geometry ---- */
-  const rad = (d) => d * Math.PI / 180;
-  const pt = (r, a) => [+(r * Math.sin(rad(a))).toFixed(2), +(-r * Math.cos(rad(a))).toFixed(2)];
-  function sector(ri, ro, a0, a1) {
-    const [x0, y0] = pt(ro, a0), [x1, y1] = pt(ro, a1), [x2, y2] = pt(ri, a1), [x3, y3] = pt(ri, a0);
-    return `M${x0} ${y0}A${ro} ${ro} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${ri} ${ri} 0 0 0 ${x3} ${y3}Z`;
-  }
+  /* ---- Geometry (angles in degrees, 0 = straight up, clockwise) ---- */
+  const rad = (d) => d * Math.PI / 180, deg = (r) => r * 180 / Math.PI;
+  const f = (n) => +n.toFixed(2);
+  const pt = (r, a) => [f(r * Math.sin(rad(a))), f(-r * Math.cos(rad(a)))];
   function arcLine(r, a0, a1) {
     const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
     return `M${x0} ${y0}A${r} ${r} 0 0 1 ${x1} ${y1}`;
+  }
+  /* A slice of the band: arc from lo to hi on radius R, depth w; capLo/capHi give it a fully round end.
+     With lo = hi and both caps it is a perfect circle: the drop. */
+  function pill({ lo, hi, R, w, capLo, capHi }) {
+    const r = w / 2;
+    if (hi - lo < .02 && capLo && capHi) {
+      const [cx, cy] = pt(R, (lo + hi) / 2);
+      return `M${f(cx - r)} ${cy}a${r} ${r} 0 1 0 ${w} 0a${r} ${r} 0 1 0 ${-w} 0Z`;
+    }
+    const ro = R + r, ri = Math.max(.5, R - r), large = hi - lo > 180 ? 1 : 0;
+    const [ox0, oy0] = pt(ro, lo), [ox1, oy1] = pt(ro, hi), [ix1, iy1] = pt(ri, hi), [ix0, iy0] = pt(ri, lo);
+    let d = `M${ox0} ${oy0}A${f(ro)} ${f(ro)} 0 ${large} 1 ${ox1} ${oy1}`;
+    d += capHi ? `A${f(r)} ${f(r)} 0 0 1 ${ix1} ${iy1}` : `L${ix1} ${iy1}`;
+    d += `A${f(ri)} ${f(ri)} 0 ${large} 0 ${ix0} ${iy0}`;
+    d += capLo ? `A${f(r)} ${f(r)} 0 0 1 ${ox0} ${oy0}` : '';
+    return d + 'Z';
   }
   function layout(align, content, n) {
     const band = BAND[content];
@@ -325,59 +345,92 @@
     if (align === 'center') angles = [...Array(n)].map((_, i) => (i - (n - 1) / 2) * step);
     else if (align === 'left') angles = [...Array(n)].map((_, i) => -4 + step * (i + .5));
     else angles = [...Array(n)].map((_, i) => -96 + step * (i + .5));
-    // Order of the fan: from the bud's 12 o'clock outward
     const order = angles.map((_, i) => align === 'center' ? Math.abs(i - (n - 1) / 2) : align === 'left' ? i : n - 1 - i);
-    return { band, step, mid, ri: mid - band / 2, ro: mid + band / 2, angles, order };
+    return { band, step, mid, ri: mid - band / 2, ro: mid + band / 2, angles, order, cap: deg(band / 2 / mid) };
+  }
+  const restSlice = (g, i, n) => ({ lo: -g.step / 2, hi: g.step / 2, R: g.mid, w: g.band, capLo: i === 0, capHi: i === n - 1 });
+
+  /* ---- The drop: where the chosen slice and its neighbours are at progress p (0..1) ---- */
+  function cutFrame(g, s, p, content) {
+    const n = g.angles.length, h = g.step / 2;
+    const eP = inOut(clamp(p / .25));                // pinch: the slice rounds its corners in place
+    const eR = inOut(clamp((p - .15) / .3));         // rise: the drop pulls away, the liquid neck stretches
+    const snap = backOut(clamp((p - .36) / .22));    // snap: the cut ends spring back into round tips
+    const eC = easeIn(clamp((p - .52) / .4));        // fall: back into the bud
+    const half = Math.max(0, h - g.cap) * (1 - .6 * eP) * (1 - eR);
+    const w0 = g.band - (g.band - 44) * eR;
+    const P = {};
+    P[s] = { lo: -half, hi: half, R: (g.mid + 6 * eP + (g.band * 1.1 - 6) * eR) * (1 - eC), w: w0 + (34 - w0) * eC, capLo: true, capHi: true };
+    const rec = deg(9 / g.mid) * snap;
+    if (s > 0) P[s - 1] = { ...restSlice(g, s - 1, n), hi: h - g.cap - rec, capHi: true };
+    if (s < n - 1) P[s + 1] = { ...restSlice(g, s + 1, n), lo: -h + g.cap + rec, capLo: true };
+    return {
+      s, P,
+      fold: easeIn(clamp((p - .46) / .4)),
+      label: 1 - clamp(p / .2),
+      iconIn: content === 'text' ? clamp((p - .12) / .2) : 1,
+      iconShift: (content === "both" ? 9 : 0) * (1 - eR),
+    };
   }
 
   let uid = 0;
-  /* Markup for one petal, drawn pointing straight up; the caller rotates it */
-  function petal(tool, g, content, angle) {
-    const id = 'tp' + (uid++);
-    const SW = 4; // half the rounding stroke
-    const half = g.step / 2 - rad(0) - ((parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 3) / 2 + SW) / g.mid * 180 / Math.PI;
-    const ri = g.ri + SW, ro = g.ro - SW;
-    const d = sector(ri, ro, -half, half);
-    const iconR = content === 'both' ? g.mid + 9 : g.mid;
-    const textR = content === 'both' ? g.mid - 15 : g.mid - 4;
-    const nb = 7, notch = `M${pt(g.ri + 2, -nb / g.ri * 57.3).join(' ')}L0 ${-(g.ri - 7)}L${pt(g.ri + 2, nb / g.ri * 57.3).join(' ')}Z`;
-    const rimHalf = half - 6 / g.ri * 57.3;
-    let inner = '';
-    if (content !== 'text') inner += `<g transform="translate(-12 ${-iconR - 12})"><g class="glyph"><g class="icon">${tool.icon}</g></g></g>`;
-    if (content !== 'icon') inner += `<path id="${id}" d="${arcLine(textR, -half - 20, half + 20)}" fill="none"/><text class="label"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${tool.label}</textPath></text>`;
-    let tip = '';
-    if (content === 'icon') {
-      const [tx, ty] = pt(g.ro + 24, 0); const w = tool.label.length * 7 + 22;
-      tip = `<g class="tip" transform="translate(${tx} ${ty}) rotate(${-angle})"><rect x="${-w / 2}" y="-13" width="${w}" height="26" rx="13"/><text text-anchor="middle" y="4">${tool.label}</text></g>`;
-    }
-    return `<g class="body" style="--mid-neg:${-g.mid}px">
-      <path class="notch" d="${notch}"/>
-      <path class="shape hit" d="${d}"/>
-      <path class="sheen" d="${d}"/>
-      <path class="rim" d="${arcLine(g.ri + 9, -rimHalf, rimHalf)}"/>
-      <path class="ring" d="${sector(ri - 6, ro + 6, -half - 1.2, half + 1.2)}" stroke-linejoin="round"/>
-      ${inner}${tip}</g>`;
+  /* Markup for a whole arc: a goo layer (the liquid band + bud) and a crisp content layer on top */
+  function renderArc(g, tools, content, o = {}) {
+    const n = tools.length, maxO = Math.max(...g.order), h = g.step / 2;
+    const fr = o.frame;
+    let goo = '<circle class="bud-blob" r="28"/>', fg = '';
+    tools.forEach((t, i) => {
+      const a = g.angles[i];
+      const q = (fr && fr.P[i]) || restSlice(g, i, n);
+      const cls = ((o.states && o.states[i]) || '') + (i === o.selected ? ' is-sel' : '');
+      let style = `--a:${f(a)}deg;--o:${g.order[i]};--oc:${maxO - g.order[i]}`;
+      if (fr && fr.fold && i !== fr.s) style += `;transform:rotate(${f(a * (1 - fr.fold))}deg) scale(${f(1 - .64 * fr.fold)});opacity:${f(1 - fr.fold)}`;
+      const lift = `--mid:${f(-g.mid)}px`;
+      goo += `<g class="piece ${cls}" data-i="${i}" style="${style}"><g class="lift" style="${lift}"><path class="band" d="${pill(q)}"/></g></g>`;
+
+      const isDrop = fr && i === fr.s;
+      const iconR = isDrop ? q.R + fr.iconShift : content === 'both' ? g.mid + 9 : g.mid;
+      const iconOpacity = isDrop ? fr.iconIn : content === 'text' ? 0 : 1;
+      const labelOpacity = isDrop ? fr.label : 1;
+      const textR = content === 'both' ? g.mid - 15 : g.mid - 4;
+      const id = 'tp' + (uid++);
+      let inner = `<path class="hit" d="${pill(restSlice(g, i, n))}"/>`;
+      inner += `<path class="ring" d="${pill({ lo: -h + g.cap * .5, hi: h - g.cap * .5, R: g.mid, w: g.band - 10, capLo: true, capHi: true })}"/>`;
+      inner += `<g class="glyph-pos" transform="translate(-12 ${f(-iconR - 12)})"><g class="glyph" style="opacity:${iconOpacity}"><g class="icon">${t.icon}</g></g></g>`;
+      if (content !== 'icon') inner += `<path id="${id}" d="${arcLine(textR, -h - 20, h + 20)}" fill="none"/><text class="label" style="opacity:${labelOpacity}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${t.label}</textPath></text>`;
+      if (content === 'icon' && !o.static) {
+        const [tx, ty] = pt(g.ro + 26, 0), tw = t.label.length * 7 + 22;
+        inner += `<g class="tip" transform="translate(${tx} ${ty}) rotate(${f(-a)})"><rect x="${-tw / 2}" y="-13" width="${tw}" height="26" rx="13"/><text text-anchor="middle" y="4">${t.label}</text></g>`;
+      }
+      const role = o.static ? '' : `role="button" tabindex="-1" aria-label="${t.label}" aria-pressed="${i === o.selected}"`;
+      fg += `<g class="pc ${cls}" data-i="${i}" ${role} style="${style}"><g class="lift" style="${lift}">${inner}</g></g>`;
+    });
+    if (o.budFace) fg += `<g class="bud-face" transform="translate(-12 -12)">${o.budFace}</g>`;
+    return `<g class="goo" filter="url(#goo)">${goo}</g><g class="fg">${fg}</g>`;
   }
 
   /* ---- Live toolbar ---- */
-  let segs = [];
+  let g = null;
+  const pcs = () => [...arc.querySelectorAll('.pc')];
   function build() {
-    const g = layout(state.align, state.content, state.count);
-    const S = Math.ceil(g.ro + 60);
+    g = layout(state.align, state.content, state.count);
+    const S = Math.ceil(g.ro + 80);
     stage.dataset.align = state.align;
     stage.dataset.content = state.content;
     if (state.selected >= state.count) state.selected = -1;
-    arc.innerHTML = TOOLS.slice(0, state.count).map((t, i) => {
-      const a = g.angles[i];
-      const maxO = Math.max(...g.order);
-      return `<button class="seg" role="button" tabindex="-1" aria-pressed="${i === state.selected}" aria-label="${t.label}" data-i="${i}"
-          style="--a:${a.toFixed(2)}deg;--o:${g.order[i]};--oc:${maxO - g.order[i]}">
-        <svg viewBox="${-S} ${-S} ${2 * S} ${2 * S}" width="${2 * S}" height="${2 * S}" style="left:${-S}px;top:${-S}px" aria-hidden="true">${petal(t, g, state.content, a)}</svg>
-      </button>`;
-    }).join('');
-    segs = [...arc.querySelectorAll('.seg')];
+    arc.innerHTML = `<svg viewBox="${-S} ${-S} ${2 * S} ${2 * S}" width="${2 * S}" height="${2 * S}" style="left:${-S}px;top:${-S}px">${renderArc(g, TOOLS.slice(0, state.count), state.content, { selected: state.selected })}</svg>`;
+    pcs().forEach((pc) => {
+      const i = +pc.dataset.i;
+      pc.addEventListener('pointerenter', () => !state.busy && mark(i, 'is-hover', true));
+      pc.addEventListener('pointerleave', () => { mark(i, 'is-hover', false); mark(i, 'is-press', false); });
+      pc.addEventListener('pointerdown', () => !state.busy && mark(i, 'is-press', true));
+      pc.addEventListener('pointerup', () => mark(i, 'is-press', false));
+      pc.addEventListener('pointercancel', () => mark(i, 'is-press', false));
+      pc.addEventListener('click', () => choose(i));
+    });
     paintTrigger(false);
   }
+  const mark = (i, cls, on) => arc.querySelectorAll(`[data-i="${i}"]`).forEach((el) => el.classList.toggle(cls, on));
 
   function paintTrigger(pop) {
     const t = TOOLS[state.selected];
@@ -404,46 +457,65 @@
     if (wasOpen) {
       stage.classList.remove('open');
       void arc.offsetWidth;
-      // let the folded pose paint, then fan out again
-      arc.querySelectorAll('.seg').forEach((s) => (s.style.transition = 'none'));
-      void arc.offsetWidth;
-      arc.querySelectorAll('.seg').forEach((s) => (s.style.transition = ''));
-      requestAnimationFrame(() => stage.classList.add('open'));
+      requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.add('open')));
     }
   }
 
   function focusSeg(i) {
-    segs.forEach((s, j) => (s.tabIndex = j === i ? 0 : -1));
-    segs[i] && segs[i].focus();
+    const list = pcs();
+    list.forEach((s, j) => s.setAttribute('tabindex', j === i ? 0 : -1));
+    list[i] && list[i].focus();
   }
 
+  /* Pick: pinch the slice off the band, let the drop rise, then fall into the bud */
   function choose(i) {
+    if (state.busy) return;
+    state.busy = true;
+    const hadFocus = arc.contains(document.activeElement);
     state.selected = i;
-    segs.forEach((s, j) => s.setAttribute('aria-pressed', j === i));
     status.textContent = `${TOOLS[i].label} selected`;
-    setTimeout(() => { setOpen(false, { focus: document.activeElement && arc.contains(document.activeElement) }); paintTrigger(true); }, 280);
+    arc.querySelectorAll('.is-sel, .is-hover, .is-press').forEach((el) => el.classList.remove('is-sel', 'is-hover', 'is-press'));
+    mark(i, 'is-sel', true);
+    pcs().forEach((pc, j) => pc.setAttribute('aria-pressed', j === i));
+    mark(i, 'flying', true);
+    stage.classList.add('landing');
+
+    const n = state.count, D = reduced ? 350 : 1000, t0 = performance.now();
+    const bands = {}, idx = [i - 1, i, i + 1].filter((k) => k >= 0 && k < n);
+    idx.forEach((k) => (bands[k] = arc.querySelector(`.piece[data-i="${k}"] .band`)));
+    const pc = arc.querySelector(`.pc[data-i="${i}"]`);
+    const pos = pc.querySelector('.glyph-pos'), glyph = pc.querySelector('.glyph'), label = pc.querySelector('.label');
+    let folded = false, landed = false;
+    (function tick(now) {
+      const p = clamp((now - t0) / D);
+      const fr = cutFrame(g, i, p, state.content);
+      idx.forEach((k) => bands[k].setAttribute('d', pill(fr.P[k])));
+      pos.setAttribute('transform', `translate(-12 ${f(-(fr.P[i].R + fr.iconShift) - 12)})`);
+      glyph.style.opacity = fr.iconIn;
+      if (label) label.style.opacity = fr.label;
+      if (p >= .46 && !folded) { folded = true; setOpen(false, { focus: hadFocus }); }
+      if (p >= .9 && !landed) { landed = true; stage.classList.remove('landing'); paintTrigger(true); }
+      if (p < 1) requestAnimationFrame(tick);
+      else { state.busy = false; build(); }
+    })(t0);
   }
 
-  trigger.addEventListener('click', (e) => setOpen(!state.open, { focus: e.detail === 0 }));
-  arc.addEventListener('click', (e) => {
-    const s = e.target.closest('.seg');
-    if (s) choose(+s.dataset.i);
-  });
+  trigger.addEventListener('click', (e) => { if (!state.busy) setOpen(!state.open, { focus: e.detail === 0 }); });
   arc.addEventListener('keydown', (e) => {
-    const i = segs.indexOf(document.activeElement);
-    const n = segs.length;
+    const list = pcs(), i = list.indexOf(document.activeElement), n = list.length;
     const map = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: n - 1 };
     if (e.key in map) { e.preventDefault(); focusSeg((map[e.key] + n) % n); }
-    if (e.key === 'Escape') { e.preventDefault(); setOpen(false, { focus: true }); }
+    else if ((e.key === 'Enter' || e.key === ' ') && i >= 0) { e.preventDefault(); choose(i); }
+    else if (e.key === 'Escape') { e.preventDefault(); setOpen(false, { focus: true }); }
   });
   trigger.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.open) setOpen(false); });
   document.addEventListener('pointerdown', (e) => {
-    if (state.open && !dock.contains(e.target) && !e.target.closest('.controls')) setOpen(false);
+    if (state.open && !state.busy && !dock.contains(e.target) && !e.target.closest('.controls')) setOpen(false);
   });
 
   document.querySelectorAll('.pills').forEach((group) => {
     group.addEventListener('click', (e) => {
-      const b = e.target.closest('button'); if (!b) return;
+      const b = e.target.closest('button'); if (!b || state.busy) return;
       group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
       const key = group.dataset.key;
       state[key] = key === 'count' ? +b.dataset.v : b.dataset.v;
@@ -452,29 +524,42 @@
     });
   });
 
-  /* ---- Specimen sheet: the drawing of every state ---- */
+  /* ---- Specimen sheet + the drop, frame by frame ---- */
+  function staticSvg(gg, tools, content, o) {
+    const n = tools.length, maxA = Math.max(...gg.angles.map(Math.abs)) + gg.step / 2 + gg.cap;
+    const top = -(gg.ro + 14) - (o.extraTop || 0);
+    const xw = maxA >= 90 ? gg.ro + 10 : (gg.ro + 10) * Math.sin(rad(maxA));
+    const bottom = 34;
+    return `<svg class="static" viewBox="${f(-xw)} ${f(top)} ${f(2 * xw)} ${f(bottom - top)}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${renderArc(gg, tools, content, { static: true, ...o })}</svg>`;
+  }
   function buildSheet() {
-    const sheet = $('sheet');
     const cols = ['Enabled', 'Hover', 'Pressed', 'Selected'];
-    const cls = ['', 'is-hover', 'is-press', ''];
+    const st = ['', 'is-hover', 'is-press', ''];
+    const tools = [TOOLS[1], TOOLS[4], TOOLS[3]];
     let html = '<div></div>' + cols.map((c) => `<div class="colh">${c}</div>`).join('');
-    const tool = TOOLS[4];
     [['icon', 'Icon'], ['text', 'Text'], ['both', 'Icon + text']].forEach(([content, name]) => {
-      const g = layout('center', content, 5);
-      const half = g.step / 2;
-      const w = Math.ceil(2 * g.ro * Math.sin(rad(half)) + 24);
-      const top = -g.ro - 14, h = Math.ceil(g.band + 34 + (g.ro - g.ro * Math.cos(rad(half))));
+      const gg = layout('center', content, 3);
       html += `<div class="rowh">${name}</div>`;
       cols.forEach((_, c) => {
-        html += `<div class="cell"><div class="seg ${cls[c]}" aria-pressed="${c === 3}"><svg viewBox="${-w / 2} ${top} ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${petal(tool, g, content, 0).replace('class="tip"', 'class="tip" style="display:none"')}</svg></div></div>`;
+        html += `<div class="cell">${staticSvg(gg, tools, content, { states: { 1: st[c] }, selected: c === 3 ? 1 : -1, budFace: `<g fill="currentColor" stroke="none" style="fill:var(--lilac)">${STAR}</g>` })}</div>`;
       });
     });
-    html += `<div class="rowh">Bud</div>`;
+    html += '<div class="rowh">Bud</div>';
     ['', 'is-hover', 'is-press'].forEach((c) => {
-      html += `<div class="cell"><span class="trigger ${c}" aria-hidden="true"><svg class="face-tool" viewBox="0 0 24 24"><g fill="currentColor">${STAR}</g></svg></span></div>`;
+      html += `<div class="cell"><span class="trigger ${c}" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="currentColor">${STAR}</g></svg></span></div>`;
     });
-    html += `<div class="cell"><span class="trigger" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span></div>`;
-    sheet.innerHTML = html;
+    html += `<div class="cell"><span class="trigger" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${X}</svg></span></div>`;
+    $('sheet').innerHTML = html;
+
+    // The drop, using the live config so it always matches the prototype above
+    const content = state.content, n = state.count, s = Math.floor(n / 2);
+    const g5 = layout('center', content, n), all = TOOLS.slice(0, n);
+    const frames = [[0, 'Pick'], [.16, 'Pinch'], [.23, 'Neck'], [.3, 'Snap'], [.75, 'Fall'], [1, 'Land']];
+    $('strip').innerHTML = frames.map(([p, name]) => {
+      const fr = cutFrame(g5, s, p, content);
+      const face = p >= .9 ? all[s].icon : X;
+      return `<div class="frame">${staticSvg(g5, all, content, { frame: fr, selected: s, extraTop: g5.band * 1.15, budFace: face })}<span><b>${name}</b> · ${Math.round(p * 1000)} ms</span></div>`;
+    }).join('');
   }
 
   build();
