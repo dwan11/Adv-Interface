@@ -25,7 +25,11 @@ A toolbar folded inside one round button. Tapping the button pours out a single 
 | Image 2 and the Pinterest motion | Items fan out from one pile along an arc, rotating into place with a slight overshoot |
 | Image 3, widget board | Colour (plum, lilac, orchid), soft blurred backdrop, fully rounded shapes |
 
-**Change from the first version:** the first version split the arc into separate tiles with seams, which read as too close to Google's Material style. This version makes the arc one continuous rounded pill with no dividers, and turns selection into a liquid cut.
+| Image 5, metaball poster | Lobes that join through necks which thin gradually, never with a hard step |
+
+**Changes from the first versions:**
+1. The first version split the arc into separate tiles with seams, which read as too close to Google's Material style. The arc became one continuous rounded pill with no dividers, and selection became a liquid cut.
+2. In the second version, hover and selection pushed a whole slice outward. That made stiff, stepped bumps, the end tools turned into shapeless blobs, and the plum selection smeared into the band. Now every state is a **round bead** that swells out of the band through soft, thinning necks, with a **crisp disk** on top that gives each state a clear circular shape and clean colour.
 
 ---
 
@@ -36,8 +40,8 @@ Stage (blurred lavender, pink and peach backdrop)
   Status pill
   Dock
     Arc (one SVG, centred on the bud)
-      Goo layer: bud blob + one slice per tool
-      Content layer: hit area, icon, label, tooltip, focus ring per tool
+      Goo layer: bud blob + per tool: one band slice and one bead (circle)
+      Content layer: per tool: hit area, disk, icon, label, tooltip, focus ring
     Bud (56 px round button)
 Controls: Align · Button · Tools
 States sheet
@@ -81,15 +85,27 @@ Every configuration uses the same basic structure: a bud plus a band divided int
 
 ## 4. States
 
-| State | Band slice | Bud |
-|---|---|---|
-| Enabled | Lilac | Plum, shows the current tool (a star before anything is chosen) |
-| Hover | Swells 6 px outward like a bead of water, darker lilac, icon grows to 110% | Lighter plum, 105% |
-| Pressed | Dents 2 px in at 95%, orchid, icon 90% | Darker plum, 92% |
-| Selected | Plum inside the band, blending softly into the lilac | Shows that tool's icon |
-| Open | | Icon turns into × |
+Each tool has two circles at its centre:
+- a **bead** in the liquid layer, the same lilac as the band. At rest it hides inside the band. When it grows, the liquid filter joins it to the band with smooth necks, so the band swells into a round lobe.
+- a **disk** in the crisp layer on top. It carries the colour, so the colour has a clean round edge and never smears.
 
-Keyboard focus draws a thin rounded ring inside the slice.
+| State | Bead (band diameter + …) | Disk | Icon |
+|---|---|---|---|
+| Enabled | hidden (−8 px) | hidden | Plum |
+| Hover | +24 px, 4 px outward: a round swell | Light lilac `#f1d5f3` | Lifts 2 px, 112% |
+| Pressed | +4 px | Orchid, 86% | 90% |
+| Selected | +10 px | Plum | Lilac |
+| Selected + hover | +24 px | Plum hover, 106% | Lilac |
+
+The end tools (Add and Brush) behave exactly like the middle ones, so they get the same clear round shape instead of a loose blob.
+
+| Bud | |
+|---|---|
+| Enabled | Plum, shows the current tool (a star before anything is chosen) |
+| Hover / Pressed | Lighter plum at 105% / darker plum at 92% |
+| Open | Icon turns into × |
+
+Keyboard focus draws a thin circle around the tool's disk.
 
 ---
 
@@ -97,7 +113,7 @@ Keyboard focus draws a thin rounded ring inside the slice.
 
 ### Liquid
 
-The band and the bud are drawn in one layer with a blur (8) followed by a hard alpha threshold. Shapes that touch flow together, and shapes that pull apart stretch a thin neck before they break, like water.
+The band, beads and bud are drawn in one single-colour layer with a blur (10) followed by a hard alpha threshold. Shapes that touch flow together, and shapes that pull apart stretch a neck that thins gradually before it breaks, like water. Because this layer is one colour, the blur never mixes colours; colour lives only on the crisp disks above it.
 
 ### Open and close
 
@@ -110,9 +126,9 @@ The band and the bud are drawn in one layer with a blur (8) followed by a hard a
 
 | Frame | Time | What happens |
 |---|---|---|
-| Pick | 0 ms | The chosen slice turns plum |
+| Pick | 0 ms | A plum disk blooms in the chosen slice |
 | Pinch | 0–250 ms | Its square sides round in; it lifts 6 px |
-| Neck | 150–450 ms | It rises 1.1× the band depth and shrinks to a 44 px ball; liquid strands still join it to its neighbours |
+| Neck | 150–450 ms | It rises 1.1× the band depth and shrinks to a 44 px ball carrying its plum disk; the liquid between it and its neighbours thins gradually into a neck |
 | Snap | 360–580 ms | The strands break and the two cut ends spring back into round tips |
 | Fall | 520–920 ms | The band folds into the bud while the drop falls straight down and merges into it |
 | Land | 900 ms | The bud squishes and pops in the new tool's icon |

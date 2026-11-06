@@ -115,7 +115,7 @@
   .piece.flying, .pc.flying { transform: rotate(var(--a)) scale(1) !important; opacity: 1 !important; transition: none !important; }
   .static .piece, .static .pc { transform: rotate(var(--a)); opacity: 1; transition: none; }
 
-  .bud-blob { fill: var(--plum); }
+  .bud-blob { fill: var(--lilac); }
   .band { fill: var(--lilac); transition: fill .2s; }
   .lift { transform-box: view-box; transform-origin: 0 var(--mid); transition: transform .38s cubic-bezier(.3,1.5,.5,1); }
   .hit { fill: transparent; pointer-events: visiblePainted; cursor: pointer; }
@@ -131,19 +131,29 @@
 
   /* States: Enabled (above) · Hover · Pressed · Selected.
      The goo layer (.piece) and the content layer (.pc) get the same class, so the band bulges with its content */
-  .is-hover .lift { transform: translateY(-6px); }
-  .piece.is-hover .band { fill: var(--lilac-hover); }
-  .pc.is-hover .glyph { transform: scale(1.1); }
+  /* Bead: a circle hidden inside the band. Under the goo filter it swells out of the band as one smooth,
+     round bulge with necks that thin gradually into the band, like the lobes of a metaball */
+  .bead { fill: var(--lilac); transform-box: fill-box; transform-origin: center; transform: scale(var(--rest));
+          transition: transform .6s cubic-bezier(.25, 1.35, .4, 1); }
+  .piece.is-hover .bead { transform: translateY(-4px) scale(var(--hov)); }
+  .piece.is-sel .bead { transform: scale(var(--sel)); }
+  .piece.is-sel.is-hover .bead { transform: translateY(-4px) scale(var(--hov)); }
+  .piece.is-press .bead, .piece.is-sel.is-press .bead { transform: scale(var(--prs)); transition-duration: .16s; }
+  .piece.flying .bead { transform: scale(0) !important; transition: none !important; }
+  /* Disk: a crisp colour circle on top, so colour never smears across the band */
+  .disk { fill: var(--plum); transform-box: fill-box; transform-origin: center; transform: scale(0);
+          transition: transform .45s cubic-bezier(.3, 1.5, .45, 1), fill .2s; }
+  .pc.is-hover .disk { fill: var(--lilac-hover); transform: scale(1); }
+  .pc.is-press .disk { fill: var(--orchid); transform: scale(.86); transition-duration: .16s; }
+  .pc.is-sel .disk { fill: var(--plum); transform: scale(1); }
+  .pc.is-sel.is-hover .disk { fill: var(--plum-hover); transform: scale(1.06); }
+  .pc.is-sel.is-press .disk { fill: var(--plum-press); transform: scale(.94); }
+  .pc.is-hover .glyph { transform: translateY(-2px) scale(1.12); }
   .pc.is-hover .tip, .pc:focus-visible .tip { opacity: 1; transition-delay: .25s; }
-  .is-press .lift { transform: translateY(2px) scale(.95); transition-duration: .09s; }
-  .piece.is-press .band { fill: var(--orchid); }
   .pc.is-press .glyph { transform: scale(.9); }
-  .piece.is-sel .band { fill: var(--plum); }
-  .piece.is-sel.is-hover .band { fill: var(--plum-hover); }
-  .piece.is-sel.is-press .band { fill: var(--plum-press); }
   .pc.is-sel .icon { stroke: var(--lilac); }
   .pc.is-sel .label { fill: var(--lilac); }
-  .pc.is-sel .ring { stroke: var(--lilac); }
+  .pc.is-sel .ring { stroke: var(--plum); }
   .pc:focus-visible .ring { opacity: .9; }
 
   /* ---------- Controls ---------- */
@@ -196,8 +206,8 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <filter id="goo" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
-      <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/>
+      <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -14"/>
     </filter>
   </defs>
 </svg>
@@ -240,7 +250,7 @@
   </div>
 
   <h2>States</h2>
-  <p class="sub">The toolbar is one continuous pill bent around the bud, with no seams. Hover swells a tool outward like a bead of water, press dents it in and flushes it orchid, and the current tool is plum inside the band.</p>
+  <p class="sub">The toolbar is one continuous pill bent around the bud, with no seams. Hover swells a round bead out of the band whose edges thin smoothly back into it, like two drops of water touching. Press tightens the bead and fills an orchid disk; the current tool is a crisp plum disk sitting in its own bead.</p>
   <div class="sheet" id="sheet"></div>
 
   <h2>Selecting: the drop</h2>
@@ -261,7 +271,7 @@
       <li>Radius grows so each slice keeps ~70 px of arc</li></ul></div>
     <div class="note"><h3>Motion</h3>
       <ul><li>Open: slices fold out of the bud and fan to their angles on a spring (k 210, c 17), 34 ms apart</li>
-      <li>Liquid: blur 8 + alpha threshold, so slices merge and split like water</li>
+      <li>Liquid: blur 10 + alpha threshold on one lilac layer, so the band and its beads merge and split like water; colour sits on crisp disks above</li>
       <li>Cut: pinch 0–250 ms, rise with a stretched neck 150–450 ms, ends snap back 360–580 ms, drop falls into the bud 520–920 ms</li></ul></div>
     <div class="note"><h3>Keys</h3>
       <ul><li><code>Enter</code>/<code>Space</code> on the bud opens</li>
@@ -378,7 +388,9 @@
   function renderArc(g, tools, content, o = {}) {
     const n = tools.length, maxO = Math.max(...g.order), h = g.step / 2;
     const fr = o.frame;
-    let goo = '<circle class="bud-blob" r="28"/>', fg = '';
+    let goo = '<circle class="bud-blob" r="25"/>', fg = '';
+    const rb = g.band / 2 + 10, k = (x) => f(x / rb);
+    const beadVars = `--rest:${k(g.band / 2 - 4)};--hov:${k(g.band / 2 + 12)};--sel:${k(g.band / 2 + 5)};--prs:${k(g.band / 2 + 2)}`;
     tools.forEach((t, i) => {
       const a = g.angles[i];
       const q = (fr && fr.P[i]) || restSlice(g, i, n);
@@ -386,7 +398,7 @@
       let style = `--a:${f(a)}deg;--o:${g.order[i]};--oc:${maxO - g.order[i]}`;
       if (fr && fr.fold && i !== fr.s) style += `;transform:rotate(${f(a * (1 - fr.fold))}deg) scale(${f(1 - .64 * fr.fold)});opacity:${f(1 - fr.fold)}`;
       const lift = `--mid:${f(-g.mid)}px`;
-      goo += `<g class="piece ${cls}" data-i="${i}" style="${style}"><g class="lift" style="${lift}"><path class="band" d="${pill(q)}"/></g></g>`;
+      goo += `<g class="piece ${cls}${fr && i === fr.s ? ' flying' : ''}" data-i="${i}" style="${style}"><g class="lift" style="${lift}"><path class="band" d="${pill(q)}"/><circle class="bead" cx="0" cy="${f(-g.mid)}" r="${f(rb)}" style="${beadVars}"/></g></g>`;
 
       const isDrop = fr && i === fr.s;
       const iconR = isDrop ? q.R + fr.iconShift : content === 'both' ? g.mid + 9 : g.mid;
@@ -395,7 +407,9 @@
       const textR = content === 'both' ? g.mid - 15 : g.mid - 4;
       const id = 'tp' + (uid++);
       let inner = `<path class="hit" d="${pill(restSlice(g, i, n))}"/>`;
-      inner += `<path class="ring" d="${pill({ lo: -h + g.cap * .5, hi: h - g.cap * .5, R: g.mid, w: g.band - 10, capLo: true, capHi: true })}"/>`;
+      const dR = isDrop ? q.R : g.mid, dr = isDrop ? Math.max(4, q.w / 2 - 4) : g.band / 2 - 4;
+      inner += `<circle class="disk" cx="0" cy="${f(-dR)}" r="${f(dr)}"/>`;
+      inner += `<circle class="ring" cx="0" cy="${f(-g.mid)}" r="${f(g.band / 2 + 3)}"/>`;
       inner += `<g class="glyph-pos" transform="translate(-12 ${f(-iconR - 12)})"><g class="glyph" style="opacity:${iconOpacity}"><g class="icon">${t.icon}</g></g></g>`;
       if (content !== 'icon') inner += `<path id="${id}" d="${arcLine(textR, -h - 20, h + 20)}" fill="none"/><text class="label" style="opacity:${labelOpacity}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${t.label}</textPath></text>`;
       if (content === 'icon' && !o.static) {
@@ -405,6 +419,7 @@
       const role = o.static ? '' : `role="button" tabindex="-1" aria-label="${t.label}" aria-pressed="${i === o.selected}"`;
       fg += `<g class="pc ${cls}" data-i="${i}" ${role} style="${style}"><g class="lift" style="${lift}">${inner}</g></g>`;
     });
+    if (o.static) fg += '<circle r="28" fill="var(--plum)"/>';
     if (o.budFace) fg += `<g class="bud-face" transform="translate(-12 -12)">${o.budFace}</g>`;
     return `<g class="goo" filter="url(#goo)">${goo}</g><g class="fg">${fg}</g>`;
   }
@@ -484,13 +499,14 @@
     const bands = {}, idx = [i - 1, i, i + 1].filter((k) => k >= 0 && k < n);
     idx.forEach((k) => (bands[k] = arc.querySelector(`.piece[data-i="${k}"] .band`)));
     const pc = arc.querySelector(`.pc[data-i="${i}"]`);
-    const pos = pc.querySelector('.glyph-pos'), glyph = pc.querySelector('.glyph'), label = pc.querySelector('.label');
+    const disk = pc.querySelector('.disk'), pos = pc.querySelector('.glyph-pos'), glyph = pc.querySelector('.glyph'), label = pc.querySelector('.label');
     let folded = false, landed = false;
     (function tick(now) {
       const p = clamp((now - t0) / D);
       const fr = cutFrame(g, i, p, state.content);
       idx.forEach((k) => bands[k].setAttribute('d', pill(fr.P[k])));
       pos.setAttribute('transform', `translate(-12 ${f(-(fr.P[i].R + fr.iconShift) - 12)})`);
+      disk.setAttribute('cy', f(-fr.P[i].R)); disk.setAttribute('r', f(Math.max(4, fr.P[i].w / 2 - 4)));
       glyph.style.opacity = fr.iconIn;
       if (label) label.style.opacity = fr.label;
       if (p >= .46 && !folded) { folded = true; setOpen(false, { focus: hadFocus }); }
