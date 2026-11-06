@@ -3,306 +3,423 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Herbarium Dock</title>
+<title>Jewellery Archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=IBM+Plex+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,400;1,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap">
 <style>
   :root {
-    /* Colour: silver foil on grey board (image 2), grey shadow print (image 3) */
-    --board: #cfd2d2;
-    --board-hi: #e2e4e4;
-    --strip: #d8dbdb;
-    --foil: #f3f4f4;
-    --rule: rgba(255, 255, 255, .85);
-    --shade: #adb2b3;
-    --graphite: #2f3435;
-    --ink: #4b5152;
-    --ink-soft: #6c7273;
-    --paper: #eef0f0;
-
-    --mono: "IBM Plex Mono", ui-monospace, monospace;
-    --serif: "Cormorant Garamond", Georgia, serif;
-    --sans: Inter, system-ui, sans-serif;
+    --type: "Courier Prime", "Courier New", ui-monospace, monospace;
+    --paper: #d0d1cc;      /* photocopy grey (image 2) */
+    --strip: #ebebe6;      /* receipt / index-card paper */
+    --ink: #262724;        /* toner */
+    --soft: #66685f;
+    --rule: rgba(38, 39, 36, .3);
+    --rule-faint: rgba(38, 39, 36, .13);
+    --blue: #444641;       /* the chosen print */
+    --cyan: #d0d1cc;       /* cyanotype ground (image 4) */
+    --row: 59px;           /* set from the strip in JS */
+    --row-top: 0px;
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0; color: var(--ink); background: #c6c9c9;
-    font: 400 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased;
-  }
+  body { margin: 0; color: var(--ink); background: var(--paper); font: 400 14px/1.55 var(--type); }
   a { color: inherit; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 80px; }
-  .back { font: 400 12px var(--mono); letter-spacing: .04em; color: var(--ink-soft); text-decoration: none; }
-  .back:hover { color: var(--graphite); }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 20px 16px 80px; }
+  .back { font-size: 13px; color: var(--soft); text-decoration: none; }
+  .back:hover { color: var(--ink); }
   header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin: 18px 0 18px; }
-  h1 { margin: 0; font-weight: 300; font-size: 32px; letter-spacing: .01em; color: var(--graphite); }
-  .eyebrow { font: 400 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px; }
-  .tone { margin: 0; max-width: 440px; color: var(--ink-soft); }
-  h2 { font-weight: 300; font-size: 22px; margin: 56px 0 6px; color: var(--graphite); }
-  .sub { margin: 0 0 18px; max-width: 680px; color: var(--ink-soft); }
+  h1 { margin: 0; font-weight: 400; font-size: 30px; letter-spacing: .02em; }
+  .eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--soft); margin-bottom: 4px; }
+  .tone { margin: 0; max-width: 440px; color: var(--soft); font-size: 13px; }
+  h2 { font-weight: 400; font-size: 20px; margin: 56px 0 6px; }
+  .sub { margin: 0 0 18px; max-width: 660px; color: var(--soft); font-size: 13px; }
 
-  /* Grain used on every board surface */
-  .grain { position: relative; isolation: isolate; }
-  .grain::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5; opacity: .32; mix-blend-mode: multiply;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .37 0 0 0 0 .38 0 0 0 .55 -.18'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* ---------- Scanner texture: mottled toner, fine grain, dust ---------- */
+  .scan { position: relative; isolation: isolate; }
+  .scan::before, .scan::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+  .scan::before {
+    opacity: .5; mix-blend-mode: multiply; background-size: max(100%, 1200px) max(100%, 800px); background-repeat: no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' preserveAspectRatio='none'%3E%3Cfilter id='m' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008' numOctaves='4' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .56 0 0 0 0 .53 0 0 0 1.1 -.42'/%3E%3C/filter%3E%3Crect width='1200' height='800' filter='url(%23m)'/%3E%3C/svg%3E");
+  }
+  .scan::after {
+    opacity: .55; mix-blend-mode: multiply; background-size: 300px 300px;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .1 0 0 0 22 -16.2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23d)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .3 0 0 0 0 .28 0 0 0 .7 -.2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
   }
 
-  /* ---------- Stage ---------- */
-  .stage {
-    position: relative; height: 780px; overflow: hidden; border-radius: 3px;
-    background:
-      radial-gradient(70% 60% at 30% 20%, var(--board-hi) 0%, transparent 70%),
-      radial-gradient(60% 70% at 85% 95%, #c2c6c6 0%, transparent 70%),
-      var(--board);
-    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 30px 60px -40px rgba(40,46,47,.5);
+  /* Crop marks: one language for every panel on the sheet */
+  .crop { position: absolute; width: 0; height: 0; color: var(--ink); opacity: .75; z-index: 31; }
+  .crop::before { content: ""; position: absolute; left: 0; top: -16px; width: 1px; height: 10px; background: currentColor; }
+  .crop::after { content: ""; position: absolute; left: -16px; top: 0; width: 10px; height: 1px; background: currentColor; }
+  .crop.tl { left: 0; top: 0; } .crop.tr { right: 0; top: 0; transform: scaleX(-1); }
+  .crop.bl { left: 0; bottom: 0; transform: scaleY(-1); } .crop.br { right: 0; bottom: 0; transform: scale(-1, -1); }
+
+  /* ---------- Stage: one ruled sheet ---------- */
+  .stage { height: 820px; overflow: hidden; background: var(--paper); box-shadow: inset 0 0 140px rgba(0,0,0,.07); }
+  /* the strip's row rules run across the whole sheet, like ledger paper */
+  .ledger {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(to bottom, var(--rule-faint) 0 1px, transparent 1px var(--row));
+    background-position: 0 var(--row-top);
   }
+  .margin { position: absolute; left: 0; right: 0; height: 1px; background: var(--rule); }
+  .margin.t { top: 34px; } .margin.b { bottom: 34px; }
+  .runhead { position: absolute; top: 12px; left: 28px; right: 28px; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .06em; color: var(--soft); z-index: 2; }
+  .runfoot { position: absolute; bottom: 11px; left: 28px; right: 28px; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .06em; color: var(--soft); z-index: 2; }
+
   .layout {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 64px; padding: 0 48px;
+    position: absolute; inset: 50px 28px; display: grid; align-items: center;
+    grid-template-columns: calc(var(--dw) * 1px) minmax(0, 1fr) 200px; column-gap: 56px;
   }
-  .stage[data-align="left"] .layout { justify-content: flex-start; padding-left: 72px; }
-  .stage[data-align="right"] .layout { justify-content: flex-end; padding-right: 72px; }
-  .dockcol { order: 1; position: relative; z-index: 3; }
-  .platecol { order: 2; }
-  .ledgercol { order: 3; }
-  .stage[data-align="right"] .dockcol { order: 3; }
-  .stage[data-align="right"] .ledgercol { order: 1; }
-  .stage[data-align="center"] .platecol { order: 1; }
-  .stage[data-align="center"] .dockcol { order: 2; }
+  .stage[data-align="right"] .layout { grid-template-columns: 200px minmax(0, 1fr) calc(var(--dw) * 1px); }
+  .stage[data-align="center"] .layout { grid-template-columns: minmax(0, 1fr) calc(var(--dw) * 1px) 200px; }
+  .col { position: relative; height: calc(var(--sh) * 1px); }
+  /* every column throws its edges as guide lines across the sheet */
+  .col::before, .col::after { content: ""; position: absolute; top: -400px; bottom: -400px; width: 0; border-left: 1px solid var(--rule-faint); pointer-events: none; }
+  .col::before { left: -1px; } .col::after { right: -1px; }
+  .c-dock { order: 1; z-index: 4; } .c-plate { order: 2; } .c-card { order: 3; }
+  .stage[data-align="right"] .c-dock { order: 3; } .stage[data-align="right"] .c-card { order: 1; }
+  .stage[data-align="center"] .c-plate { order: 1; } .stage[data-align="center"] .c-dock { order: 2; }
 
-  .corner { position: absolute; z-index: 4; font: 400 10.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #fff; opacity: .9; }
-  .corner.tl { top: 18px; left: 20px; } .corner.tr { top: 18px; right: 20px; }
-  .corner.bl { bottom: 16px; left: 20px; } .corner.br { bottom: 16px; right: 20px; }
+  /* ---------- Cyanotype plate: several prints of the chosen flower ---------- */
+  .plate { position: absolute; inset: 0; background: var(--cyan); overflow: hidden; box-shadow: 0 0 0 1px rgba(20,30,50,.25), 3px 4px 0 rgba(0,0,0,.08); }
+  .plate .p { position: absolute; aspect-ratio: 1; pointer-events: none; transition: opacity .25s; }
+  .plate .p img { width: 100%; height: 100%; display: block; }
+  .plate .p.in { animation: develop 1.1s cubic-bezier(.2,.8,.2,1) both; }
+  .plate .p.out { opacity: 0; }
+  @keyframes develop { from { opacity: 0; filter: blur(7px); scale: 1.05; } to { opacity: 1; filter: none; scale: 1; } }
+  .plate-no { position: absolute; left: 16px; bottom: 12px; color: rgba(242,244,247,.8); font-size: 12px; letter-spacing: .06em; z-index: 3; }
 
-  /* ---------- Dock (the toolbar) ---------- */
-  .dock { position: relative; touch-action: none; }
-  .dock::before { content: ""; position: absolute; inset: -6px -16px; }
-  .strip {
-    position: absolute; left: 0; right: 0; top: 0; height: 100%; pointer-events: none;
-    background: var(--strip);
-    border-left: 1px solid var(--rule); border-right: 1px solid var(--rule);
-    box-shadow: 0 0 0 1px rgba(110,117,118,.18), 0 18px 30px -24px rgba(40,46,47,.55);
-  }
-  .strip::before, .strip::after {
-    content: ""; position: absolute; left: 7px; right: 7px; height: 1px; background: var(--rule);
-  }
-  .strip::before { top: 5px; } .strip::after { bottom: 5px; }
+  /* ---------- Index card ---------- */
+  .card { position: absolute; inset: 0; background: var(--strip); box-shadow: 0 0 0 1px var(--rule), 2px 3px 0 rgba(0,0,0,.08);
+    background-image: repeating-linear-gradient(to bottom, var(--rule-faint) 0 1px, transparent 1px var(--row)); background-position: 0 calc(var(--row-card)); }
+  .card-in { position: absolute; inset: 18px 18px 14px; display: flex; flex-direction: column; }
+  .card .no { font-size: 44px; line-height: 1; letter-spacing: -.02em; }
+  .card .mo { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--ink); font-weight: 700; font-size: 15px; }
+  .card .fl { font-size: 13px; color: var(--soft); }
+  .card .mini { margin: 26px auto 0; width: 140px; aspect-ratio: 1; }
+  .card .mini img { width: 100%; height: 100%; display: block; }
+  .card .foot { margin-top: auto; padding-top: 6px; border-top: 1px solid var(--rule); font-size: 11px; color: var(--soft); display: flex; justify-content: space-between; }
 
+  /* ---------- Toolbar: a ruled paper strip ---------- */
+  .dock { position: relative; height: 100%; touch-action: none; }
+  .dock::before { content: ""; position: absolute; inset: -10px -40px; }
+  .strip { position: relative; padding: 10px 0; background: var(--strip); color: var(--ink); box-shadow: 0 0 0 1px var(--rule), 2px 3px 0 rgba(0,0,0,.08); }
   .tool {
-    position: absolute; left: 0; top: 0; margin: 0; padding: 0; border: 0; background: none; color: inherit;
-    transform-origin: 0 0; cursor: pointer; -webkit-tap-highlight-color: transparent; font: inherit;
+    position: relative; display: grid; place-items: center; width: 100%; height: calc(var(--cell) * 1px);
+    margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
+  .tool + .tool { border-top: 1px solid var(--rule); }
   .tool:focus { outline: none; }
+  .face { position: relative; display: grid; place-items: center; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); transition: transform .14s cubic-bezier(.2,.8,.2,1); }
+  .is-press .face { transform: scale(.92); transition-duration: .06s; }
+  .art { position: absolute; inset: -3px; }
+  .art img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; user-select: none; transition: opacity .2s, transform .28s cubic-bezier(.2,.8,.2,1); }
+  .l-sh, .l-pb { opacity: 0; }
+  .lab { position: relative; font: 700 11px/1 var(--type); letter-spacing: .02em; color: var(--ink); transition: color .2s; white-space: nowrap; }
 
-  /* A face is drawn at its largest size and scaled down, so the prints never re-rasterise mid-motion. */
-  .face {
-    position: relative; display: flex; align-items: center; gap: calc(8px * var(--M));
-    width: calc(var(--bw) * var(--M) * 1px); height: calc(var(--bh) * var(--M) * 1px);
-  }
-  .art { position: relative; flex: none; width: calc(var(--bh) * var(--M) * 1px); height: 100%; }
-  .peb { width: 100%; }
-  .art img {
-    position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; user-select: none;
-    transition: opacity .24s ease, transform .32s cubic-bezier(.2,.8,.2,1);
-  }
-  .l-shadow, .l-mark, .l-ink { opacity: 0; }
-  .l-shadow { transform: translate(0, 0); }
+  /* states: outline in toner; the chosen month is printed in blue and stays blue */
+  .is-hover .l-sh { opacity: .55; transform: translate(-9%, 10%); }
+  .is-sel .l-pb { opacity: 1; }
+  .is-sel .l-lt { opacity: 0; }
+  .is-sel .l-sh { opacity: .45; transform: translate(-7%, 8%); }
+  .is-sel.is-hover .l-sh { transform: translate(-10%, 11%); }
+  .is-sel .lab { color: var(--strip); }
+  .is-press .l-sh { opacity: .6; transform: translate(-1.5%, 1.5%); transition-duration: .06s; }
+  .is-press .l-pb { opacity: .7; transition-duration: .06s; }
+  .stamping .l-pb { animation: stamp .56s cubic-bezier(.2,.8,.2,1); }
+  .stamping .l-sh { animation: lift .7s cubic-bezier(.2,.8,.2,1); }
+  @keyframes stamp { 0% { opacity: 0; transform: scale(1.16) translate(3%, -4%); } 38% { opacity: 1; transform: scale(.95); } 62% { transform: scale(1.015); } 100% { opacity: 1; transform: none; } }
+  @keyframes lift { 0%, 30% { transform: translate(0, 0); } 100% { transform: translate(-7%, 8%); } }
 
-  /* future (enabled): silver outline */
-  .is-hover .l-shadow { opacity: .8; transform: translate(-5%, 6.5%); }
-  .is-hover .peb .l-shadow { opacity: .5; }
-  /* collected: grey impression with a faint engraved line */
-  [data-state="past"] .l-mark { opacity: 1; }
-  [data-state="past"] .l-line { opacity: .45; }
-  [data-state="past"].is-hover .l-line { opacity: 1; }
-  /* current: solid silver foil */
-  [data-state="current"] .l-ink { opacity: 1; }
-  [data-state="current"] .l-line { opacity: 0; }
-  [data-state="current"] .l-shadow { opacity: .85; transform: translate(-3%, 4%); }
-  [data-state="current"].is-hover .l-shadow { transform: translate(-6%, 7.5%); }
-  /* pressed: the stamp comes down, the shadow closes up, ink transfers */
-  .is-press .l-shadow { opacity: .95; transform: translate(-.8%, 1%); transition-duration: .08s; }
-  .is-press .l-ink { opacity: .9; transition-duration: .08s; }
-  .is-press .l-line { opacity: .35; transition-duration: .08s; }
+  .c-text .lab { font-weight: 400; font-size: 15px; color: var(--soft); }
+  .c-text.is-hover .lab { color: var(--ink); }
+  .c-text.is-sel .lab { color: var(--blue); font-weight: 700; text-shadow: -2px 2px 0 rgba(120,124,118,.4); }
+  .tool:focus-visible .face::after { content: ""; position: absolute; inset: -6px; border: 1px dashed var(--ink); }
 
-  .stamping .l-ink { animation: stamp .56s cubic-bezier(.2,.8,.2,1) both; }
-  .stamping .l-shadow { animation: lift .7s cubic-bezier(.2,.8,.2,1) both; }
-  @keyframes stamp {
-    0% { opacity: 0; transform: scale(1.14) translate(2%, -4%); }
-    38% { opacity: 1; transform: scale(.95); }
-    62% { transform: scale(1.015); }
-    100% { opacity: 1; transform: none; }
-  }
-  @keyframes lift {
-    0%, 30% { opacity: .95; transform: translate(0, 0); }
-    100% { opacity: .85; transform: translate(-3%, 4%); }
-  }
+  /* Printer's loupe: square glass, etched scale, folded metal foot. */
+  .lens { position: absolute; left: 0; top: 0; width: 132px; height: 132px; pointer-events: none; z-index: 8; opacity: 0; }
+  .lens-shadow { position: absolute; inset: 9px -5px -7px 9px; border: 1px solid var(--ink); background: rgba(38,39,36,.08); }
+  .glass { position: absolute; inset: 0; overflow: hidden; border: 1px solid var(--ink); box-shadow: 0 0 0 4px var(--strip), 0 0 0 5px var(--ink), 5px 7px 0 rgba(38,39,36,.13); }
+  .refract { position: absolute; left: -1px; top: -1px; width: 132px; height: 132px; background: var(--strip); }
+  .view { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .glass::before { content: ""; position: absolute; inset: 7px; z-index: 2; border: 1px solid rgba(38,39,36,.22); background: repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 10px) left bottom / 100% 6px no-repeat, repeating-linear-gradient(0deg,var(--ink) 0 1px,transparent 1px 10px) left top / 6px 100% no-repeat; }
+  .glass::after { content: "1.9× / FIELD"; position: absolute; right: 11px; top: 9px; padding: 2px 3px; background: rgba(235,235,230,.84); color: var(--ink); font: 9px/1 var(--type); letter-spacing: .06em; }
+  .lens::after { content: ""; position: absolute; left: 48px; bottom: -11px; width: 36px; height: 5px; border: 1px solid var(--ink); background: var(--strip); }
 
-  /* text button: month inside a pebble, as on the stone calendar */
-  .lab-t {
-    position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
-    font: 500 calc(12px * var(--M)) var(--sans); letter-spacing: .02em; color: var(--ink-soft);
-    transition: color .2s;
-  }
-  [data-state="past"] .lab-t { color: var(--ink); }
-  [data-state="current"] .lab-t { color: var(--graphite); }
-  .is-hover .lab-t { color: var(--graphite); }
-
-  /* icon + text */
-  .lab-b { display: grid; gap: calc(1px * var(--M)); text-align: left; white-space: nowrap; min-width: 0; }
-  .lb-no { font: 500 calc(9px * var(--M)) var(--mono); letter-spacing: .14em; color: var(--ink-soft); }
-  .lb-f { font: italic 500 calc(13px * var(--M)) / 1 var(--serif); color: var(--ink); }
-  [data-state="current"] .lb-no, [data-state="current"] .lb-f, .is-hover .lb-f { color: var(--graphite); }
-  [data-align="right"] .face.both { flex-direction: row-reverse; }
-  [data-align="right"] .lab-b { text-align: right; }
-
-  .tool:focus-visible .art::after {
-    content: ""; position: absolute; inset: calc(-4px * var(--M)); border: calc(1.25px * var(--M)) dashed var(--graphite); border-radius: 50%;
-  }
-  .tool:focus-visible .peb::after { border-radius: 40%; }
-
-  /* ---------- Tooltip slip ---------- */
-  .slip {
-    position: absolute; left: 0; top: 0; z-index: 6; width: 178px; pointer-events: none;
-    padding: 10px 12px 11px; background: var(--paper); color: var(--ink);
-    box-shadow: 0 0 0 1px rgba(110,117,118,.2), -6px 8px 0 -1px rgba(150,156,157,.45);
-    opacity: 0; transition: opacity .16s ease;
-  }
-  .slip.on { opacity: 1; }
-  .slip::before { /* hairline tying the slip to its print */
-    content: ""; position: absolute; top: 50%; width: 14px; height: 1px; background: #9aa0a1; left: -14px;
-  }
-  .slip.flip::before { left: auto; right: -14px; }
-  .slip-top { display: flex; justify-content: space-between; font: 400 10px var(--mono); letter-spacing: .14em; color: var(--ink-soft); text-transform: uppercase; }
-  .slip-f { margin-top: 6px; font: italic 500 19px/1.05 var(--serif); color: var(--graphite); }
-  .slip-l { font: italic 400 13px/1.2 var(--serif); color: var(--ink-soft); }
-  .slip-n { margin-top: 7px; padding-top: 6px; border-top: 1px solid #c9cdcd; font: 400 9.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
-
-  /* ---------- Plate (what the toolbar opens) ---------- */
-  .plate {
-    position: relative; width: 300px; height: 640px; margin: 0;
-    background: #b9bebe; box-shadow: inset 0 0 0 1px rgba(255,255,255,.55);
-  }
-  .letters { position: absolute; top: 24px; left: 22px; display: grid; gap: 2px; font: 200 25px/1.12 var(--sans); color: #fff; text-align: center; }
-  .plate-no { position: absolute; top: 24px; right: 22px; font: 200 21px var(--sans); color: #fff; }
-  .print { position: absolute; left: 50%; top: 104px; width: 236px; height: 236px; margin-left: -96px; }
-  .print img { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .print .ps { transform: translate(-6%, 7%); opacity: .95; }
-  .print.stamp .pi { animation: stamp .7s cubic-bezier(.2,.8,.2,1) both; }
-  .print.stamp .ps { animation: plift .9s cubic-bezier(.2,.8,.2,1) both; }
-  @keyframes plift { 0%, 25% { transform: none; } 100% { transform: translate(-6%, 7%); } }
-  .plate figcaption { position: absolute; left: 22px; right: 22px; bottom: 22px; display: grid; gap: 2px; }
-  .pf { font: italic 500 30px/1 var(--serif); color: var(--graphite); }
-  .pl { font: italic 400 16px/1.2 var(--serif); color: var(--ink); }
-  .pn { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--rule); font: 400 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); display: flex; justify-content: space-between; }
-
-  /* ---------- Ledger: the month's days, set like the stone calendar ---------- */
-  .ledger { width: 150px; display: grid; gap: 15px; }
-  .ledger-h { font: 400 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #fff; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
-  .wd { display: grid; grid-template-columns: 34px 1fr; align-items: start; }
-  .wd b { font: italic 500 16px/1 var(--serif); color: var(--graphite); }
-  .wd span { display: flex; flex-wrap: wrap; gap: 0 9px; padding-left: 9px; border-left: 1px solid var(--rule); font: italic 400 14.5px/1.15 var(--serif); color: var(--ink); }
-  .wd span i { font-style: inherit; min-width: 14px; }
+  /* Specimen tag: accession number, flower, and print process. */
+  .tip { position: absolute; left: 0; top: 0; z-index: 9; pointer-events: none; display: flex; align-items: center; opacity: 0; white-space: nowrap; }
+  .tip i { display: block; flex: 0 0 20px; height: 1px; background: var(--ink); }
+  .tip div { position: relative; display: grid; gap: 5px; width: 174px; font-size: 10px; line-height: 1.3; padding: 10px 12px; background: var(--strip); border: 1px solid var(--ink); box-shadow: 3px 3px 0 rgba(38,39,36,.13); }
+  .tip b { font-weight: 400; font-size: 17px; white-space: normal; }
+  .tip span { color: var(--soft); letter-spacing: .08em; }
+  .tip .accession { padding-bottom: 5px; border-bottom: 1px solid var(--rule); color: var(--ink); }
+  .tip .process { font-size: 9px; text-transform: uppercase; }
+  .tip.flip { flex-direction: row-reverse; }
 
   /* ---------- Controls ---------- */
   .controls { display: flex; flex-wrap: wrap; gap: 14px 28px; margin-top: 16px; }
   .ctl { display: flex; align-items: center; gap: 10px; }
-  .ctl > span { font: 400 10.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
-  .pills { display: flex; border: 1px solid #a9aeaf; }
-  .pills button {
-    border: 0; margin: 0; padding: 7px 13px; background: transparent; color: var(--ink); cursor: pointer;
-    font: 400 12px var(--mono); letter-spacing: .04em;
-  }
-  .pills button + button { border-left: 1px solid #a9aeaf; }
-  .pills button:hover { background: rgba(255,255,255,.35); }
-  .pills button[aria-pressed="true"] { background: var(--foil); color: var(--graphite); box-shadow: inset 0 -2px 0 #a9aeaf; }
-  .pills button:focus-visible { outline: 1.5px dashed var(--graphite); outline-offset: 2px; }
+  .ctl > span { font-size: 12px; color: var(--soft); }
+  .pills { display: flex; border: 1px solid var(--rule); }
+  .pills button { border: 0; margin: 0; padding: 7px 13px; background: transparent; color: var(--ink); cursor: pointer; font: 400 13px var(--type); }
+  .pills button + button { border-left: 1px solid var(--rule); }
+  .pills button:hover { background: rgba(38,39,36,.06); }
+  .pills button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .pills button:focus-visible { outline: 1px dashed var(--ink); outline-offset: 2px; }
 
   /* ---------- Sheets ---------- */
-  .sheet { overflow-x: auto; background: var(--board); padding: 26px 24px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
-  .sheet table { border-collapse: collapse; min-width: 760px; width: 100%; }
-  .sheet th { font: 400 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); text-align: left; padding: 0 10px 14px; font-weight: 400; }
-  .sheet td { padding: 12px 10px; border-top: 1px solid var(--rule); vertical-align: middle; height: 110px; }
-  .sheet td:first-child { font: 400 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); width: 90px; }
-  .cellbox { position: relative; }
-  .cellbox .tool { position: absolute; cursor: default; }
-  .cap { display: block; margin-top: 6px; font: 400 10px var(--mono); color: var(--ink-soft); letter-spacing: .04em; }
-
+  .sheet { overflow-x: auto; padding: 22px 22px 8px; box-shadow: 0 0 0 1px var(--rule); }
+  .sheet table { border-collapse: collapse; width: 100%; min-width: 660px; }
+  .sheet th { font-weight: 400; font-size: 12px; color: var(--soft); text-align: left; padding: 0 10px 12px; }
+  .sheet td { padding: 22px 10px; border-top: 1px solid var(--rule); vertical-align: middle; height: 260px; }
+  .sheet td:first-child { font-size: 12px; color: var(--soft); width: 100px; }
+  .cell { position: relative; display: inline-block; }
   .configs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); box-shadow: 0 0 0 1px var(--rule); }
-  .cfg { position: relative; height: 420px; background: var(--board); overflow: hidden; }
-  .cfg .tag { position: absolute; top: 12px; left: 14px; font: 400 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); z-index: 6; }
-  .cfg .dock { position: absolute; top: 60px; }
-
-  .curve { background: var(--board); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); padding: 18px 20px; }
-  .curve svg { display: block; width: 100%; height: auto; }
+  .cfg { height: 480px; background: var(--paper); overflow: hidden; }
+  .cfg .tag { position: absolute; top: 12px; left: 14px; font-size: 12px; color: var(--soft); z-index: 31; }
+  .cfg .dock { position: absolute; top: 64px; height: auto; }
+  .cell .lens, .cfg .lens, .cell .tip, .cfg .tip { opacity: 1; }
+  .cell .dock { height: auto; }
 
   .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--rule); box-shadow: 0 0 0 1px var(--rule); }
-  .note { background: var(--board); padding: 18px 20px 20px; }
-  .note h3 { margin: 0 0 8px; font: 400 10.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--graphite); }
-  .note ul { margin: 0; padding-left: 16px; color: var(--ink); }
+  .note { background: var(--paper); padding: 18px 20px 20px; font-size: 13px; }
+  .note h3 { margin: 0 0 8px; font-weight: 700; font-size: 13px; }
+  .note ul { margin: 0; padding-left: 16px; }
   .note li { margin: 3px 0; }
-  code { font: 400 12px var(--mono); background: rgba(255,255,255,.45); padding: 0 4px; }
-
+  code { font: inherit; background: rgba(38,39,36,.08); padding: 0 4px; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   @media (max-width: 980px) {
-    .ledgercol { display: none; }
-    .layout { gap: 44px; }
+    .layout, .stage[data-align] .layout { grid-template-columns: calc(var(--dw) * 1px) minmax(0, 1fr); column-gap: 48px; }
+    .stage[data-align="right"] .layout { grid-template-columns: minmax(0, 1fr) calc(var(--dw) * 1px); }
+    .stage[data-align="center"] .layout { grid-template-columns: minmax(0, 1fr) calc(var(--dw) * 1px); }
+    .c-card { display: none; }
   }
-  @media (max-width: 760px) {
-    .stage { height: 720px; }
-    .layout, .stage[data-align="left"] .layout, .stage[data-align="right"] .layout { padding: 0 24px; gap: 28px; }
-    .plate { width: 200px; height: 520px; }
-    .print { width: 170px; height: 170px; margin-left: -70px; top: 120px; }
-    .letters { font-size: 19px; }
-    .pf { font-size: 23px; }
+  @media (max-width: 560px) {
+    .layout { inset: 50px 16px; column-gap: 40px; }
+    .runhead span:last-child, .runfoot span:last-child { display: none; }
     .configs { grid-template-columns: 1fr; }
   }
-  @media (max-width: 520px) {
-    .platecol { display: none; }
-    .corner.bl, .corner.br { display: none; }
-    .stage[data-align="left"] .layout { justify-content: flex-start; }
-    .stage[data-align="center"] .layout { justify-content: center; }
-  }
   @media (prefers-reduced-motion: reduce) {
-    .art img { transition-duration: .01s; }
-    .stamping .l-ink, .stamping .l-shadow, .print.stamp .pi, .print.stamp .ps { animation: none; }
+    .art img, .face { transition-duration: .01s; }
+    .stamping .l-pb, .stamping .l-sh, .plate .p.in { animation: none; }
   }
+
+  /* One sheet, one ink: botanical archive revision. */
+  .stage { box-shadow: none; }
+  .ledger { opacity: .2; }
+  .col::before, .col::after, .crop { display: none; }
+  .plate, .card, .strip { background: transparent; box-shadow: none; }
+  .strip.scan::before, .strip.scan::after, .plate.scan::before, .plate.scan::after, .card.scan::before, .card.scan::after { display: none; }
+  .plate { overflow: visible; }
+  .plate .p { mix-blend-mode: multiply; }
+  .plate-no { color: var(--soft); left: 0; bottom: -35px; font-size: 10px; }
+  .c-plate { height: 610px; }
+  .card { background-image: none; }
+  .card .no { font: italic 42px/1 Georgia,serif; color: var(--soft); }
+  .card .mo { border: 0; font: italic 22px/1.25 Georgia,serif; }
+  .card .mini { opacity: .5; }
+  .tool + .tool { border: 0; }
+  .tool::before { content: ''; position: absolute; left: -8px; width: 3px; height: 3px; border-radius: 50%; background: var(--ink); opacity: 0; }
+  .tool.is-sel::before { opacity: .7; }
+  .lens-shadow, .lens::after, .glass::before, .glass::after { display: none; }
+  .glass { border-radius: 47% 53% 49% 51%; border: 1px solid rgba(255,255,255,.45); box-shadow: inset 0 0 14px rgba(255,255,255,.25), 0 6px 16px rgba(38,39,36,.09); }
+  .refract { background: var(--paper); }
+  .tip i { flex-basis: 14px; opacity: .25; }
+  .tip div { width: 180px; padding: 8px 12px; border: 0; box-shadow: none; background: rgba(208,209,204,.94); }
+  .tip .accession { border: 0; font-size: 9px; letter-spacing: .13em; opacity: .65; padding: 0; }
+  .tip b { font: italic 23px/1.15 Georgia,serif; }
+  .tip .process { font-size: 8px; letter-spacing: .02em; text-transform: none; }
+  .is-sel .lab { color: #e2e3de; }
+  .c-text.is-sel .lab { color: var(--ink); text-shadow: none; }
+  .pills { box-shadow: none; border-bottom: 1px solid var(--rule); }
+  .pills button { border: 0; background: transparent; }
+  .pills button[aria-pressed="true"] { background: transparent; color: var(--ink); box-shadow: inset 0 -2px var(--ink); }
+
+  /* Reference: upper-right vintage jewellery advertisement — garden green and ivory. */
+  :root { --paper: #ede2c5; --strip: #eee2bf; --ink: #484a32; --soft: #777458; --blue: #b29b64; --cyan: #596344; --rule: rgba(111,97,57,.3); --rule-faint: rgba(111,97,57,.12); --type: Georgia, 'Times New Roman', serif; }
+  body { background: #ede2c5; }
+  .wrap { max-width: 1220px; padding-top: 25px; }
+  .back { font: italic 12px Georgia,serif; }
+  header { align-items: center; margin: 28px 0 30px; padding: 0 12px; }
+  h1 { font: 400 clamp(30px,4vw,52px)/1.15 'Baskerville','Times New Roman',serif; letter-spacing: .22em; }
+  .eyebrow { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 12px; }
+  .tone { font: italic 15px/1.55 Georgia,serif; max-width: 285px; }
+  .stage { height: 830px; background: radial-gradient(ellipse at 40% 12%,#92966a 0%,#747e53 38%,#4b593e 100%); color: #eee2bf; border: 1px solid #b9aa7b; }
+  .stage.scan::before { opacity: .24; }
+  .stage.scan::after { opacity: .28; }
+  .ledger { display: none; }
+  .margin.t { top: 42px; left: 24px; right: 24px; background: rgba(238,226,191,.25); }
+  .margin.b { display: none; }
+  .runhead { color: #e4dab9; top: 17px; font-size: 10px; letter-spacing: .13em; }
+  .runfoot { color: #777458; bottom: 14px; font-size: 9px; letter-spacing: .08em; }
+  .layout { inset: 65px 44px 190px; column-gap: 50px; }
+  .c-plate { height: 500px; }
+  .plate .p { mix-blend-mode: normal; }
+  .plate .p img { filter: sepia(.15); }
+  .plate-no { color: #e4dab9; bottom: -12px; font-style: italic; letter-spacing: .08em; }
+  .stage .strip { color: #eee2bf; }
+  .lab { color: #eee2bf; font: 11px Georgia,serif; }
+  .is-sel .lab { color: #424e35; }
+  .tool::before { background: #e4ce95; }
+  .tool:focus-visible .face::after { border-color: #e4ce95; border-radius: 50%; }
+  .c-text .lab, .c-text.is-hover .lab, .c-text.is-sel .lab { color: #eee2bf; }
+  .card .no { color: #e5d8ae; font: italic 48px/1 Baskerville,Georgia,serif; }
+  .card .mo { color: #f2e7ca; font: italic 25px/1.2 Baskerville,Georgia,serif; }
+  .card .fl, .card .foot { color: #d5d1aa; font-size: 11px; }
+  .card .foot { border-color: rgba(238,226,191,.3); }
+  .card .mini { opacity: .7; }
+  .refract { background: #707a51; }
+  .glass { border-color: rgba(231,211,157,.7); box-shadow: inset 0 0 18px rgba(231,211,157,.12),0 6px 20px rgba(28,36,19,.14); }
+  .tip i { background: #eadbb0; opacity: .5; }
+  .tip div { color: #eee2bf; background: #66724e; padding: 12px 15px; border-radius: 2px 12px 2px 12px; }
+  .tip .accession, .tip .process { color: #d3cfaa; }
+  .tip b { font: italic 25px/1.1 Baskerville,Georgia,serif; }
+  .archive-imprint { position: absolute; bottom: 0; left: 0; right: 0; height: 178px; background: linear-gradient(#f1e5c5,#e7d9b5); color: #58513a; display: flex; align-items: center; flex-direction: column; padding-top: 17px; border-top: 5px double #bdac79; box-shadow: 0 -8px 0 rgba(236,222,180,.65),0 -10px 0 rgba(73,68,40,.2); }
+  .imprint-flourish { font-size: 22px; line-height: 1; color: #9c8856; }
+  .imprint-title { font: 400 clamp(29px,5vw,54px)/1.25 Baskerville,'Times New Roman',serif; letter-spacing: .27em; margin-left: .27em; }
+  .imprint-sub { font: italic 12px/1.8 Georgia,serif; }
+  .imprint-edition { margin-top: 8px; font-size: 8px; letter-spacing: .17em; }
+  h2 { font: 400 28px Baskerville,Georgia,serif; letter-spacing: .04em; }
+  .sub { font: 13px/1.6 Georgia,serif; }
+  .cell, .cfg { background: #727c55; color: #eee2bf; }
+  .cfg .tag { color: #eee2bf; }
+  .note { background: #ede2c5; }
+  @media(max-width:700px) { .layout { inset: 65px 28px 190px; } header { padding: 0; } .tone { max-width: 100%; } .imprint-title { letter-spacing: .18em; } }
+  .stage { margin-top: 22px; }
+  .archive-imprint { height: 135px; justify-content: center; padding: 0; }
+  .imprint-title { margin-top: 5px; margin-bottom: 0; }
+  .tip div { width: auto; min-width: 90px; }
+
+  /* mono-color: pale substrate, moss structure, ochre accents; texture lives in the ink. */
+  :root { --paper: #f5f1e8; --strip: #f5f1e8; --ink: #596344; --soft: #777c66; }
+  body { background: var(--paper); }
+  .stage { background: var(--paper); color: var(--ink); border: 0; height: 740px; }
+  .stage.scan::before { opacity: .045; }
+  .stage.scan::after { opacity: .035; }
+  .margin { display: none; }
+  .layout { inset: 20px 40px 145px; grid-template-columns: calc(var(--dw) * 1px) minmax(0,1fr) 130px; column-gap: 28px; }
+  .stage[data-align="right"] .layout { grid-template-columns: 130px minmax(0,1fr) calc(var(--dw) * 1px); }
+  .stage[data-align="center"] .layout { grid-template-columns: minmax(0,1fr) calc(var(--dw) * 1px) 130px; }
+  .c-plate { height: 550px; }
+  .jewel { display: block; width: 100%; height: 100%; background-image: url('assets/jewellery-print-atlas.png'); background-size: 300% 200%; background-repeat: no-repeat; mix-blend-mode: multiply; }
+  .face .jewel { opacity: .6; }
+  .is-hover .jewel, .is-sel .jewel { opacity: 1; }
+  .lab, .c-text .lab, .c-text.is-hover .lab, .c-text.is-sel .lab { color: var(--ink); }
+  .face .lab { position: absolute; bottom: -9px; font: 9px/1 'Courier New',monospace; }
+  .c-text .lab { position: static; font: 15px/1 Georgia,serif; }
+  .is-sel .lab { color: #8d743f; }
+  .tool::before { background: #a58b52; }
+  .tool:focus-visible .face::after { border-color: var(--ink); }
+  .plate .jewel-hero { inset: 0; width: 100%; height: 100%; aspect-ratio: auto; display: grid; place-items: center; }
+  .jewel-hero .jewel { width: min(100%,550px); height: auto; aspect-ratio: 1; }
+  .card-in { inset: auto 0 38px; }
+  .card .mo { color: var(--ink); font: italic 24px/1.2 Georgia,serif; }
+  .refract { background: var(--paper); }
+  .glass { border-color: #b6b99e; box-shadow: 0 3px 12px rgba(89,99,68,.08); }
+  .tip div { background: var(--paper); color: var(--ink); border-radius: 0; }
+  .tip i { background: var(--ink); }
+  .archive-imprint { height: 145px; border: 0; background: none; box-shadow: none; align-items: flex-start; padding-left: 16%; }
+  .imprint-title { color: var(--ink); font: italic clamp(34px,5.6vw,70px)/1.05 Baskerville,Georgia,serif; letter-spacing: -.035em; margin: 0; max-width: 600px; }
+  .controls { opacity: .8; }
+  @media(max-width:900px) { .layout, .stage[data-align] .layout { grid-template-columns: calc(var(--dw) * 1px) minmax(0,1fr); gap: 20px; } .stage[data-align="right"] .layout, .stage[data-align="center"] .layout { grid-template-columns: minmax(0,1fr) calc(var(--dw) * 1px); } .c-card { display: none; } }
+  @media(max-width:600px) { .layout { inset: 10px 18px 140px; } .stage { height: 620px; } .c-plate { height: 420px; } .archive-imprint { padding-left: 24px; } }
+  .jewel { mask-image: linear-gradient(to right,transparent,#000 6%,#000 94%,transparent),linear-gradient(to bottom,transparent,#000 5%,#000 96%,transparent); mask-composite: intersect; }
+
+  /* Archive design plate and compact tool states. */
+  .stage { height: 700px; }
+  .layout, .stage[data-align="right"] .layout { inset: 30px 32px; grid-template-columns: 88px minmax(0,1fr); gap: 30px; }
+  .stage[data-align="right"] .layout { grid-template-columns: minmax(0,1fr) 88px; }
+  .c-card { display: none; }
+  .c-plate { height: 570px; }
+  .plate { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-content:center; gap: 24px 36px; }
+  .plate .design-study { position: relative; inset: auto; width: 100%; aspect-ratio: 1; margin: 0; }
+  .design-study:nth-last-child(1) { width: 78%; grid-column: 1 / -1; justify-self: center; max-width: 260px; }
+  .design-study .jewel { background-image: url('assets/jewellery-design-variants.png'); background-size: 300% 600%; }
+  .design-study figcaption { position: absolute; bottom: -9px; width: 100%; text-align:center; font: 9px/1.2 'Courier New',monospace; color: #7d806a; }
+  .tool { border-radius: 3px; }
+  .tool .face { width: 40px; height: 40px; }
+  .face .lab { font: 10px/1.1 Georgia,serif; bottom: -9px; }
+  .c-text .lab { position:static; font-size:11px; }
+  .tool .jewel { opacity:.55; }
+  .tool.is-hover { background:rgba(89,99,68,.065); }
+  .tool.is-hover .jewel { opacity:.85; }
+  .tool.is-sel { background:rgba(89,99,68,.11); box-shadow:inset 2px 0 #596344; }
+  .tool.is-sel .jewel { opacity:1; }
+  .tool.is-sel .lab { color:#414d32; }
+  .tool::before { display:none; }
+  .tool.is-press .face { transform:scale(.94); }
+  .tip[hidden] { display:none; }
+  .tip div { padding:6px 9px; min-width:0; background:#eeeadf; border-bottom:1px solid #a6a88f; }
+  .tip b { font:italic 13px/1.2 Georgia,serif; }
+  .tip i { flex-basis:10px; }
+  .controls, .pills button, .back { font-size:11px; }
+  .stage[data-align="center"] .layout { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:90px 1fr; inset:20px 32px; gap:32px; }
+  .stage[data-align="center"] .c-dock { order:0; width:min(100%,432px); height:78px; justify-self:center; }
+  .stage[data-align="center"] .c-plate { order:1; height:510px; width:min(100%,700px); justify-self:center; }
+  .stage[data-align="center"] .strip { display:flex; width:100% !important; padding:8px 0; }
+  .stage[data-align="center"] .tool { flex:1; min-width:0; width:72px; height:60px; }
+  .stage[data-align="center"] .tool.is-sel { box-shadow:inset 0 -2px #596344; }
+  .stage[data-align="center"] .view .strip { width:100% !important; }
+  .stage[data-align="center"] .tip i { display:none; }
+  @media(max-width:600px) { .layout,.stage[data-align="right"] .layout { inset:25px 8px; gap:12px; } .plate { gap:28px 8px; } .stage[data-align="center"] .layout { inset:20px 8px; } .stage[data-align="center"] .tool { width:auto; } .face .lab { font-size:9px; } }
+
+  .strip { border:1px solid #b8b9a5; border-radius:12px; background:rgba(245,241,232,.96); padding:6px; box-shadow:0 2px 7px rgba(89,99,68,.06); }
+  .tool { border-radius:7px; }
+  .tool + .tool { border-top:1px solid rgba(89,99,68,.10); }
+  .stage[data-align="center"] .strip { padding:6px; }
+  .stage[data-align="center"] .tool + .tool { border-top:0; border-left:1px solid rgba(89,99,68,.10); }
+  .stage[data-align="center"] .c-dock { width:min(100%,444px); }
+  .design-study .variant { aspect-ratio:4/3; height:auto; }
+
+  .strip { border-radius:38px; padding:8px; border-color:rgba(89,99,68,.22); background:#f5f1e8; box-shadow:0 8px 16px rgba(89,99,68,.10),inset 0 1px rgba(255,255,255,.8); }
+  .tool { z-index:2; }
+  .tool + .tool, .stage[data-align="center"] .tool + .tool { border:0; }
+  .tool.is-hover { background:transparent; }
+  .tool.is-sel { background:transparent; box-shadow:none; }
+  .stage[data-align="center"] .tool.is-sel { box-shadow:none; }
+  .tool.is-sel::after { content:''; position:absolute; bottom:2px; left:calc(50% - 6px); width:12px; height:2px; background:#8d743f; border-radius:2px; }
+  .lens { width:132px; height:132px; z-index:1; }
+  .lens .glass { inset:37px; border-radius:50%; border:0; background:rgba(89,99,68,.09); box-shadow:none; }
+  .lens .refract { display:none; }
+  .tip { transition:width .22s; }
+  .tip div { border:0; border-radius:20px; background:#eae8de; padding:9px 13px; overflow:hidden; }
+  .tip b { display:block; font:12px/1.2 Georgia,serif; white-space:nowrap; }
+  .tip i { display:none; }
+  .stage[data-align="center"] .layout { inset:72px 32px 20px; }
+  .stage[data-align="center"] .strip { border-radius:40px; }
+  @media(prefers-reduced-motion:reduce) { .tip { transition:none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <a class="back" href="../../#week7">← Week 7</a>
-  <header>
-    <div>
-      <div class="eyebrow">Week 7 · Toolbar · Set 2 · Archival</div>
-      <h1>Herbarium Dock</h1>
-    </div>
-    <p class="tone">A vertical toolbar of twelve pressed-flower prints, one birth flower for each month of 2026. The pointer works like a magnifying glass: the print under it swells and its neighbours ease aside. Months already filed are grey impressions, the open month is struck in silver foil, and the rest wait in silver outline.</p>
-  </header>
 
-  <section class="stage grain" id="stage" data-align="left" data-content="icon" aria-label="Toolbar prototype">
-    <span class="corner tl">Herbarium · MMXXVI</span>
-    <span class="corner tr" id="cornerTr">Plate 11 / 12</span>
-    <span class="corner bl">Birth flowers, pressed &amp; filed</span>
-    <span class="corner br">Archive drawer 07</span>
-    <div class="layout">
-      <div class="dockcol">
-        <div class="dock" id="dock" role="toolbar" aria-orientation="vertical" aria-label="Months of 2026">
-          <div class="strip" id="strip"></div>
-          <div class="slip" id="slip" aria-hidden="true"></div>
+  <section class="stage scan" id="stage" data-align="center" aria-label="Toolbar prototype">
+    <div class="ledger" aria-hidden="true"></div>
+    <div class="margin t"></div><div class="margin b"></div>
+    <div class="layout" id="layout">
+      <div class="col c-dock">
+        <div class="dock" id="dock">
+          <div class="strip scan" id="strip" role="toolbar" aria-orientation="vertical" aria-label="Jewellery archive"></div>
+          <div class="lens" id="lens" aria-hidden="true" inert>
+            <div class="lens-shadow"></div>
+            <div class="glass"><div class="refract"><div class="view" id="view"></div></div></div>
+          </div>
+          <div class="tip" id="tip" role="tooltip" hidden></div>
         </div>
       </div>
-      <div class="platecol">
-        <figure class="plate grain" id="plate">
-          <div class="letters" id="letters" aria-hidden="true"></div>
-          <div class="plate-no" id="plateNo"></div>
-          <div class="print" id="print"><img class="ps" id="printShadow" alt=""><img class="pi" id="printInk" alt=""></div>
-          <figcaption><span class="pf" id="pf"></span><span class="pl" id="pl"></span><span class="pn"><span id="pn"></span><span>2026</span></span></figcaption>
-        </figure>
+      <div class="col c-plate" aria-hidden="true">
+        <div class="plate scan" id="plate"></div>
+        <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span>
       </div>
-      <div class="ledgercol"><div class="ledger" id="ledger"></div></div>
+      <div class="col c-card" aria-hidden="true">
+        <div class="card scan"><div class="card-in" id="card"></div></div>
+        <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span>
+      </div>
     </div>
     <p class="sr" aria-live="polite" id="live"></p>
   </section>
@@ -310,612 +427,246 @@
   <div class="controls">
     <div class="ctl"><span>Align</span>
       <div class="pills" data-key="align">
-        <button data-v="left" aria-pressed="true">Left</button><button data-v="center">Center</button><button data-v="right">Right</button>
+        <button data-v="left" aria-pressed="false">Left</button><button data-v="center" aria-pressed="true">Center</button><button data-v="right">Right</button>
       </div></div>
     <div class="ctl"><span>Button</span>
       <div class="pills" data-key="content">
-        <button data-v="icon" aria-pressed="true">Icon</button><button data-v="text">Text</button><button data-v="both">Icon + text</button>
+        <button data-v="icon">Icon</button><button data-v="text">Text</button><button data-v="both" aria-pressed="true">Icon + text</button>
       </div></div>
   </div>
 
-  <h2>States</h2>
-  <p class="sub">Outline is the default. Hover magnifies the print and lifts a grey shadow print off the page beneath it. Press brings the stamp down: the shadow closes up under the print and silver starts to transfer. The chosen month stays struck in foil. Months before it are filed as grey impressions, like the stones already placed on the stone calendar.</p>
-  <div class="sheet grain" id="sheet"></div>
-
-  <h2>Configurations</h2>
-  <p class="sub">One structure, nine configurations. Alignment sets which edge the strip sits on and which way the prints grow: away from the wall when docked left or right, evenly both ways when centred. The magnifier is the same for every button type.</p>
-  <div class="configs" id="configs"></div>
-
-  <h2>The magnifier</h2>
-  <p class="sub">Scale is a cosine bump centred on the pointer. A print directly under the pointer reaches full size, and the effect fades to nothing 2.8 slots away. The stack then shifts so the point under the cursor stays still, so the print you are aiming at never slides away from you.</p>
-  <div class="curve" id="curve"></div>
-
-  <h2>System</h2>
-  <div class="notes">
-    <div class="note"><h3>Structure</h3>
-      <ul><li>Strip: one ruled paper strip, 12 px inner padding, 6 px between slots</li>
-      <li>Icon slot 40 × 40, text pebble 57 × 36, icon + text 140 × 36</li>
-      <li>Each slot holds four stacked prints: shadow, impression, foil, outline</li>
-      <li>Tooltip slip: 178 px, attached by a 14 px hairline</li></ul></div>
-    <div class="note"><h3>Alignment</h3>
-      <ul><li><strong>Left</strong>: strip on the left wall, prints grow right, slip on the right</li>
-      <li><strong>Right</strong>: mirrored, and labels align right</li>
-      <li><strong>Center</strong>: strip between plate and ledger, prints grow both ways</li></ul></div>
-    <div class="note"><h3>Motion</h3>
-      <ul><li>Magnify: max 2.15× icon, 1.75× text, 1.85× icon + text</li>
-      <li>Falloff radius 2.8 slots, cosine; gaps grow 60% as much as prints</li>
-      <li>Pointer smoothed with τ 45 ms; magnifier fades in and out with τ 85 ms</li>
-      <li>Press 0.9×, τ 50 ms. Selecting strikes the foil in over 560 ms (overshoot 1.14 → .95 → 1)</li></ul></div>
-    <div class="note"><h3>Keys &amp; touch</h3>
-      <ul><li><code>↑</code> <code>↓</code> move along the strip, <code>Home</code>/<code>End</code></li>
-      <li>Focus also drives the magnifier, so the keyboard sees the same lens</li>
-      <li><code>Enter</code>/<code>Space</code> files the month</li>
-      <li>Touch: drag along the strip to scrub, lift to choose</li></ul></div>
-  </div>
 </div>
 
 <script>
 (() => {
-  /* ================= Prints ================= */
-  const rng = (seed) => () => {
-    seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-  const circ = (r) => `M${-r} 0a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
-  const line = (l) => `M0 0L0 ${-l}`;
-  // Petal / leaf shapes: base at 0,0, pointing up (-y).
-  function pet(shape, l, w) {
-    switch (shape) {
-      case 'round': return `M0 0C${w * .95} ${-l * .2} ${w * .8} ${-l} 0 ${-l}C${-w * .8} ${-l} ${-w * .95} ${-l * .2} 0 0Z`;
-      case 'blunt': return `M0 0C${w * .75} ${-l * .2} ${w * .7} ${-l * .85} ${w * .35} ${-l}L0 ${-l * .93}L${-w * .35} ${-l}C${-w * .7} ${-l * .85} ${-w * .75} ${-l * .2} 0 0Z`;
-      case 'frill': return `M0 0C${w} ${-l * .3} ${w * 1.1} ${-l * .75} ${w * .9} ${-l}L${w * .45} ${-l * .88}L${w * .15} ${-l * 1.04}L${-w * .2} ${-l * .88}L${-w * .55} ${-l * 1.02}L${-w * .9} ${-l * .9}C${-w * 1.1} ${-l * .7} ${-w} ${-l * .3} 0 0Z`;
-      case 'heart': return `M0 ${-l * .12}C${w * .4} ${l * .08} ${w * 1.15} ${-l * .1} ${w * .85} ${-l * .55}C${w * .6} ${-l * .85} ${w * .15} ${-l * .95} 0 ${-l}C${-w * .15} ${-l * .95} ${-w * .6} ${-l * .85} ${-w * .85} ${-l * .55}C${-w * 1.15} ${-l * .1} ${-w * .4} ${l * .08} 0 ${-l * .12}Z`;
-      default: return `M0 0C${w * .8} ${-l * .25} ${w * .55} ${-l * .75} 0 ${-l}C${-w * .55} ${-l * .75} ${-w * .8} ${-l * .25} 0 0Z`;
-    }
-  }
-  function ring(r1, r2, n) {
-    let d = '';
-    for (let i = 0; i < n * 2; i++) { const r = i % 2 ? r2 : r1, a = Math.PI * i / n; d += (i ? 'L' : 'M') + (r * Math.cos(a)) + ' ' + (r * Math.sin(a)); }
-    return d + 'Z';
-  }
-  function bell(k) {
-    return `M${-3.6 * k} ${1.6 * k}C${-3.8 * k} ${-1.6 * k} ${3.8 * k} ${-1.6 * k} ${3.6 * k} ${1.6 * k}L${4.6 * k} ${6.2 * k}L${2.6 * k} ${5.4 * k}L${1.3 * k} ${6.8 * k}L0 ${5.6 * k}L${-1.3 * k} ${6.8 * k}L${-2.6 * k} ${5.4 * k}L${-4.6 * k} ${6.2 * k}Z`;
-  }
-  function lobed(l, w) {
-    const N = 26, R = [], L = [];
-    for (let i = 1; i < N; i++) {
-      const t = i / N, hw = w * Math.pow(Math.sin(Math.PI * t), .7) * (.72 + .28 * Math.cos(t * Math.PI * 7));
-      R.push([hw, -l * t]); L.unshift([-hw, -l * t]);
-    }
-    return 'M0 0' + R.map((p) => `L${p[0]} ${p[1]}`).join('') + `L0 ${-l}` + L.map((p) => `L${p[0]} ${p[1]}`).join('') + 'Z';
-  }
-  function hollyLeaf(l, w, k = 4) {
-    const pts = [];
-    for (let j = 1; j <= k; j++) { const t = j / (k + 1); pts.push([w * Math.pow(Math.sin(Math.PI * t), .6) * 1.1, -l * t]); }
-    let d = 'M0 0', prev = [0, 0];
-    for (const [x, y] of pts) { d += `Q${(prev[0] + x) / 2 * .45} ${(prev[1] + y) / 2} ${x} ${y}`; prev = [x, y]; }
-    d += `Q${prev[0] * .35} ${(prev[1] - l) / 2} 0 ${-l}`; prev = [0, -l];
-    for (const [x, y] of [...pts].reverse()) { d += `Q${(prev[0] - x) / 2 * .45} ${(prev[1] + y) / 2} ${-x} ${y}`; prev = [-x, y]; }
-    return d + `Q${prev[0] * .45} ${prev[1] / 2} 0 0Z`;
-  }
-  function sketch(seed) {
-    const r = rng(seed), els = [];
-    return {
-      j: (a) => (r() * 2 - 1) * a,
-      fill: (d, x = 0, y = 0, a = 0) => els.push({ k: 'f', d, x, y, a }),
-      stem: (d, w = 2) => els.push({ k: 's', d, w }),
-      vein: (d, x = 0, y = 0, a = 0) => els.push({ k: 'v', d, x, y, a }),
-      els,
-    };
-  }
-  function compound(s, ax, ay, bx, by, l, w) {
-    s.stem(`M${ax} ${ay}L${bx} ${by}`, 1);
-    const a = Math.atan2(bx - ax, -(by - ay)) * 180 / Math.PI;
-    const mx = ax + (bx - ax) * .5, my = ay + (by - ay) * .5;
-    [[mx, my, a - 62, .85], [mx, my, a + 62, .85], [bx, by, a, 1]].forEach(([x, y, aa, k]) => {
-      s.fill(pet('point', l * k, w * k), x, y, aa); s.vein(line(l * k * .8), x, y, aa);
-    });
-  }
-
-  const FLOWERS = {
-    carnation(s) {
-      s.stem('M50 98C49 82 52 62 50 44', 2.2);
-      s.fill(pet('point', 24, 2.6), 50, 80, -38); s.vein(line(20), 50, 80, -38);
-      s.fill(pet('point', 21, 2.4), 50, 68, 40); s.vein(line(17), 50, 68, 40);
-      s.fill('M45.6 45L46.4 31H53.6L54.4 45Z'); s.vein('M48 44L48.4 33M52 44L51.6 33');
-      [[21, 7.5, 9, 150], [16.5, 7, 8, 124], [11.5, 6, 6, 96]].forEach(([l, w, n, span]) => {
-        for (let i = 0; i < n; i++) { const a = -span / 2 + span * i / (n - 1) + s.j(6); s.fill(pet('frill', l + s.j(1.5), w), 50, 33, a); s.vein(line(l * .6), 50, 33, a); }
-      });
-    },
-    violet(s) {
-      s.stem('M47 98C45 82 40 62 45 50C48 43 52 40 55 41', 1.6);
-      s.stem('M47 98C44 92 40 88 34 84', 1.2); s.stem('M47 98C52 92 58 90 64 88', 1.2);
-      s.fill(pet('heart', 24, 14), 34, 84, -52); s.vein(line(19), 34, 84, -52);
-      s.fill(pet('heart', 21, 12.5), 64, 88, 48); s.vein(line(16), 64, 88, 48);
-      s.fill(pet('heart', 16, 9.5), 46, 92, -8); s.vein(line(12), 46, 92, -8);
-      const cx = 56, cy = 36;
-      [[-38, 14, 8], [34, 14, 8], [-104, 12, 7], [104, 12, 7], [180, 15, 9]].forEach(([a, l, w]) => s.fill(pet('round', l, w), cx, cy, a));
-      s.vein('M0 0L0 -10M0 0L-3 -9M0 0L3 -9', cx, cy, 180);
-      s.fill(circ(2.3), cx, cy);
-    },
-    daffodil(s) {
-      s.fill(pet('point', 50, 3.4), 47, 98, -14); s.vein(line(42), 47, 98, -14);
-      s.fill(pet('point', 44, 3), 54, 98, 16); s.vein(line(36), 54, 98, 16);
-      s.stem('M51 98C50 80 49 62 50 44', 2.2);
-      s.fill(pet('point', 9, 2.6), 50, 46, -30);
-      const cx = 50, cy = 32;
-      for (let i = 0; i < 6; i++) { const a = i * 60 + 15 + s.j(4); s.fill(pet('point', 17 + s.j(1), 7.5), cx, cy, a); s.vein(line(12), cx, cy, a); }
-      s.fill(ring(8.4, 7, 16), cx, cy); s.vein(circ(4.4), cx, cy); s.fill(circ(2.4), cx, cy);
-    },
-    daisy(s) {
-      s.stem('M50 98C51 80 48 60 50 40', 1.7);
-      [[-62, 15, 5.5], [56, 14, 5], [-18, 12, 4.5]].forEach(([a, l, w]) => { s.fill(pet('round', l, w), 50, 95, a); s.vein(line(l * .7), 50, 95, a); });
-      s.fill(pet('point', 10, 2.6), 50, 66, -45);
-      const cx = 50, cy = 31;
-      for (let i = 0; i < 17; i++) { const a = i * 360 / 17 + s.j(5); s.fill(pet('round', 18 + s.j(1.6), 3.5), cx, cy, a); s.vein(line(12), cx, cy, a); }
-      s.fill(circ(6.2), cx, cy); s.vein(circ(3.6), cx, cy); s.vein(circ(1.3), cx, cy);
-    },
-    lily(s) {
-      s.fill(pet('point', 62, 12), 44, 98, -8); s.vein('M0 0C1 -20 1 -40 0 -56', 44, 98, -8); s.vein('M0 -6C4 -24 5 -40 3 -52M0 -6C-4 -24 -5 -40 -3 -52', 44, 98, -8);
-      s.stem('M45 98C45 72 46 44 58 28C64 21 71 18 79 22', 1.5);
-      [[47, 64, 1], [49, 52, .95], [52, 42, .88], [57, 33, .8], [63, 26, .72], [70, 22, .6], [77, 22, .48]].forEach(([x, y, k]) => {
-        const bx = x + 6 * k + 2, by = y + 7 * k;
-        s.stem(`M${x} ${y}C${x + 3} ${y - 1} ${bx} ${by - 4} ${bx} ${by - 1}`, .9);
-        if (k > .55) s.fill(bell(k * 1.3), bx, by, s.j(6)); else s.fill(circ(1.9), bx, by + 1.6);
-      });
-      s.fill(pet('point', 54, 10), 46, 98, -34); s.vein('M0 0C0 -18 0 -34 0 -48', 46, 98, -34);
-    },
-    rose(s) {
-      s.stem('M50 98C52 82 48 62 50 44', 2.3);
-      [[51.4, 86, 62], [48.7, 74, -62], [51.2, 58, 58]].forEach(([x, y, a]) => s.fill(pet('point', 4.5, 1.8), x, y, a));
-      compound(s, 50, 78, 70, 64, 11, 5); compound(s, 50, 66, 31, 54, 10, 4.6);
-      [-130, 130, 180].forEach((a) => s.fill(pet('point', 9, 2.4), 50, 45, a));
-      [[-58, 20, 9], [58, 20, 9], [-26, 25, 11], [26, 25, 11]].forEach(([a, l, w]) => { s.fill(pet('round', l, w), 50, 44, a); s.vein(line(l * .55), 50, 44, a); });
-      s.fill(pet('round', 20, 14), 50, 45);
-      s.vein('M43 31C45 24 55 23 56 29C57 34 50 36 47 33C45 30 48 27 51 28');
-      s.vein('M41 38C45 41 55 41 59 37');
-    },
-    larkspur(s) {
-      s.stem('M50 98C50 76 49 42 50 9', 1.5);
-      [['M50 90C44 86 38 84 31 84', 1], ['M38 85C35 81 33 78 32 74', .8], ['M50 82C57 78 63 77 69 78', 1], ['M62 77C64 73 66 70 66 66', .8], ['M44 87C41 89 37 91 33 91', .8]].forEach(([d, w]) => s.stem(d, w));
-      [[66, 1, -1], [58, .95, 1], [50, .9, -1], [43, .84, 1], [36, .76, -1], [29, .68, 1], [22, .58, -1], [16, .5, 1]].forEach(([y, k, side]) => {
-        const cx = 50 + side * 8 * k, cy = y - 2;
-        s.stem(`M50 ${y + 2}L${cx} ${cy}`, .8);
-        s.fill(pet('point', 9 * k, 1.7 * k), cx, cy, side * 100);
-        for (let i = 0; i < 5; i++) s.fill(pet('round', 6 * k, 4 * k), cx, cy, i * 72 + s.j(8));
-        s.fill(circ(1.4 * k), cx, cy);
-      });
-      s.fill(pet('round', 5, 2.6), 50, 13, s.j(10)); s.fill(pet('round', 4, 2.1), 51, 8, 10);
-    },
-    gladiolus(s) {
-      s.fill(pet('point', 62, 3.4), 49, 98, -9); s.vein(line(54), 49, 98, -9);
-      s.fill(pet('point', 52, 3), 53, 98, 12); s.vein(line(44), 53, 98, 12);
-      s.stem('M51 98C50 76 48 46 50 10', 1.9);
-      [[72, 1], [60, .92], [49, .84], [39, .75], [30, .66]].forEach(([y, k], i) => {
-        const side = i % 2 ? -1 : 1, cx = 50 + side * 8 * k, cy = y;
-        s.fill(pet('point', 7 * k, 2 * k), 50, y + 5, side * 40);
-        for (let p = 0; p < 6; p++) { const a = p * 60 + side * 20 + s.j(6); s.fill(pet('round', (p % 2 ? 7.5 : 9) * k, 5.6 * k), cx, cy, a); s.vein(line(5 * k), cx, cy, a); }
-        s.fill(circ(1.8 * k), cx, cy);
-      });
-      s.fill(pet('point', 9, 2.6), 50, 22, 8); s.fill(pet('point', 7, 2.2), 50, 15, -6); s.fill(pet('point', 5, 1.8), 50, 10, 4);
-    },
-    aster(s) {
-      s.stem('M50 98C50 80 49 60 50 40', 1.7); s.stem('M50 72C56 64 62 59 70 55', 1.3); s.stem('M50 64C44 58 38 55 32 53', 1.2);
-      [[50, 86, -50], [50, 80, 48], [57, 63, 60], [42, 57, -70], [50, 52, -40]].forEach(([x, y, a]) => { s.fill(pet('point', 10, 2.4), x, y, a); s.vein(line(8), x, y, a); });
-      const head = (cx, cy, n, l, w, dr) => {
-        for (let i = 0; i < n; i++) { const a = i * 360 / n + s.j(4); s.fill(pet('point', l + s.j(1.2), w), cx, cy, a); }
-        s.fill(circ(dr), cx, cy); s.vein(circ(dr * .55), cx, cy);
-      };
-      head(50, 30, 26, 16, 1.9, 5); head(70, 53, 18, 9.5, 1.5, 3);
-      for (let i = 0; i < 5; i++) s.fill(pet('point', 6.5, 1.6), 32, 53, -40 + i * 20);
-    },
-    marigold(s) {
-      s.stem('M50 98C50 80 51 62 50 44', 2.3);
-      [[50, 84, -56, 22, 5.5], [50, 72, 52, 20, 5]].forEach(([x, y, a, l, w]) => { s.fill(pet('round', l, w), x, y, a); s.vein(line(l * .8), x, y, a); });
-      s.fill(pet('point', 7, 2.4), 48, 45, -40); s.fill(pet('point', 7, 2.4), 52, 45, 40);
-      const cx = 50, cy = 31;
-      [[18, 18.5, 3.5, 0], [16, 14, 3.4, 11], [12, 9.5, 2.9, 5]].forEach(([n, l, w, off]) => {
-        for (let i = 0; i < n; i++) { const a = i * 360 / n + off + s.j(4); s.fill(pet('blunt', l + s.j(1), w), cx, cy, a); s.vein(line(l * .7), cx, cy, a); }
-      });
-      s.fill(circ(4.4), cx, cy); s.vein(circ(2.1), cx, cy);
-    },
-    mum(s) {
-      s.stem('M50 98C49 80 52 62 50 46', 2.3);
-      s.fill(lobed(27, 9.5), 50, 82, -58); s.vein(line(23), 50, 82, -58);
-      s.fill(lobed(24, 8.5), 50, 68, 54); s.vein(line(20), 50, 68, 54);
-      [[13, 21, 4, 220, 44], [12, 17, 3.8, 190, 40], [10, 13, 3.4, 160, 36], [8, 9, 3, 120, 33]].forEach(([n, l, w, span, by]) => {
-        for (let i = 0; i < n; i++) { const a = -span / 2 + span * i / (n - 1) + s.j(5); s.fill(pet('round', l + s.j(1.2), w), 50, by, a); s.vein(line(l * .6), 50, by, a); }
-      });
-    },
-    holly(s) {
-      s.stem('M50 98C50 84 48 70 50 54', 2); s.stem('M50 64C45 60 40 58 34 57', 1.3); s.stem('M50 60C56 57 61 55 67 55', 1.3);
-      s.fill(hollyLeaf(32, 10.5), 50, 56, -8); s.vein(line(29), 50, 56, -8);
-      s.fill(hollyLeaf(29, 9.5), 34, 57, -62); s.vein(line(26), 34, 57, -62);
-      s.fill(hollyLeaf(29, 9.5), 67, 55, 64); s.vein(line(26), 67, 55, 64);
-      s.fill(hollyLeaf(23, 8), 50, 82, -118); s.vein(line(20), 50, 82, -118);
-      [[46, 52, 4.4], [54.5, 51, 4.2], [50, 45.5, 4], [42, 46, 3.4]].forEach(([x, y, r]) => {
-        s.fill(circ(r), x, y); s.vein(`M${-r * .5} ${-r * .15}a${r * .4} ${r * .4} 0 0 1 ${r * .45} ${-r * .4}`, x, y);
-      });
-    },
-  };
-
-  const MONTHS = [
-    ['Jan', 'January', 'Carnation', 'Dianthus caryophyllus', 'admiration', 'carnation'],
-    ['Feb', 'February', 'Violet', 'Viola odorata', 'faithfulness', 'violet'],
-    ['Mar', 'March', 'Daffodil', 'Narcissus pseudonarcissus', 'new beginnings', 'daffodil'],
-    ['Apr', 'April', 'Daisy', 'Bellis perennis', 'innocence', 'daisy'],
-    ['May', 'May', 'Lily of the valley', 'Convallaria majalis', 'return of happiness', 'lily'],
-    ['Jun', 'June', 'Rose', 'Rosa gallica', 'love', 'rose'],
-    ['Jul', 'July', 'Larkspur', 'Consolida ajacis', 'lightness', 'larkspur'],
-    ['Aug', 'August', 'Gladiolus', 'Gladiolus communis', 'strength of character', 'gladiolus'],
-    ['Sep', 'September', 'Aster', 'Aster amellus', 'patience', 'aster'],
-    ['Oct', 'October', 'Marigold', 'Calendula officinalis', 'warmth', 'marigold'],
-    ['Nov', 'November', 'Chrysanthemum', 'Chrysanthemum morifolium', 'longevity', 'mum'],
-    ['Dec', 'December', 'Holly', 'Ilex aquifolium', 'domestic happiness', 'holly'],
-  ].map(([abbr, name, flower, latin, note, key], i) => {
-    const s = sketch(101 + i * 37); FLOWERS[key](s);
-    return { i, no: String(i + 1).padStart(2, '0'), abbr, name, flower, latin, note, els: s.els, peb: pebble(7 + i * 11) };
-  });
-
-  // A river pebble for the text button: a jittered ellipse, smoothed.
-  function pebble(seed) {
-    const r = rng(seed), k = 9, pts = [];
-    for (let i = 0; i < k; i++) {
-      const a = i / k * Math.PI * 2 + (r() - .5) * .3, rr = 1 + (r() - .5) * .14;
-      pts.push([50 + 47 * rr * Math.cos(a), 30 + 27 * rr * Math.sin(a)]);
-    }
-    let d = `M${pts[0][0]} ${pts[0][1]}`;
-    for (let i = 0; i < k; i++) {
-      const p0 = pts[(i - 1 + k) % k], p1 = pts[i], p2 = pts[(i + 1) % k], p3 = pts[(i + 2) % k];
-      d += `C${p1[0] + (p2[0] - p0[0]) / 6} ${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6} ${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]} ${p2[1]}`;
-    }
-    return [{ k: 'f', d: d + 'Z', x: 0, y: 0, a: 0 }];
-  }
-
-  /* Each print is rendered once per variant as an SVG image:
-     line = silver outline (embossed), ink = silver foil (stamped), mark = grey impression (stamped). */
-  function printSVG(els, variant, seed, vb, w, h) {
-    let body = '';
-    for (const e of els) {
-      const tf = e.k === 's' ? '' : ` transform="translate(${e.x} ${e.y}) rotate(${e.a})"`;
-      if (variant === 'line') {
-        if (e.k === 'f') body += `<path d="${e.d}"${tf} fill="none" stroke="#fbfcfc" stroke-width="1.5" stroke-linejoin="round"/>`;
-        else if (e.k === 's') body += `<path d="${e.d}" fill="none" stroke="#fbfcfc" stroke-width="${Math.max(1.25, e.w * .6)}" stroke-linecap="round"/>`;
-        else body += `<path d="${e.d}"${tf} fill="none" stroke="#fbfcfc" stroke-width=".75" stroke-linecap="round" opacity=".8"/>`;
-      } else {
-        const paint = variant === 'ink' ? 'url(#g)' : '#9da3a4';
-        if (e.k === 'f') body += `<path d="${e.d}"${tf} fill="${paint}"/>`;
-        else if (e.k === 's') body += `<path d="${e.d}" fill="none" stroke="${paint}" stroke-width="${e.w}" stroke-linecap="round"/>`;
-        else if (variant === 'ink') body += `<path d="${e.d}"${tf} fill="none" stroke="#8f9596" stroke-width=".7" stroke-linecap="round" opacity=".85"/>`;
-      }
-    }
-    const defs = variant === 'line'
-      ? `<filter id="f" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="${seed}" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1" xChannelSelector="R" yChannelSelector="G" result="d"/><feDropShadow in="d" dx="0" dy=".9" stdDeviation=".3" flood-color="#6f7576" flood-opacity=".75"/></filter>`
-      : `<linearGradient id="g" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="92" y2="100"><stop offset="0" stop-color="#fbfcfc"/><stop offset=".22" stop-color="#c3c7c8"/><stop offset=".42" stop-color="#f1f3f3"/><stop offset=".6" stop-color="#a9aeaf"/><stop offset=".8" stop-color="#e9ebeb"/><stop offset="1" stop-color="#b7bbbc"/></linearGradient>
-         <filter id="f" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="${seed}" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="2" seed="${seed + 7}" result="h"/><feColorMatrix in="h" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -12 0 0 0 9" result="holes"/><feComposite in="d" in2="holes" operator="in" result="ink"/><feTurbulence type="fractalNoise" baseFrequency="2.6" numOctaves="1" seed="${seed + 3}" result="gr"/><feColorMatrix in="gr" type="matrix" values="0 0 0 0 .33 0 0 0 0 .35 0 0 0 0 .36 -1.3 0 0 0 .8" result="ga"/><feComposite in="ga" in2="ink" operator="in" result="gi"/><feMerge><feMergeNode in="ink"/><feMergeNode in="gi"/></feMerge></filter>`;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="${w}" height="${h}"><defs>${defs}</defs><g filter="url(#f)">${body}</g></svg>`
-      .replace(/(\d+\.\d{2})\d+/g, '$1');
-    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  }
-  for (const m of MONTHS) {
-    m.uri = {}; m.peburi = {};
-    for (const v of ['line', 'ink', 'mark']) {
-      m.uri[v] = printSVG(m.els, v, 3 + m.i * 5, '-6 -6 112 112', 240, 240);
-      m.peburi[v] = printSVG(m.peb, v, 5 + m.i * 3, '-4 -4 108 68', 216, 136);
-    }
-  }
-
-  /* ================= Toolbar system ================= */
-  const CFG = {
-    icon: { bw: 40, bh: 40, M: 2.15, pad: 12, gap: 6 },
-    text: { bw: 57, bh: 36, M: 1.75, pad: 12, gap: 6 },
-    both: { bw: 140, bh: 36, M: 1.85, pad: 12, gap: 6 },
-  };
-  const PADX = 12;
-  const stripW = (cfg) => cfg.bw + PADX * 2;
-  const restH = (cfg, n) => cfg.pad * 2 + n * cfg.bh + (n - 1) * cfg.gap;
+  const SPECIMENS = ['Ring','Earrings','Cuff','Brooch','Pendant','Watch'].map((name,i) => ({i,name,flower:name,no:String(i+1).padStart(2,'0'),pos:`${(i%3)*50}% ${Math.floor(i/3)*100}%`}));
+  function jewel(m, extra='') { return `<span class="jewel ${extra}" style="background-position:${m.pos}" aria-hidden="true"></span>`; }
+  const CFG = { icon: { w: 44, h: 44, cell: 58 }, both: { w: 46, h: 46, cell: 58 }, text: { w: 56, h: 30, cell: 44 } };
+  const PADY = 10, W = 132, R = 66, K = 1.9;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const layers = (u) => `<span class="art${u === 'peb' ? ' peb' : ''}">` +
-    ['shadow', 'mark', 'ink', 'line'].map((l) => `<img class="l-${l}" alt="" draggable="false" src="${(u === 'peb' ? CUR.peburi : CUR.uri)[l === 'shadow' ? 'mark' : l]}">`).join('') + '</span>';
-  let CUR;
-  function faceHTML(m, content) {
-    CUR = m;
-    if (content === 'text') return `<span class="face text">${layers('peb')}<span class="lab-t">${m.abbr}</span></span>`;
-    CUR = m;
-    const art = layers('art');
-    if (content === 'icon') return `<span class="face icon">${art}</span>`;
-    return `<span class="face both">${art}<span class="lab-b"><span class="lb-no">${m.no} · ${m.abbr.toUpperCase()}</span><span class="lb-f">${m.flower}</span></span></span>`;
-  }
-  const stateOf = (i, sel) => (i < sel ? 'past' : i === sel ? 'current' : 'future');
-
-  /* Magnifier layout. y is the pointer in rest coordinates; p is how present the lens is (0–1). */
-  function layout(cfg, n, p, y) {
-    const { bh, M, pad, gap } = cfg, pitch = bh + gap, R = 2.8 * pitch;
-    const s = [], tops = [], g = [];
-    for (let i = 0; i < n; i++) {
-      const d = Math.abs(y - (pad + i * pitch + bh / 2));
-      const f = d < R ? (Math.cos(Math.PI * d / R) + 1) / 2 : 0;
-      s[i] = 1 + (M - 1) * p * f;
-      g[i] = gap * (1 + (s[i] - 1) * .6);
-    }
-    let cur = pad;
-    for (let i = 0; i < n; i++) { tops[i] = cur; cur += bh * s[i] + (i < n - 1 ? g[i] : 0); }
-    let E = null;
-    if (y <= pad) E = y;
-    else for (let i = 0; i < n; i++) {
-      const rt = pad + i * pitch, rb = rt + bh;
-      if (y <= rb) { E = tops[i] + (y - rt) / bh * bh * s[i]; break; }
-      if (i < n - 1 && y <= rb + gap) { E = tops[i] + bh * s[i] + (y - rb) / gap * g[i]; break; }
-    }
-    if (E === null) E = tops[n - 1] + bh * s[n - 1] + (y - (pad + (n - 1) * pitch + bh));
-    const off = y - E;
-    return { s, tops: tops.map((t) => t + off), top: off, bottom: cur + pad + off };
-  }
-  function place(el, cfg, align, sw, top, s, press = 1) {
-    const w = cfg.bw * s, h = cfg.bh * s, k = s * press;
-    let x0 = align === 'left' ? PADX : align === 'right' ? sw - PADX - w : (sw - w) / 2;
-    const x = x0 + w * (1 - press) / 2, y = top + h * (1 - press) / 2;
-    el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${(k / cfg.M).toFixed(4)})`;
-    return { x: x0, y: top, w, h };
-  }
-  function setVars(el, cfg) {
-    el.style.setProperty('--bw', cfg.bw); el.style.setProperty('--bh', cfg.bh); el.style.setProperty('--M', cfg.M);
-  }
-
-  /* ================= Live dock ================= */
   const $ = (id) => document.getElementById(id);
-  const stage = $('stage'), dock = $('dock'), strip = $('strip'), slip = $('slip');
-  const N = MONTHS.length;
-  const st = {
-    align: 'left', content: 'icon', sel: 10,
-    p: 0, pT: 0, y: 0, yT: 0, hover: -1, focus: -1, pointerIn: false, press: -1, pr: new Array(N).fill(1),
-    raf: 0, last: 0,
-  };
-  let tools = [], cfg = CFG.icon, boxes = [];
+  const dockW = (c) => CFG[c].w + 40;
+  const stripH = (c, n = SPECIMENS.length) => PADY * 2 + n * CFG[c].cell + (n - 1);
+  const centerY = (c, i) => PADY + i * (CFG[c].cell + 1) + CFG[c].cell / 2;
 
+  function faceHTML(m, content) {
+    return `<span class="face">${content === 'text' ? '' : jewel(m)}${content === 'icon' ? '' : `<span class="lab">${m.name}</span>`}</span>`;
+  }
+  function makeTool(m, content, tag = 'button') {
+    const b = document.createElement(tag);
+    b.className = `tool c-${content}`;
+    if (tag === 'button') b.type = 'button';
+    b.innerHTML = faceHTML(m, content);
+    return b;
+  }
+  const CROPS = '<span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span>';
+  function setVars(el, content) { const c = CFG[content]; el.style.setProperty('--w', c.w); el.style.setProperty('--h', c.h); el.style.setProperty('--cell', c.cell); el.style.width = dockW(content) + 'px'; }
+  function makeStrip(content, list) {
+    const s = document.createElement('div'); s.className = 'strip scan';
+    setVars(s, content); s.innerHTML = CROPS;
+    list.forEach((m) => s.appendChild(makeTool(m, content, 'span')));
+    return s;
+  }
+  function tipHTML(m) { return `<i></i><div><b>${m.flower}</b></div>`; }
+  function placeTip(tip, align, lx, ly) {
+    if (align === 'center') { const w=tip.offsetWidth || 90; tip.classList.remove('flip'); tip.style.transform=`translate(${lx-w/2}px,${ly-72}px)`; return; }
+    const host = tip.closest('.stage, .cfg, .cell');
+    const bounds = host?.getBoundingClientRect();
+    const origin = tip.parentElement.getBoundingClientRect();
+    const tipWidth = tip.offsetWidth || 90;
+    const flip = bounds ? origin.left + lx + R + 10 + tipWidth > bounds.right - 8 : align === 'right';
+    tip.classList.toggle('flip', flip);
+    const h = tip.offsetHeight || 60, w = tip.offsetWidth || 150;
+    const x = flip ? lx - 44 - w : lx + 44;
+    tip.style.transform = `translate(${x.toFixed(1)}px, ${(ly - h / 2).toFixed(1)}px)`;
+  }
+  function placeLens(lensEl, viewEl, lx, ly, s = 1) {
+    lensEl.style.transform = `translate(${(lx - R).toFixed(2)}px, ${(ly - R).toFixed(2)}px) scale(${s.toFixed(4)})`;
+    viewEl.style.transform = `translate(${(R - K * lx).toFixed(2)}px, ${(R - K * ly).toFixed(2)}px) scale(${K})`;
+  }
+  function staticLens(dock, content, i, m, align = 'left') {
+    const lens = document.createElement('div'); lens.className = 'lens';
+    lens.innerHTML = `<div class="lens-shadow"></div><div class="glass"><div class="refract"><div class="view"></div></div></div>`;
+    const view = lens.querySelector('.view');
+    view.appendChild(dock.querySelector('.strip').cloneNode(true));
+    dock.appendChild(lens);
+    const lx = dockW(content) / 2, ly = centerY(content, i);
+    placeLens(lens, view, lx, ly);
+    const tip = document.createElement('div'); tip.className = 'tip'; tip.innerHTML = tipHTML(m);
+    dock.appendChild(tip); placeTip(tip, align, lx, ly);
+  }
+
+  /* ---------- Live ---------- */
+  const stage = $('stage'), layout = $('layout'), dock = $('dock'), strip = $('strip'), lens = $('lens'), view = $('view'), tip = $('tip');
+  const N = SPECIMENS.length;
+  const st = {
+    align: 'center', content: 'both', sel: 0, hover: -1, press: -1, focus: -1, pointerIn: false,
+    on: false, px: 0, py: 0, x: 0, y: 0, vx: 0, vy: 0, s: 0, vs: 0, raf: 0, last: 0, tipFor: -1,
+  };
+  let tools = [];
+  let points = [];
+  let dismissed = false;
+  function focusAim(i) { if (points[i]) aim(points[i].x,points[i].y); }
+
+  function syncSheet() {
+    // the ledger lines follow the strip's row rules, across the whole sheet and the index card
+    const c = CFG[st.content], sh = stripH(st.content);
+    strip.setAttribute('aria-orientation', st.align === 'center' ? 'horizontal' : 'vertical');
+    const origin = strip.getBoundingClientRect();
+    points = tools.map(b => { const r=b.getBoundingClientRect(); return {x:r.left-origin.left+r.width/2,y:r.top-origin.top+r.height/2}; });
+    layout.style.setProperty('--dw', dockW(st.content));
+    layout.style.setProperty('--sh', sh);
+    const top = strip.getBoundingClientRect().top - stage.getBoundingClientRect().top;
+    stage.style.setProperty('--row', (c.cell + 1) + 'px');
+    stage.style.setProperty('--row-top', (top + PADY + c.cell) + 'px');
+    stage.style.setProperty('--row-card', (PADY + c.cell) + 'px');
+  }
   function build() {
-    cfg = CFG[st.content];
-    setVars(dock, cfg);
-    dock.style.width = stripW(cfg) + 'px';
-    dock.style.height = restH(cfg, N) + 'px';
-    tools.forEach((t) => t.remove());
-    tools = MONTHS.map((m, i) => {
-      const b = document.createElement('button');
-      b.className = 'tool'; b.type = 'button';
+    setVars(strip, st.content);
+    strip.innerHTML = CROPS;
+    syncSheet();
+    tools = SPECIMENS.map((m, i) => {
+      const b = makeTool(m, st.content);
       b.tabIndex = i === st.sel ? 0 : -1;
-      b.innerHTML = faceHTML(m, st.content);
-      b.setAttribute('aria-label', `${m.name}, ${m.flower}`);
-      dock.insertBefore(b, slip);
-      b.addEventListener('pointerenter', () => { st.hover = i; paint(); });
-      b.addEventListener('pointerleave', () => { if (st.hover === i) st.hover = -1; if (st.press === i) st.press = -1; paint(); });
-      b.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch' && e.button === 0) { st.press = i; paint(); kick(); } });
+      b.setAttribute('aria-label', `Show ${m.flower} studies`);
+      b.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch' && e.button === 0) { st.press = i; paint(); } });
       b.addEventListener('click', (e) => { if (e.pointerType === 'touch') return; select(i); });
-      b.addEventListener('focus', () => { st.focus = i; if (b.matches(':focus-visible') && !st.pointerIn) { st.yT = center(i); if (st.pT === 0) st.y = st.yT; st.pT = 1; } paint(); kick(); });
-      b.addEventListener('blur', () => { if (st.focus === i) st.focus = -1; setTimeout(() => { if (!dock.contains(document.activeElement) && !st.pointerIn) { st.pT = 0; kick(); } paint(); }); });
+      b.addEventListener('focus', () => { st.focus = i; if (b.matches(':focus-visible')) focusAim(i); });
+      b.addEventListener('blur', () => { st.focus = -1; setTimeout(() => { if (!st.pointerIn && !strip.contains(document.activeElement)) { st.on = false; kick(); } }); });
+      strip.appendChild(b);
       return b;
     });
-    paint(); frame(performance.now(), true);
+    st.on = false; st.s = 0; st.hover = -1; st.tipFor = -1;
+    syncSheet();
+    paint(); kick();
   }
-  const center = (i) => cfg.pad + i * (cfg.bh + cfg.gap) + cfg.bh / 2;
-
   function paint() {
     tools.forEach((b, i) => {
-      b.dataset.state = stateOf(i, st.sel);
+      b.classList.toggle('is-sel', i === st.sel);
       b.setAttribute('aria-pressed', i === st.sel);
-      const kbHover = st.focus === i && !st.pointerIn && b.matches(':focus-visible');
-      b.classList.toggle('is-hover', st.hover === i || kbHover);
-      b.classList.toggle('is-press', st.press === i);
+      b.classList.toggle('is-hover', i === st.hover);
+      b.classList.toggle('is-press', i === st.press);
     });
-  }
-  function slipTarget() {
-    if (st.hover >= 0) return st.hover;
-    if (st.focus >= 0 && !st.pointerIn && tools[st.focus]?.matches(':focus-visible')) return st.focus;
-    return -1;
-  }
-  let slipFor = -1;
-  function fillSlip(i) {
-    const m = MONTHS[i];
-    slip.innerHTML = `<div class="slip-top"><span>/${m.no}</span><span>${m.name}</span></div><div class="slip-f">${m.flower}</div><div class="slip-l">${m.latin}</div><div class="slip-n">${stateOf(i, st.sel) === 'current' ? 'Open · ' : stateOf(i, st.sel) === 'past' ? 'Filed · ' : ''}${m.note}</div>`;
+    const copy = strip.cloneNode(true);
+    view.style.width = strip.getBoundingClientRect().width + 'px';
+    copy.removeAttribute('id'); copy.removeAttribute('role'); copy.removeAttribute('aria-label'); copy.removeAttribute('aria-orientation');
+    copy.querySelectorAll('button').forEach((b) => { b.tabIndex = -1; b.removeAttribute('aria-pressed'); b.removeAttribute('aria-label'); b.removeAttribute('aria-describedby'); });
+    view.replaceChildren(copy);
   }
 
-  const ease = (dt, tau) => (reduced ? 1 : 1 - Math.exp(-dt / tau));
+  function aim(px, py) {
+    if (!points.length) return;
+    dismissed = false;
+    const target = points[nearest(px,py)];
+    st.px=target.x; st.py=target.y;
+    if (!st.on && st.s < .05) { st.x = st.px; st.y = st.py; st.vx = st.vy = 0; }
+    st.on = true; kick();
+  }
   function kick() { if (!st.raf) { st.last = performance.now(); st.raf = requestAnimationFrame(frame); } }
-  function frame(now, once) {
-    const dt = Math.min(48, now - st.last); st.last = now;
-    st.p += (st.pT - st.p) * ease(dt, 85);
-    st.y += (st.yT - st.y) * ease(dt, 45);
-    let busy = Math.abs(st.pT - st.p) > .001 || Math.abs(st.yT - st.y) > .05;
-    for (let i = 0; i < N; i++) {
-      const t = st.press === i ? .9 : 1;
-      st.pr[i] += (t - st.pr[i]) * ease(dt, 50);
-      if (Math.abs(t - st.pr[i]) > .001) busy = true;
+  function nearest(x,y) { let best=0,d=Infinity; points.forEach((p,i)=>{const dd=Math.hypot(p.x-x,p.y-y);if(dd<d){d=dd;best=i;}}); return best; }
+  function frame(now) {
+    let dt = Math.min(32, now - st.last) / 1000; st.last = now;
+    if (reduced) { st.x = st.px; st.y = st.py; st.s = st.on ? 1 : 0; st.vx = st.vy = st.vs = 0; }
+    else {
+      const steps = 4; dt /= steps;
+      for (let k = 0; k < steps; k++) {
+        st.vx += (260 * (st.px - st.x) - 24 * st.vx) * dt; st.x += st.vx * dt;
+        st.vy += (260 * (st.py - st.y) - 24 * st.vy) * dt; st.y += st.vy * dt;
+        st.vs += (320 * ((st.on ? 1 : 0) - st.s) - 36 * st.vs) * dt; st.s += st.vs * dt;
+      }
     }
-    const L = layout(cfg, N, st.p, st.y), sw = stripW(cfg);
-    boxes = tools.map((b, i) => place(b, cfg, st.align, sw, L.tops[i], L.s[i], st.pr[i]));
-    strip.style.top = L.top + 'px';
-    strip.style.height = (L.bottom - L.top) + 'px';
-
-    const ti = slipTarget();
-    if (ti >= 0) {
-      if (ti !== slipFor) { fillSlip(ti); slipFor = ti; }
-      const bx = boxes[ti], flip = st.align === 'right';
-      const sh = slip.offsetHeight;
-      const x = flip ? bx.x - 14 - 178 - 6 : bx.x + bx.w + 14 + 6;
-      slip.style.transform = `translate(${x.toFixed(1)}px, ${(bx.y + bx.h / 2 - sh / 2).toFixed(1)}px)`;
-      slip.classList.toggle('flip', flip);
-      slip.classList.add('on');
-    } else { slip.classList.remove('on'); slipFor = -1; }
-
+    const s = Math.max(0, st.s);
+    lens.style.opacity = Math.min(1, s * 1.6).toFixed(3);
+    placeLens(lens, view, st.x, st.y, .94 + .06 * s);
+    const h = st.on ? nearest(st.x,st.y) : -1;
+    if (h !== st.hover) { st.hover = h; paint(); }
+    if (h >= 0 && h !== st.tipFor) {
+      const previous=st.tipFor; st.tipFor=h;
+      tip.innerHTML=tipHTML(SPECIMENS[h]);
+      if(!reduced && previous>=0) tip.querySelector('b').animate([{opacity:0,transform:`translateX(${h>previous?18:-18}px)`},{opacity:1,transform:'translateX(0)'}],{duration:220,easing:'cubic-bezier(.2,.8,.2,1)'});
+    }
+    const tipVisible = st.on && !dismissed && s > .4;
+    tip.hidden = !tipVisible;
+    tools.forEach((b,i)=>{ if(tipVisible && i===h) b.setAttribute('aria-describedby','tip'); else b.removeAttribute('aria-describedby'); });
+    tip.style.opacity = tipVisible ? '1' : '0';
+    placeTip(tip, st.align, st.x, st.y);
     st.raf = 0;
-    if (busy && !once) st.raf = requestAnimationFrame(frame);
-    else if (busy && once) kick();
+    const moving = Math.abs(st.px - st.x) > .05 || Math.abs(st.py - st.y) > .05 || Math.abs(st.vx) + Math.abs(st.vy) > .5 || Math.abs((st.on ? 1 : 0) - st.s) > .002 || Math.abs(st.vs) > .01;
+    if (moving) st.raf = requestAnimationFrame(frame);
   }
 
-  // Pointer = magnifying glass
-  const ry = (e) => Math.max(0, Math.min(restH(cfg, N), e.clientY - dock.getBoundingClientRect().top));
+  const rel = (e) => { const r = strip.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
   let scrub = false;
-  dock.addEventListener('pointerenter', (e) => { st.pointerIn = true; st.yT = ry(e); if (st.p < .02) st.y = st.yT; st.pT = 1; paint(); kick(); });
-  dock.addEventListener('pointermove', (e) => { st.pointerIn = true; st.yT = ry(e); st.pT = 1; kick(); });
-  dock.addEventListener('pointerleave', () => { if (scrub) return; st.pointerIn = false; st.hover = -1; st.press = -1; if (!(st.focus >= 0 && tools[st.focus].matches(':focus-visible'))) st.pT = 0; paint(); kick(); });
-  // Touch: scrub along the strip, lift to choose
-  dock.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'touch') return;
-    scrub = true; dock.setPointerCapture(e.pointerId);
-    st.pointerIn = true; st.yT = st.y = ry(e); st.pT = 1; kick();
+  dock.addEventListener('pointerenter', (e) => { st.pointerIn = true; aim(...rel(e)); });
+  dock.addEventListener('pointermove', (e) => { st.pointerIn = true; aim(...rel(e)); });
+  dock.addEventListener('pointerleave', () => {
+    if (scrub) return;
+    st.pointerIn = false; st.press = -1;
+    if (!(st.focus >= 0 && tools[st.focus].matches(':focus-visible'))) st.on = false;
+    paint(); kick();
   });
-  const nearest = () => { let best = 0, d = Infinity; for (let i = 0; i < N; i++) { const dd = Math.abs(center(i) - st.yT); if (dd < d) { d = dd; best = i; } } return best; };
-  dock.addEventListener('pointermove', (e) => { if (scrub) { st.hover = nearest(); paint(); } });
-  const endScrub = (e, choose) => {
-    if (!scrub) return; scrub = false;
-    if (choose) select(nearest());
-    st.pointerIn = false; st.hover = -1; st.pT = 0; paint(); kick();
-  };
-  dock.addEventListener('pointerup', (e) => endScrub(e, true));
-  dock.addEventListener('pointercancel', (e) => endScrub(e, false));
-  window.addEventListener('pointerup', () => { if (st.press >= 0) { st.press = -1; paint(); kick(); } });
+  dock.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch') return; scrub = true; dock.setPointerCapture(e.pointerId); st.pointerIn = true; aim(...rel(e)); });
+  const endScrub = (choose) => { if (!scrub) return; scrub = false; if (choose) select(nearest(st.px,st.py)); st.pointerIn = false; st.on = false; kick(); };
+  dock.addEventListener('pointerup', () => endScrub(true));
+  dock.addEventListener('pointercancel', () => endScrub(false));
+  window.addEventListener('pointerup', () => { if (st.press >= 0) { st.press = -1; paint(); } });
 
-  // Keys
-  dock.addEventListener('keydown', (e) => {
+  strip.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { dismissed=true; tip.hidden=true; tools.forEach(b=>b.removeAttribute('aria-describedby')); return; }
     const i = tools.indexOf(document.activeElement); if (i < 0) return;
-    let j = null;
-    if (e.key === 'ArrowDown') j = Math.min(N - 1, i + 1);
-    else if (e.key === 'ArrowUp') j = Math.max(0, i - 1);
-    else if (e.key === 'Home') j = 0;
-    else if (e.key === 'End') j = N - 1;
-    if (j === null) return;
+    const forward = st.align === 'center' ? 'ArrowRight' : 'ArrowDown';
+    const backward = st.align === 'center' ? 'ArrowLeft' : 'ArrowUp';
+    const j = { [forward]: Math.min(N - 1, i + 1), [backward]: Math.max(0, i - 1), Home: 0, End: N - 1 }[e.key];
+    if (j === undefined) return;
     e.preventDefault();
     tools.forEach((t, k) => (t.tabIndex = k === j ? 0 : -1));
     tools[j].focus();
-    st.pointerIn = false; st.hover = -1; st.yT = center(j); st.pT = 1; paint(); kick();
+    focusAim(j);
   });
 
-  /* ================= Selecting: strike the month ================= */
-  function select(i) {
-    const changed = i !== st.sel;
+  /* ---------- Choosing ---------- */
+  const plate = $('plate');
+  function select(i, first = false) {
+    const changed = i !== st.sel || first;
     st.sel = i; st.press = -1;
     tools.forEach((t, k) => (t.tabIndex = k === i ? 0 : -1));
-    paint(); slipFor = -1; kick();
-    if (changed && !reduced) {
+    if (changed && !first && !reduced) {
       const b = tools[i]; b.classList.remove('stamping'); void b.offsetWidth; b.classList.add('stamping');
-      setTimeout(() => b.classList.remove('stamping'), 760);
+      setTimeout(() => { b.classList.remove('stamping'); paint(); }, 760);
     }
-    showPlate(i, changed);
+    paint();
+    if (!changed) return;
+    const m = SPECIMENS[i];
+    showPlate(m, !first);
+    $('card').innerHTML = '';
+    $('live').textContent = `${m.name}: three designs selected.`;
   }
-  function showPlate(i, animate) {
-    const m = MONTHS[i];
-    $('letters').innerHTML = m.name.toUpperCase().split('').map((c) => `<span>${c}</span>`).join('');
-    $('plateNo').textContent = '/' + m.no;
-    $('printInk').src = m.uri.ink; $('printShadow').src = m.uri.mark;
-    $('pf').textContent = m.flower; $('pl').textContent = m.latin;
-    $('pn').textContent = `Plate ${m.no} · ${m.note}`;
-    $('cornerTr').textContent = `Plate ${m.no} / 12`;
-    const pr = $('print');
-    if (animate && !reduced) { pr.classList.remove('stamp'); void pr.offsetWidth; pr.classList.add('stamp'); }
-    // ledger
-    const days = new Date(2026, i + 1, 0).getDate(), cols = [[], [], [], [], [], [], []];
-    for (let d = 1; d <= days; d++) cols[(new Date(2026, i, d).getDay() + 6) % 7].push(d);
-    $('ledger').innerHTML = `<div class="ledger-h">${m.name} · 2026</div>` +
-      ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((w, k) => `<div class="wd"><b>${w}</b><span>${cols[k].map((d) => `<i>${d}</i>`).join('')}</span></div>`).join('');
-    $('live').textContent = `${m.name} 2026 open: ${m.flower}.`;
+  function showPlate(m, animate) {
+    const old = [...plate.querySelectorAll('.p')];
+    old.forEach((p) => p.classList.add('out'));
+    setTimeout(() => old.forEach((p) => p.remove()), animate ? 260 : 0);
+    for(let v=0;v<3;v++) {
+      const p=document.createElement('figure'); p.className='p design-study';
+      p.innerHTML=`<span class="jewel variant" style="background-position:${v*50}% ${m.i*20}%"></span><figcaption>${m.no} / ${String(v+1).padStart(2,'0')}</figcaption>`;
+      if(animate && !reduced) p.classList.add('in');
+      plate.appendChild(p);
+    }
   }
 
-  /* ================= Controls ================= */
+  /* ---------- Controls ---------- */
   document.querySelectorAll('.pills').forEach((group) => {
     group.addEventListener('click', (e) => {
       const b = e.target.closest('button'); if (!b) return;
       group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
       st[group.dataset.key] = b.dataset.v;
-      stage.dataset.align = st.align; stage.dataset.content = st.content;
-      st.p = st.pT = 0; st.hover = -1; st.focus = -1;
+      stage.dataset.align = st.align;
       build();
     });
   });
 
-  /* ================= States sheet ================= */
-  function staticTool(m, content, state, s, cls = '') {
-    const c = CFG[content];
-    const w = c.bw * s, h = c.bh * s;
-    return `<div class="cellbox" style="width:${w}px;height:${h}px;--bw:${c.bw};--bh:${c.bh};--M:${c.M}">
-      <span class="tool ${cls}" data-state="${state}" style="transform:scale(${(s / c.M).toFixed(4)})">${faceHTML(m, content)}</span></div>`;
-  }
-  (function sheet() {
-    const m = MONTHS[4];
-    const cols = [
-      ['Enabled', 'future', 1, '', 'outline'],
-      ['Hover', 'future', null, 'is-hover', 'magnified, shadow lifts'],
-      ['Pressed', 'future', 'press', 'is-hover is-press', 'stamp down, ink transfers'],
-      ['Selected', 'current', 1, '', 'silver foil'],
-      ['Collected', 'past', 1, '', 'grey impression'],
-    ];
-    let html = '<table><thead><tr><th></th>' + cols.map((c) => `<th>${c[0]}</th>`).join('') + '</tr></thead><tbody>';
-    for (const content of ['icon', 'text', 'both']) {
-      const c = CFG[content];
-      html += `<tr><td>${content === 'both' ? 'Icon + text' : content}</td>`;
-      for (const [, state, sc, cls, cap] of cols) {
-        const s = sc === null ? c.M : sc === 'press' ? c.M * .9 : sc;
-        html += `<td>${staticTool(m, content, state, s, cls)}<span class="cap">${cap}${sc === null ? ' · ' + c.M + '×' : ''}</span></td>`;
-      }
-      html += '</tr>';
-    }
-    $('sheet').innerHTML = html + '</tbody></table>';
-  })();
-
-  /* ================= Configurations ================= */
-  (function configs() {
-    const host = $('configs'); let html = '';
-    const subset = MONTHS.slice(6, 11);
-    for (const content of ['icon', 'text', 'both']) for (const align of ['left', 'center', 'right']) {
-      html += `<div class="cfg grain" data-align="${align}" data-c="${content}"><span class="tag">${align} · ${content === 'both' ? 'icon + text' : content}</span><div class="dock"></div></div>`;
-    }
-    host.innerHTML = html;
-    host.querySelectorAll('.cfg').forEach((tile) => {
-      const content = tile.dataset.c, align = tile.dataset.align, c = CFG[content], d = tile.querySelector('.dock');
-      const n = subset.length, sw = stripW(c);
-      setVars(d, c);
-      d.style.width = sw + 'px'; d.style.height = restH(c, n) + 'px';
-      const tw = tile.clientWidth || 340;
-      d.style.left = (align === 'left' ? 22 : align === 'right' ? tw - sw - 22 : (tw - sw) / 2) + 'px';
-      const L = layout(c, n, 1, c.pad + 2 * (c.bh + c.gap) + c.bh / 2);
-      d.style.top = (52 - L.top) + 'px';
-      tile.style.height = (52 + L.bottom - L.top + 28) + 'px';
-      d.innerHTML = `<div class="strip" style="top:${L.top}px;height:${L.bottom - L.top}px"></div>`;
-      subset.forEach((m, i) => {
-        const el = document.createElement('span');
-        el.className = 'tool' + (i === 2 ? ' is-hover' : '');
-        el.dataset.state = stateOf(i, 3);
-        el.innerHTML = faceHTML(m, content);
-        d.appendChild(el);
-        place(el, c, align, sw, L.tops[i], L.s[i]);
-      });
-    });
-  })();
-
-  /* ================= Magnifier curve ================= */
-  (function curve() {
-    const W = 1000, H = 220, c = CFG.icon, pitch = c.bh + c.gap, R = 2.8 * pitch;
-    const X = (d) => W / 2 + d / (4 * pitch) * (W / 2 - 40), Y = (s) => H - 40 - (s - 1) / (c.M - 1) * (H - 80);
-    let path = '';
-    for (let k = 0; k <= 200; k++) {
-      const d = -4 * pitch + k / 200 * 8 * pitch, f = Math.abs(d) < R ? (Math.cos(Math.PI * Math.abs(d) / R) + 1) / 2 : 0;
-      path += (k ? 'L' : 'M') + X(d).toFixed(1) + ' ' + Y(1 + (c.M - 1) * f).toFixed(1);
-    }
-    let ticks = '';
-    for (let i = -4; i <= 4; i++) {
-      const d = i * pitch, f = Math.abs(d) < R ? (Math.cos(Math.PI * Math.abs(d) / R) + 1) / 2 : 0, s = 1 + (c.M - 1) * f;
-      const x = X(d), r = 7 * s;
-      ticks += `<line x1="${x}" x2="${x}" y1="${H - 40}" y2="${Y(s)}" stroke="#fff" stroke-width="1" opacity=".7"/>` +
-        `<rect x="${x - r}" y="${Y(s) - r * 2 - 6}" width="${r * 2}" height="${r * 2}" fill="none" stroke="#fff" stroke-width="1.2"/>` +
-        `<text x="${x}" y="${H - 18}" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#4b5152">${i === 0 ? 'pointer' : (i > 0 ? '+' : '') + i}</text>` +
-        `<text x="${x + r + 4}" y="${Y(s) - r - 2}" font-family="IBM Plex Mono" font-size="11" fill="#6c7273">${s.toFixed(2)}×</text>`;
-    }
-    $('curve').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scale falls from 2.15 at the pointer to 1 at 2.8 slots away, following a cosine curve">
-      <line x1="40" x2="${W - 40}" y1="${H - 40}" y2="${H - 40}" stroke="#fff"/>
-      <path d="${path}" fill="none" stroke="#2f3435" stroke-width="1.5"/>${ticks}</svg>`;
-  })();
-
   build();
-  showPlate(st.sel, false);
+  select(st.sel, true);
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { syncSheet(); paint(); }, 200); });
 })();
 </script>
 </body>
