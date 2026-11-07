@@ -635,7 +635,7 @@
   .archive-pick[aria-pressed=true]::before{opacity:.32}
   .archive-pick[aria-pressed=true] .variant{filter:url(#print-selected);mix-blend-mode:multiply;transform:translate(2px,-1px)}
   .archive-piece:has(.archive-pick[aria-pressed=true]){opacity:1!important;filter:none!important}
-  .archive-piece:has(.archive-pick[aria-pressed=true]) figcaption{color:#b84740;opacity:1;font-weight:bold}
+  .archive-piece:has(.archive-pick[aria-pressed=true]) figcaption{color:#6e6145;opacity:1;font-weight:bold}
   .archive-pick:hover .variant{filter:url(#print-selected)}
   @media(prefers-reduced-motion:reduce){.archive-pick::before{transition:none}}
 </style>
@@ -664,7 +664,7 @@
     <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -.96 -1.888 -.352 0 2.96" result="ink"/>
     <feComposite in="mapped" in2="ink" operator="in"/>
   </filter>
-  <filter id="print-selected" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 .72 0 0 0 0 .28 0 0 0 0 .25 -.96 -1.888 -.352 0 2.96"/></filter>
+  <filter id="print-selected" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 .43 0 0 0 0 .38 0 0 0 0 .27 -.96 -1.888 -.352 0 2.96"/></filter>
   <filter id="paperout" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 -.06  0 1 0 0 -.06  0 0 1 0 -.06  -.72 -1.416 -.264 0 2.22"/></filter>
 </svg>
 <div class="wrap">
