@@ -392,16 +392,216 @@
   .stage[data-align="center"] .layout { inset:72px 32px 20px; }
   .stage[data-align="center"] .strip { border-radius:40px; }
   @media(prefers-reduced-motion:reduce) { .tip { transition:none; } }
+
+  /* Tooltip motion (Cosmos reference): a window over one strip of all the names.
+     Moving between items slides the strip through the window while the window resizes to the new name. */
+  .tip .tw { display: block; position: relative; overflow: hidden; height: 32px; border-radius: 20px; background: #eae8de; transition: width .34s cubic-bezier(.25,.8,.3,1); }
+  .tip .tt { position: absolute; left: 0; top: 0; display: flex; transition: transform .34s cubic-bezier(.25,.8,.3,1); }
+  .tip .tt b { display: block; flex: none; padding: 0 13px; font: 12px/32px Georgia, serif; white-space: nowrap; color: var(--ink); }
+  .tip.vert .tt { flex-direction: column; }
+  .tip.cold .tw, .tip.cold .tt { transition: none; }
+  .tip.show { animation: tipin .24s cubic-bezier(.2,.8,.2,1); }
+  @keyframes tipin { from { opacity: 0; translate: 0 4px; scale: .94; } to { opacity: 1; } }
+  /* Icons: outlined by default, filled when selected (like a chess set, white and black pieces). */
+  .tool .face, .stage[data-align] .tool .face { position: relative; width: auto; height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+  .face .lab, .c-text .lab { position: static; font: 10.5px/1.1 Georgia, serif; color: var(--ink); }
+  .c-text .lab { font-size: 12px; padding: 5px 10px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(89,99,68,.45); }
+  .ico { display: block; width: 26px; height: 26px; color: var(--ink); overflow: visible; }
+  .ico .s { fill: transparent; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; transition: fill .22s ease; }
+  .ico .d { fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; opacity: .7; transition: stroke .22s ease, opacity .22s; }
+  .ico .x { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
+  .tool.is-sel .ico .s { fill: currentColor; }
+  .tool.is-sel .ico .d { stroke: var(--paper); opacity: 1; }
+  .tool.is-sel .lab { color: var(--ink) !important; font-weight: 400; }
+  .c-text.is-sel .lab { background: var(--ink); color: var(--paper) !important; font-weight: 400; }
+  .tool.is-sel::after { display: none; }
+  .tool.is-press .ico { transform: scale(.92); }
+  /* even padding: every slot centres its icon and label, the strip adds the same 8 px top and bottom */
+  .stage .strip, .strip { padding: 8px; }
+  .stage[data-align="center"] .strip { padding: 8px 10px; }
+
+  /* the large studies are slightly see-through */
+  .plate .design-study .jewel { opacity: .96; filter: url(#jewelpal);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 85%, transparent 91%);
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 85%, transparent 91%);
+    -webkit-mask-composite: source-in; mask-composite: intersect; }
+  /* Studies laid out loosely, like plates pinned to a board: three sizes, staggered, a slight tilt.
+     Each category uses one of three arrangements, so the sheet changes as you browse. */
+  .stage .plate { display: block; }
+  .stage .plate .design-study { position: absolute; margin: 0; aspect-ratio: auto; transform: rotate(var(--r, 0deg)); }
+  .stage .plate .design-study .variant { display: block; width: 100%; aspect-ratio: 4/3; }
+  .stage .plate .design-study figcaption { position: static; margin-top: 2px; text-align: left; padding-left: 12%; }
+  .plate[data-layout="0"] .design-study[data-k="0"] { left: 0;   top: 4%;  width: 56%; --r: -1deg; }
+  .plate[data-layout="0"] .design-study[data-k="1"] { left: 62%; top: 0;   width: 34%; --r: 1.4deg; }
+  .plate[data-layout="0"] .design-study[data-k="2"] { left: 48%; top: 50%; width: 42%; --r: -.5deg; }
+  .plate[data-layout="1"] .design-study[data-k="0"] { left: 30%; top: 0;   width: 58%; --r: .8deg; }
+  .plate[data-layout="1"] .design-study[data-k="1"] { left: 0;   top: 38%; width: 36%; --r: -1.5deg; }
+  .plate[data-layout="1"] .design-study[data-k="2"] { left: 64%; top: 60%; width: 32%; --r: 1deg; }
+  .plate[data-layout="2"] .design-study[data-k="0"] { left: 6%;  top: 28%; width: 48%; --r: 1deg; }
+  .plate[data-layout="2"] .design-study[data-k="1"] { left: 44%; top: 0;   width: 40%; --r: -1.2deg; }
+  .plate[data-layout="2"] .design-study[data-k="2"] { left: 60%; top: 54%; width: 36%; --r: .6deg; }
+  @media (max-width: 600px) { .stage .plate .design-study figcaption { padding-left: 4%; } }
+  /* Water ripple under the pointer: a height field drawn as light and shade on the paper. */
+  .ripple { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; mix-blend-mode: normal; opacity: .75; filter: blur(5px); }
+  .stage .layout { z-index: 1; }
+  .stage .layout.wet { filter: url(#ripplefx); }
+
+
+  /* Glass toolbar: a clear pane over the paper, with a cool edge and a soft highlight. */
+  .stage .strip {
+    background: linear-gradient(160deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.16) 42%, rgba(245,241,232,.22) 100%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.25) brightness(1.04); backdrop-filter: blur(10px) saturate(1.25) brightness(1.04);
+    border: 1px solid rgba(255,255,255,.75) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(89,99,68,.12), inset 0 0 0 1px rgba(255,255,255,.25),
+                0 10px 28px rgba(89,99,68,.14), 0 1px 2px rgba(89,99,68,.12) !important;
+  }
+  .stage .strip::before { content: ""; position: absolute; inset: 1px; border-radius: inherit; pointer-events: none; z-index: 0; display: block !important;
+    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,.5) 32%, transparent 44%), radial-gradient(120% 70% at 50% -20%, rgba(255,255,255,.55), transparent 60%);
+    mix-blend-mode: screen; opacity: .8; }
+  .stage .strip::after { display: none !important; }
+
+  /* Vintage sheet: fibres, grain, dust, foxing and a toned edge over the whole page. */
+  .vintage { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+  .vintage::before, .vintage::after { content: ""; position: absolute; inset: 0; }
+  .vintage::before { /* paper fibres + fine grain */
+    mix-blend-mode: multiply; opacity: .28;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .18' numOctaves='3' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .47 0 0 0 0 .34 0 0 0 .9 -.5'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23f)'/%3E%3C/svg%3E") 0 0 / 420px 420px,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .27 0 0 0 0 .2 0 0 0 .75 -.27'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 260px 260px;
+  }
+  .vintage::after { /* foxing spots, dust, toned edges */
+    mix-blend-mode: multiply;
+    background:
+      radial-gradient(14px 11px at 12% 18%, rgba(150,104,52,.22), transparent 70%),
+      radial-gradient(22px 18px at 83% 9%, rgba(150,104,52,.16), transparent 70%),
+      radial-gradient(9px 9px at 91% 63%, rgba(140,96,46,.22), transparent 70%),
+      radial-gradient(30px 24px at 6% 74%, rgba(150,110,60,.13), transparent 70%),
+      radial-gradient(12px 10px at 47% 92%, rgba(140,96,46,.18), transparent 70%),
+      radial-gradient(7px 7px at 64% 37%, rgba(130,90,40,.18), transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .18 0 0 0 0 .15 0 0 0 0 .1 0 0 0 34 -26.9'/%3E%3C/filter%3E%3Crect width='520' height='520' filter='url(%23d)'/%3E%3C/svg%3E") 0 0 / 520px 520px,
+      radial-gradient(130% 110% at 50% 45%, transparent 58%, rgba(132,104,60,.16) 88%, rgba(110,84,44,.3) 100%);
+  }
+  /* Aura: one soft field of pastel light behind everything, with glowing beads on fine threads (image 1)
+     and a coloured stipple grain over it (image 2). */
+  html { background: #efe8ee; } body { background: transparent !important; }
+  .stage, .stage.scan { background: transparent !important; }
+  .aura { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .aura canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .aura canvas.wet { filter: url(#ripplebg); }
+  .aura::after { content: ""; position: absolute; inset: 0; mix-blend-mode: soft-light; opacity: .9;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.25' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='2.2 0 0 0 -.6 0 2.2 0 0 -.6 0 0 2.2 0 -.6 0 0 0 0 .85'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 240px 240px; }
+  .aura::before { content: ""; position: absolute; inset: 0; z-index: 1; mix-blend-mode: multiply; opacity: .35;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='1' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .38 0 0 0 1.6 -.55'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23s)'/%3E%3C/svg%3E") 0 0 / 200px 200px; }
+  .vintage::after { opacity: .45; }
+  /* Toolbar in the aura palette, matching the studies: deep teal lines, pink details, a teal fill when selected. */
+  .stage .strip { --t-ink: #2b6a72; --t-teal: #4aa6aa; --t-pink: #e2869f; --t-cream: #fbf3df; }
+  .stage .strip .ico, .stage .strip .lab { color: var(--t-ink) !important; }
+  .stage .strip .ico .d { stroke: var(--t-pink); opacity: 1; }
+  .stage .strip .tool.is-sel .ico .s { fill: var(--t-teal); stroke: var(--t-ink); }
+  .stage .strip .tool.is-sel .ico .d { stroke: var(--t-cream); }
+  .stage .strip .tool.is-sel .lab { color: var(--t-ink) !important; }
+  .stage .strip .c-text .lab { box-shadow: inset 0 0 0 1px rgba(43,106,114,.45); }
+  .stage .strip .c-text.is-sel .lab { background: var(--t-teal); color: var(--t-cream) !important; box-shadow: none; }
+  .lens .glass { background: rgba(226,134,159,.16) !important; }
+  .tip .tt b { color: #2b6a72; }
+
+  /* Clear glass, after the frosted-panel reference: mostly transparent, a strong blur of what is behind,
+     a soft vertical sheen, a bright top edge and a faint dark lower edge. */
+  .stage .strip {
+    background: linear-gradient(100deg, rgba(255,255,255,.26) 0%, rgba(255,255,255,.08) 38%, rgba(255,255,255,.04) 62%, rgba(255,255,255,.14) 100%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(1.5) brightness(1.06); backdrop-filter: blur(16px) saturate(1.5) brightness(1.06);
+    border: 1px solid rgba(255,255,255,.55) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -1px 0 rgba(43,106,114,.12), 0 12px 30px rgba(60,70,90,.12) !important;
+  }
+  .stage .strip::before { background: linear-gradient(100deg, transparent 8%, rgba(255,255,255,.35) 18%, transparent 30%) !important; opacity: .7 !important; }
+  .tip .tw {
+    background: linear-gradient(100deg, rgba(255,255,255,.32) 0%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.18) 100%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.5) brightness(1.05); backdrop-filter: blur(14px) saturate(1.5) brightness(1.05);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), inset 0 0 0 1px rgba(255,255,255,.4), 0 6px 18px rgba(60,70,90,.12);
+  }
+  @media (prefers-reduced-motion: reduce) { .tip .tw, .tip .tt { transition: none; } .tip.show { animation: none; } }
+
+  /* Outfit matching workbench: mist, glass and compact grouped actions. */
+  html { background:#f2f4ee; } .aura::after { opacity:.08; filter:grayscale(1); } .aura::before { opacity:.07; } .vintage { display:none; }
+  .ripple { opacity:.84; filter:blur(4px); }
+  .stage { min-height:790px; overflow:visible; } .controls,.c-dock { display:none!important; }
+  .stage[data-align] .layout { inset:180px 70px 80px; display:block; } .stage[data-align] .c-plate { width:100%; max-width:850px; height:480px; margin:auto; }
+  .matchbar { position:absolute; top:68px; left:50%; transform:translateX(-50%); display:flex; gap:10px; align-items:center; z-index:40; }
+  .action,.action-group,.glass-panel,#actionTip,.look-tray { background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.65); box-shadow:inset 0 1px rgba(255,255,255,.7),0 8px 24px rgba(70,90,79,.07); backdrop-filter:blur(18px) saturate(.7); -webkit-backdrop-filter:blur(18px) saturate(.7); }
+  .action { border-radius:20px; width:76px; height:70px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:6px; color:#52675f; cursor:pointer; font:11px Georgia,serif; transition:background .2s,transform .2s; }
+  .action svg { width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round; }
+  .action:hover { background:rgba(255,255,255,.47); transform:translateY(-2px); } .action:active { transform:scale(.96); }
+  .action[aria-expanded="true"],.action[aria-pressed="true"] { background:rgba(159,180,165,.26); box-shadow:inset 0 -2px #81988a; }
+  .action:focus-visible,.category:focus-visible,.design-pick:focus-visible { outline:2px solid #70877b;outline-offset:4px; }
+  .search-action { width:170px; flex-direction:row; gap:14px; }
+  .action-group { display:flex;border-radius:20px;padding:0 5px; } .action-group .action { border:0;background:transparent;box-shadow:none;width:64px; }
+  #actionTip { position:absolute;bottom:85px;transform:translateX(-50%);padding:9px 13px;border-radius:14px;white-space:nowrap;font:12px Georgia,serif;color:#52675f;pointer-events:none; }
+  [hidden] { display:none!important; }
+  .glass-panel { position:absolute;top:84px;left:0;width:255px;border-radius:22px;padding:12px; }
+  #query { width:100%;border:0;border-bottom:1px solid #bdc7bd;background:transparent;padding:10px;font:12px Georgia,serif;color:#465e51;outline-offset:2px; }
+  #results { max-height:226px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin; }
+  .category { display:flex;align-items:center;gap:14px;width:100%;padding:13px 10px;border:0;border-radius:12px;background:transparent;color:#52675f;text-align:left;cursor:pointer;font:12px Georgia,serif; }
+  .category .ico { width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.5; } .category small { margin-left:auto;font-size:9px;opacity:.6; }
+  .category:hover { background:rgba(255,255,255,.3); } .category[aria-pressed="true"] { background:rgba(137,160,144,.19); }
+  .design-pick { display:block;width:100%;height:100%;border:0;background:transparent;cursor:pointer;border-radius:20px; }
+  .design-pick[aria-pressed="true"] { outline:1px solid rgba(94,120,102,.32);outline-offset:6px; }
+  .design-pick:hover { background:rgba(255,255,255,.12); } .design-pick .variant { width:100%;height:100%; }
+  .look { position:absolute;left:35px;top:230px;width:220px;height:320px;border-radius:24px;overflow:hidden;background:rgba(255,255,255,.25);z-index:4; }
+  .look img { width:100%;height:100%;object-fit:contain; } #removePhoto { position:absolute;right:8px;top:8px;border:0;border-radius:50%;width:25px;height:25px;background:#ffffff88;z-index:2;cursor:pointer; }
+  #tryOn { position:absolute;width:100px;height:110px;bottom:12px;right:12px;filter:url(#paperout); } .variant { background-image:url('assets/jewellery-design-variants.png');background-size:300% 600%; }
+  .has-outfit .layout { left:280px!important; }
+  .look-tray { position:absolute;bottom:35px;left:50%;transform:translateX(-50%);display:flex;gap:8px;border-radius:18px;padding:5px;z-index:5;max-width:90%;overflow:auto; }
+  .look-tray:empty { display:none; } .saved-piece { position:relative;flex:0 0 52px;height:52px;border:0;border-radius:12px;background:transparent;cursor:pointer; } .saved-piece>span:last-child { position:absolute;right:0;top:0;font-size:12px;color:#65776b; } .saved-piece.previewing { background:#a6b4a633; }
+  #matchStatus { position:absolute;bottom:0;width:100%;text-align:center;font:11px/1.4 Georgia,serif;color:#6a7c70; }
+  @media(max-width:650px){ .matchbar{gap:6px;width:calc(100% - 24px);justify-content:center}.search-action{width:120px}.action{width:60px}.action-group .action{width:53px}.stage[data-align] .layout{left:18px;right:18px}.look{position:relative;top:170px;left:20px;width:120px;height:170px}.has-outfit .layout{left:160px!important}.glass-panel{width:230px} }
+  @media(prefers-reduced-motion:reduce){.action{transition:none}.action:hover{transform:none}}
+  .plate .p.design-study { pointer-events:auto; }
 </style>
 </head>
 <body>
+<div class="aura" aria-hidden="true"><canvas id="aura"></canvas></div>
+<div class="vintage" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- turns the study paper (luminance ~.92) transparent and keeps the ink: alpha = (0.925 - L) x 2.4 -->
+  <filter id="ripplefx" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <feFlood flood-color="rgb(128,128,128)" result="flat"/><feImage id="rippleMap" x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="img"/><feComposite in="img" in2="flat" operator="over" result="map"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="ripplebg" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <feFlood flood-color="rgb(128,128,128)" result="flat"/><feImage id="rippleBgMap" x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="img"/><feComposite in="img" in2="flat" operator="over" result="map"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="55" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <!-- studies in the aura palette: ink tone mapped deep teal -> teal -> lilac -> pink -> butter; paper knocked out, ink kept dense -->
+  <filter id="jewelpal" color-interpolation-filters="sRGB">
+    <feColorMatrix in="SourceGraphic" type="matrix" values=".3 .59 .11 0 0  .3 .59 .11 0 0  .3 .59 .11 0 0  0 0 0 0 1" result="lum"/>
+    <feComponentTransfer in="lum" result="mapped">
+      <feFuncR type="table" tableValues=".13 .2 .36 .9 .98"/>
+      <feFuncG type="table" tableValues=".32 .52 .66 .6 .92"/>
+      <feFuncB type="table" tableValues=".4 .58 .7 .74 .7"/>
+    </feComponentTransfer>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -.96 -1.888 -.352 0 2.96" result="ink"/>
+    <feComposite in="mapped" in2="ink" operator="in"/>
+  </filter>
+  <filter id="paperout" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 -.06  0 1 0 0 -.06  0 0 1 0 -.06  -.72 -1.416 -.264 0 2.22"/></filter>
+</svg>
 <div class="wrap">
   <a class="back" href="../../#week7">← Week 7</a>
 
   <section class="stage scan" id="stage" data-align="center" aria-label="Toolbar prototype">
+    <canvas class="ripple" id="ripple" aria-hidden="true"></canvas>
     <div class="ledger" aria-hidden="true"></div>
     <div class="margin t"></div><div class="margin b"></div>
-    <div class="layout" id="layout">
+    <div class="matchbar" role="toolbar" aria-label="Outfit jewellery tools">
+<button id="find" class="action search-action" aria-expanded="false" aria-controls="finder" data-hint="Find jewellery"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span>Search</span></button>
+<div class="action-group"><button id="scan" class="action" data-hint="Choose an outfit photo"><svg viewBox="0 0 24 24"><path d="M8 3H4v4m12-4h4v4M4 17v4h4m8 0h4v-4"/><circle cx="12" cy="12" r="4"/></svg><span>Scan</span></button><button id="add" class="action" data-hint="Add selected design to your look"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg><span>Add</span></button></div>
+<button id="play" class="action" aria-pressed="false" data-hint="Preview your jewellery combinations"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/><path d="m10 8 6 4-6 4Z"/></svg><span>Play</span></button>
+<div id="actionTip" role="tooltip" hidden></div>
+<div id="finder" class="glass-panel" hidden><input id="query" type="search" placeholder="Find a piece…" aria-label="Search jewellery categories"><div id="results"></div><p id="noResults" hidden>No matching pieces</p></div>
+</div>
+<input type="file" id="outfitFile" accept="image/*" hidden>
+<div class="look" id="look" hidden><button id="removePhoto" aria-label="Remove outfit photo">×</button><img id="outfitPhoto" alt="Your outfit"><div id="tryOn" aria-hidden="true"></div></div>
+<div class="look-tray" id="tray" aria-label="Jewellery in your look"></div><p id="matchStatus" role="status">Choose a design, then add it to your look.</p>
+<div class="layout" id="layout">
       <div class="col c-dock">
         <div class="dock" id="dock">
           <div class="strip scan" id="strip" role="toolbar" aria-orientation="vertical" aria-label="Jewellery archive"></div>
@@ -412,7 +612,7 @@
           <div class="tip" id="tip" role="tooltip" hidden></div>
         </div>
       </div>
-      <div class="col c-plate" aria-hidden="true">
+      <div class="col c-plate">
         <div class="plate scan" id="plate"></div>
         <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span>
       </div>
@@ -440,6 +640,15 @@
 <script>
 (() => {
   const SPECIMENS = ['Ring','Earrings','Cuff','Brooch','Pendant','Watch'].map((name,i) => ({i,name,flower:name,no:String(i+1).padStart(2,'0'),pos:`${(i%3)*50}% ${Math.floor(i/3)*100}%`}));
+  const ICONS = {
+    Ring: `<path class="s" fill-rule="evenodd" d="M12 8.2a6.4 6.4 0 1 1 0 12.8a6.4 6.4 0 0 1 0-12.8zm0 2.2a4.2 4.2 0 1 0 0 8.4a4.2 4.2 0 0 0 0-8.4z"/><path class="s" d="M8.6 5.2L10.4 2.8h3.2l1.8 2.4L12 8.6z"/><path class="d" d="M8.8 5.2h6.4M12 2.8v5.6"/>`,
+    Earrings: `<circle class="x" cx="7.5" cy="4.2" r="1.6"/><circle class="x" cx="16.5" cy="4.2" r="1.6"/><path class="x" d="M7.5 5.8v3.4M16.5 5.8v3.4"/><path class="s" d="M7.5 9.2c2.6 3 3.4 5.6 3.4 7.6a3.4 3.4 0 0 1-6.8 0c0-2 .8-4.6 3.4-7.6z"/><path class="s" d="M16.5 9.2c2.6 3 3.4 5.6 3.4 7.6a3.4 3.4 0 0 1-6.8 0c0-2 .8-4.6 3.4-7.6z"/><path class="d" d="M7.5 14.2v3.6M16.5 14.2v3.6"/>`,
+    Cuff: `<path class="s" d="M4.6 9.4C4.2 15 7.6 19.4 12 19.4s7.8-4.4 7.4-10l-2.6.6c.2 3.8-2 6.8-4.8 6.8s-5-3-4.8-6.8z"/><circle class="s" cx="4.4" cy="8.6" r="1.4"/><circle class="s" cx="19.6" cy="8.6" r="1.4"/><path class="d" d="M8.2 14.8l.9-.4M12 17.4v-.9M15.8 14.8l-.9-.4"/>`,
+    Brooch: `<path class="s" d="M12 11.6C9.8 7.4 4.2 6.2 3.8 10.4c-.3 3.6 4.6 4.4 8.2 2.6z"/><path class="s" d="M12 11.6c2.2-4.2 7.8-5.4 8.2-1.2.3 3.6-4.6 4.4-8.2 2.6z"/><path class="s" d="M10.8 13.4L8 20.4l2.2-.6.8 1.6 1.6-7.6zM13.2 13.4L16 20.4l-2.2-.6-.8 1.6-1.6-7.6z"/><circle class="s" cx="12" cy="12.2" r="2"/><path class="d" d="M6.6 10.6c1.6-.2 3 .4 4 1.2M17.4 10.6c-1.6-.2-3 .4-4 1.2"/>`,
+    Pendant: `<path class="x" d="M5 2.6l6 6.4M19 2.6l-6 6.4"/><circle class="x" cx="12" cy="9.8" r="1.3"/><ellipse class="s" cx="12" cy="16.2" rx="4.4" ry="5.2"/><ellipse class="d" cx="12" cy="16.2" rx="2" ry="2.6"/>`,
+    Watch: `<path class="s" d="M9.2 2.4h5.6l.8 4.2H8.4zM8.4 17.4h7.2l-.8 4.2H9.2z"/><circle class="s" cx="12" cy="12" r="5.8"/><rect class="s" x="17.6" y="10.8" width="1.8" height="2.4" rx=".6"/><path class="d" d="M12 8.8V12l2.2 1.4"/>`,
+  };
+  const icon = (m) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[m.name]}</svg>`;
   function jewel(m, extra='') { return `<span class="jewel ${extra}" style="background-position:${m.pos}" aria-hidden="true"></span>`; }
   const CFG = { icon: { w: 44, h: 44, cell: 58 }, both: { w: 46, h: 46, cell: 58 }, text: { w: 56, h: 30, cell: 44 } };
   const PADY = 10, W = 132, R = 66, K = 1.9;
@@ -450,7 +659,7 @@
   const centerY = (c, i) => PADY + i * (CFG[c].cell + 1) + CFG[c].cell / 2;
 
   function faceHTML(m, content) {
-    return `<span class="face">${content === 'text' ? '' : jewel(m)}${content === 'icon' ? '' : `<span class="lab">${m.name}</span>`}</span>`;
+    return `<span class="face">${content === 'text' ? '' : icon(m)}${content === 'icon' ? '' : `<span class="lab">${m.name}</span>`}</span>`;
   }
   function makeTool(m, content, tag = 'button') {
     const b = document.createElement(tag);
@@ -537,6 +746,8 @@
       return b;
     });
     st.on = false; st.s = 0; st.hover = -1; st.tipFor = -1;
+    tip.innerHTML = `<span class="tw"><span class="tt">${SPECIMENS.map((m) => `<b>${m.flower}</b>`).join('')}</span></span>`;
+    tip.classList.toggle('vert', st.align !== 'center');
     syncSheet();
     paint(); kick();
   }
@@ -570,8 +781,8 @@
     else {
       const steps = 4; dt /= steps;
       for (let k = 0; k < steps; k++) {
-        st.vx += (260 * (st.px - st.x) - 24 * st.vx) * dt; st.x += st.vx * dt;
-        st.vy += (260 * (st.py - st.y) - 24 * st.vy) * dt; st.y += st.vy * dt;
+        st.vx += (260 * (st.px - st.x) - 34 * st.vx) * dt; st.x += st.vx * dt;
+        st.vy += (260 * (st.py - st.y) - 34 * st.vy) * dt; st.y += st.vy * dt;
         st.vs += (320 * ((st.on ? 1 : 0) - st.s) - 36 * st.vs) * dt; st.s += st.vs * dt;
       }
     }
@@ -580,13 +791,21 @@
     placeLens(lens, view, st.x, st.y, .94 + .06 * s);
     const h = st.on ? nearest(st.x,st.y) : -1;
     if (h !== st.hover) { st.hover = h; paint(); }
-    if (h >= 0 && h !== st.tipFor) {
-      const previous=st.tipFor; st.tipFor=h;
-      tip.innerHTML=tipHTML(SPECIMENS[h]);
-      if(!reduced && previous>=0) tip.querySelector('b').animate([{opacity:0,transform:`translateX(${h>previous?18:-18}px)`},{opacity:1,transform:'translateX(0)'}],{duration:220,easing:'cubic-bezier(.2,.8,.2,1)'});
-    }
     const tipVisible = st.on && !dismissed && s > .4;
+    const wasHidden = tip.hidden;
     tip.hidden = !tipVisible;
+    if (tipVisible && h >= 0 && h !== st.tipFor) {
+      const first = st.tipFor < 0 || wasHidden; st.tipFor = h;
+      const lab = tip.querySelectorAll('.tt b')[h], tw = tip.querySelector('.tw'), tt = tip.querySelector('.tt');
+      if (lab && tw) {
+        tip.classList.toggle('cold', first);   // first appearance: no slide, just fade in
+        tw.style.width = lab.offsetWidth + 'px';
+        tt.style.transform = st.align === 'center' ? `translateX(${-lab.offsetLeft}px)` : `translateY(${-lab.offsetTop}px)`;
+        if (first) { void tw.offsetWidth; tip.classList.remove('cold'); }
+      }
+    }
+    if (tipVisible && wasHidden) { tip.classList.remove('show'); void tip.offsetWidth; tip.classList.add('show'); }
+    if (!tipVisible) st.tipFor = -1;
     tools.forEach((b,i)=>{ if(tipVisible && i===h) b.setAttribute('aria-describedby','tip'); else b.removeAttribute('aria-describedby'); });
     tip.style.opacity = tipVisible ? '1' : '0';
     placeTip(tip, st.align, st.x, st.y);
@@ -625,6 +844,7 @@
   });
 
   /* ---------- Choosing ---------- */
+  let chosenDesign=0;
   const plate = $('plate');
   function select(i, first = false) {
     const changed = i !== st.sel || first;
@@ -636,7 +856,7 @@
     }
     paint();
     if (!changed) return;
-    const m = SPECIMENS[i];
+    const m = SPECIMENS[i]; chosenDesign=0;
     showPlate(m, !first);
     $('card').innerHTML = '';
     $('live').textContent = `${m.name}: three designs selected.`;
@@ -645,9 +865,11 @@
     const old = [...plate.querySelectorAll('.p')];
     old.forEach((p) => p.classList.add('out'));
     setTimeout(() => old.forEach((p) => p.remove()), animate ? 260 : 0);
+    plate.dataset.layout = m.i % 3;
     for(let v=0;v<3;v++) {
-      const p=document.createElement('figure'); p.className='p design-study';
-      p.innerHTML=`<span class="jewel variant" style="background-position:${v*50}% ${m.i*20}%"></span><figcaption>${m.no} / ${String(v+1).padStart(2,'0')}</figcaption>`;
+      const p=document.createElement('figure'); p.className='p design-study'; p.dataset.k=v;
+      p.innerHTML=`<button class="design-pick" aria-label="Select ${m.name} design ${v+1}" aria-pressed="${v===chosenDesign}"><span class="jewel variant" style="background-position:${v*50}% ${m.i*20}%"></span></button><figcaption>${m.name} · ${String(v+1).padStart(2,'0')}</figcaption>`;
+      p.querySelector('button').onclick=()=>{chosenDesign=v; plate.querySelectorAll('.design-pick').forEach(b=>b.setAttribute('aria-pressed',b===p.querySelector('button')));$('matchStatus').textContent=`${m.name} ${v+1} selected — Add to your look.`;};
       if(animate && !reduced) p.classList.add('in');
       plate.appendChild(p);
     }
@@ -663,6 +885,121 @@
       build();
     });
   });
+
+  /* Mist: warm white light with subdued jewellery silhouettes at different depths. */
+  (function aura() {
+    const cv=$('aura'),g=cv.getContext('2d'),atlas=new Image();
+    function draw(){const w=innerWidth,h=innerHeight,d=Math.min(devicePixelRatio||1,2);cv.width=w*d;cv.height=h*d;g.setTransform(d,0,0,d,0,0);g.fillStyle='#f2f4ee';g.fillRect(0,0,w,h);
+      if(!atlas.complete || !atlas.naturalWidth)return;
+      const places=[[.72,.05,.48,0,14,.10],[-.12,.53,.50,4,6,.14],[.63,.65,.40,2,22,.12],[.37,-.12,.30,1,10,.08]];
+      for(const [x,y,k,i,blur,alpha] of places){g.save();g.globalAlpha=alpha;g.globalCompositeOperation='multiply';g.filter=`grayscale(1) sepia(.18) blur(${blur}px)`;const size=Math.min(w,h)*k;g.drawImage(atlas,(i%3)*atlas.width/3,Math.floor(i/3)*atlas.height/2,atlas.width/3,atlas.height/2,x*w,y*h,size,size);g.restore();}
+      g.fillStyle='rgba(255,255,255,.35)';g.fillRect(0,0,w,h);
+    }
+    atlas.onload=draw;atlas.src='assets/jewellery-print-atlas.png';draw();addEventListener('resize',draw);
+  })();
+
+  /* ---------- Water ripple that follows the pointer ----------
+     A damped wave equation on a quarter-resolution grid. Each pointer move drops a small disturbance;
+     the surface slope is drawn as light and shade, blended soft-light into the paper. */
+  (function ripple() {
+    const cv = $('ripple'); if (!cv || reduced) return;
+    const ctx = cv.getContext('2d');
+    const S = 4; let w = 0, h = 0, a, b, img, raf = 0, mapImg, frame = 0;
+    const mapCv = document.createElement('canvas'), mctx = mapCv.getContext('2d'), feMap = $('rippleMap'), lay = $('layout');
+    function size() {
+      w = Math.max(2, Math.ceil(stage.clientWidth / S)); h = Math.max(2, Math.ceil(stage.clientHeight / S));
+      cv.width = w; cv.height = h; a = new Float32Array(w * h); b = new Float32Array(w * h); img = ctx.createImageData(w, h);
+      mapCv.width = Math.ceil(w / 2); mapCv.height = Math.ceil(h / 2); mapImg = mctx.createImageData(mapCv.width, mapCv.height);
+      for (let q = 0; q < mapImg.data.length; q += 4) { mapImg.data[q] = mapImg.data[q + 1] = mapImg.data[q + 2] = 128; mapImg.data[q + 3] = 255; }
+    }
+    function drop(x, y, r, f) {
+      const cx = Math.round(x / S), cy = Math.round(y / S);
+      for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) {
+        const d = Math.hypot(i, j); if (d > r) continue;
+        const X = cx + i, Y = cy + j; if (X < 1 || Y < 1 || X >= w - 1 || Y >= h - 1) continue;
+        a[Y * w + X] += f * (Math.cos(d / r * Math.PI) + 1) / 2;
+      }
+      lastDrop = performance.now();
+      if (!raf) raf = requestAnimationFrame(step);
+    }
+    let tPrev = 0, lastDrop = 0;
+    function step(now) {
+      // run the water on real time: 60 simulation steps a second, whatever the frame rate
+      const steps = tPrev ? Math.max(1, Math.min(10, Math.round((now - tPrev) / 16.7))) : 1; tPrev = now;
+      let e = 0;
+      for (let n = 0; n < steps; n++) {
+        e = 0;
+        for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x;
+          const v = ((a[i - 1] + a[i + 1] + a[i - w] + a[i + w]) / 2 - b[i]) * .96;
+          b[i] = v; e += v < 0 ? -v : v;
+        }
+        const t = a; a = b; b = t;
+      }
+      const d = img.data, m = mapImg.data, mw = mapCv.width;
+      for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+        const i = y * w + x, sx = a[i + 1] - a[i - 1], sy = a[i + w] - a[i - w];
+        const k = i * 4, hgt = a[i], u = x / w;
+        // colour rings in the background's own palette: crests lift to cream, troughs tint teal -> pink across the page
+        if (hgt > 0) { d[k] = 255; d[k + 1] = 250; d[k + 2] = 236; }
+        else { d[k] = 133; d[k + 1] = 155; d[k + 2] = 145; }
+        d[k + 3] = Math.min(120, Math.abs(hgt) * 40);
+        if (!(x & 1) && !(y & 1)) {   // refraction map at half resolution: the slope bends what lies under the water
+          const q = ((y >> 1) * mw + (x >> 1)) * 4;
+          m[q] = 128 + Math.max(-127, Math.min(127, sx * 22)); m[q + 1] = 128 + Math.max(-127, Math.min(127, sy * 22)); m[q + 2] = 128; m[q + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      if (frame++ % 3 === 0) {
+        mctx.putImageData(mapImg, 0, 0);
+        const r = lay.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+        // the map covers the stage; place it in the layout's own coordinates and in the viewport for the background
+        feMap.setAttribute('x', (sr.left - r.left).toFixed(1)); feMap.setAttribute('y', (sr.top - r.top).toFixed(1));
+        feMap.setAttribute('width', sr.width.toFixed(1)); feMap.setAttribute('height', sr.height.toFixed(1));
+        const url = mapCv.toDataURL('image/jpeg', .85);
+        feMap.setAttribute('href', url);
+        lay.classList.add('wet');
+        const bm = $('rippleBgMap'); bm.setAttribute('x', sr.left.toFixed(1)); bm.setAttribute('y', sr.top.toFixed(1)); bm.setAttribute('width', sr.width.toFixed(1)); bm.setAttribute('height', sr.height.toFixed(1)); bm.setAttribute('href', url);
+        $('aura').classList.add('wet');
+      }
+      // stop once the average movement is negligible, and never later than 1.6 s after the last touch
+      raf = e > w * h * .004 && now - lastDrop < 2400 ? requestAnimationFrame(step) : 0;
+      if (!raf) { a.fill(0); b.fill(0); tPrev = 0; ctx.clearRect(0, 0, w, h); lay.classList.remove('wet'); $('aura').classList.remove('wet'); }
+    }
+    size();
+    let last = 0;
+    let lx = -1e4, ly = -1e4;
+    stage.addEventListener('pointermove', (ev) => {
+      const r = stage.getBoundingClientRect(), now = performance.now(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+      // only every 40 ms and after 14 px of travel, so slow or small movements barely stir the water
+      if (now - last < 40 || Math.hypot(x - lx, y - ly) < 14) return;
+      drop(x, y, 4, now - last > 160 ? 5.1 : 2.3);
+      last = now; lx = x; ly = y;
+    });
+    stage.addEventListener('pointerdown', (ev) => { const r = stage.getBoundingClientRect(); drop(ev.clientX - r.left, ev.clientY - r.top, 5, 8); });
+    let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(size, 150); });
+  })();
+
+  const finder=$('finder'), find=$('find'), query=$('query'), results=$('results'), status=$('matchStatus');
+  const categoryNames=['Ring','Earrings','Bracelet','Brooch','Pendant','Watch'];
+  function listCategories(){const q=query.value.trim().toLowerCase();results.replaceChildren();SPECIMENS.forEach((m,i)=>{if(!(categoryNames[i]+' '+m.name).toLowerCase().includes(q))return;const b=document.createElement('button');b.className='category';b.setAttribute('aria-pressed',i===st.sel);b.innerHTML=icon(m)+`<span>${categoryNames[i]}</span><small>3 designs</small>`;b.onclick=()=>{select(i);listCategories();status.textContent=`${categoryNames[i]} — choose one of three designs.`;};results.appendChild(b);});$('noResults').hidden=!!results.children.length;}
+  function closeFinder(){const restore=finder.contains(document.activeElement);finder.hidden=true;find.setAttribute('aria-expanded','false');if(restore)find.focus();}
+  find.onclick=()=>{finder.hidden=!finder.hidden;find.setAttribute('aria-expanded',!finder.hidden);if(!finder.hidden){listCategories();query.focus();}};
+  query.oninput=listCategories;
+  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.matchbar'))closeFinder();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFinder();$('actionTip').hidden=true;}});
+  let photoURL='',timer=0,previewIndex=0;const saved=[];
+  $('scan').onclick=()=>$('outfitFile').click();
+  $('outfitFile').onchange=()=>{const f=$('outfitFile').files[0];if(!f)return;if(!f.type.startsWith('image/')){status.textContent='Choose an image file.';return;}if(photoURL)URL.revokeObjectURL(photoURL);photoURL=URL.createObjectURL(f);$('outfitPhoto').src=photoURL;$('look').hidden=false;stage.classList.add('has-outfit');status.textContent='Outfit ready. Select jewellery and add it to your look.';};
+  $('removePhoto').onclick=()=>{if(photoURL)URL.revokeObjectURL(photoURL);photoURL='';$('look').hidden=true;stage.classList.remove('has-outfit');$('outfitFile').value='';};
+  function renderTray(){const tray=$('tray');tray.replaceChildren();saved.forEach((item,i)=>{const b=document.createElement('button');b.className='saved-piece';b.setAttribute('aria-label',`Remove ${item.name} design ${item.v+1}`);b.innerHTML=`<span class="jewel variant" style="background-position:${item.v*50}% ${item.i*20}%"></span><span>×</span>`;b.onclick=()=>{saved.splice(i,1);renderTray();status.textContent='Piece removed from your look.';};tray.appendChild(b);});if(!saved.length){stopPlay();$('tryOn').replaceChildren();}}
+  $('add').onclick=()=>{const m=SPECIMENS[st.sel];if(saved.some(x=>x.i===m.i&&x.v===chosenDesign)){status.textContent='This design is already in your look.';return;}saved.push({i:m.i,v:chosenDesign,name:m.name});renderTray();preview(saved.at(-1));status.textContent=`${m.name} ${chosenDesign+1} added to your look.`;};
+  function preview(item){$('tryOn').innerHTML=`<span class="jewel variant" style="background-position:${item.v*50}% ${item.i*20}%"></span>`;document.querySelectorAll('.saved-piece').forEach((b,i)=>b.classList.toggle('previewing',saved[i]===item));status.textContent=`Preview: ${item.name} ${item.v+1}${photoURL?' with your outfit':''}.`;}
+  function stopPlay(){clearInterval(timer);timer=0;$('play').setAttribute('aria-pressed','false');$('play').querySelector('span').textContent='Play';}
+  $('play').onclick=()=>{if(timer){stopPlay();return;}if(!saved.length){status.textContent='Add a design to your look first.';return;}previewIndex=0;preview(saved[0]);$('play').setAttribute('aria-pressed','true');$('play').querySelector('span').textContent='Pause';timer=setInterval(()=>{previewIndex=(previewIndex+1)%saved.length;preview(saved[previewIndex]);},2200);};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlay();});
+  const actionTip=$('actionTip');document.querySelectorAll('.action').forEach((b)=>{function show(){actionTip.textContent=b.dataset.hint;actionTip.hidden=false;const r=b.getBoundingClientRect(),host=b.closest('.matchbar').getBoundingClientRect();actionTip.style.left=(r.left-host.left+r.width/2)+'px';b.setAttribute('aria-describedby','actionTip');}function hide(){actionTip.hidden=true;b.removeAttribute('aria-describedby');}b.addEventListener('pointerenter',show);b.addEventListener('pointerleave',hide);b.addEventListener('focus',show);b.addEventListener('blur',hide);});
+  const actionButtons=[...document.querySelectorAll('.action')];actionButtons.forEach((b,i)=>b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();actionButtons[(i+(e.key==='ArrowRight'?1:actionButtons.length-1))%actionButtons.length].focus();}}));
 
   build();
   select(st.sel, true);
