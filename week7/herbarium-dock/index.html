@@ -638,6 +638,9 @@
   .archive-piece:has(.archive-pick[aria-pressed=true]) figcaption{color:#6e6145;opacity:1;font-weight:bold}
   .archive-pick:hover .variant{filter:url(#print-selected)}
   @media(prefers-reduced-motion:reduce){.archive-pick::before{transition:none}}
+
+  /* Every hint occupies the same centred cell, sized to the longest label. */
+  .tip .tw{transition:none}.tip .tt b{text-align:center}
 </style>
 </head>
 <body>
@@ -888,7 +891,11 @@
       const lab = tip.querySelectorAll('.tt b')[h], tw = tip.querySelector('.tw'), tt = tip.querySelector('.tt');
       if (lab && tw) {
         tip.classList.toggle('cold', first);   // first appearance: no slide, just fade in
-        tw.style.width = lab.offsetWidth + 'px';
+        const labels = [...tt.querySelectorAll('b')];
+        labels.forEach(label => label.style.width = 'max-content');
+        const universalWidth = Math.ceil(Math.max(...labels.map(label => label.getBoundingClientRect().width)));
+        labels.forEach(label => label.style.width = universalWidth + 'px');
+        tw.style.width = universalWidth + 'px';
         tt.style.transform = st.align === 'center' ? `translateX(${-lab.offsetLeft}px)` : `translateY(${-lab.offsetTop}px)`;
         if (first) { void tw.offsetWidth; tip.classList.remove('cold'); }
       }

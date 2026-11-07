@@ -13,3 +13,6 @@ Water impulses are larger and more frequent, fading over up to 3.4 seconds. Back
 
 ## Scanned print refinement
 Toolbar width is reduced by 20px; tooltip labels now use their own intrinsic widths so short words centre correctly rather than stretching to the longest label. Paper grain is stronger with fine scan lines. Jewellery has a faint screened grain overlay. Selection uses muted antique-brass ink (#6e6145), a translucent offset rectangular print plate and a shifted impression instead of a circular outline. Keyboard focus retains a dashed rectangular indicator.
+
+## Universal tooltip width
+All supporting labels use the measured width of the longest label, including equal horizontal padding. Both the glass window and each text cell share that width; text stays centred during horizontal or vertical scrolling and the window no longer resizes between labels.
