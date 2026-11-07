@@ -571,6 +571,42 @@
   .glass-panel{top:158px}.action,.action-group,#actionTip{background:#ffffff26;backdrop-filter:blur(22px) saturate(.8);-webkit-backdrop-filter:blur(22px) saturate(.8)}
   #actionTip{bottom:163px}.ripple{opacity:.55;filter:blur(3px)}
   @media(max-width:650px){.search-field{width:112px}.search-field #query{width:70px}.search-field .search-action{width:32px}.wheel-shell,.wheel-item{width:68px}.action{width:48px}.action-group .action{width:44px}.matchbar{gap:5px}}
+
+  .search-field:has(:disabled){cursor:default}.search-field :disabled{opacity:1;color:#52675f;-webkit-text-fill-color:#52675f;cursor:default}.search-field .action:disabled:hover{transform:none;background:transparent}
+  #actionTip{height:34px;padding:0;overflow:hidden;border-radius:22px;transition:left .34s cubic-bezier(.25,.8,.3,1),width .34s cubic-bezier(.25,.8,.3,1)}
+  .hint-track{position:absolute;left:0;top:0;display:flex;transition:transform .34s cubic-bezier(.25,.8,.3,1)}
+  .hint-label{display:block;flex:none;padding:0 13px;font:12px/32px Georgia,serif;white-space:nowrap}
+  #actionTip.hint-cold,#actionTip.hint-cold .hint-track{transition:none}
+  @media(prefers-reduced-motion:reduce){#actionTip,.hint-track{transition:none}}
+
+  /* The archive: ivory, sage, deep teal. A single connected tool capsule. */
+  :root{--paper:#f3f0e7;--ink:#2e544f;--soft:#98a591}html{background:#f3f0e7}
+  .matchbar,.look,.look-tray,#matchStatus{display:none!important}
+  .wrap{max-width:1450px}.stage{height:850px;min-height:850px}
+  .stage[data-align] .layout{inset:25px 45px 45px;display:block}
+  .stage[data-align] .c-plate{position:absolute;left:0;top:0;width:calc(100% - 145px);max-width:none;height:100%;margin:0}
+  .stage[data-align] .c-dock{display:block!important;position:absolute;right:0;left:auto;top:50%;transform:translateY(-50%);z-index:10}
+  .stage[data-align=left] .c-dock{left:0;right:auto}.stage[data-align=left] .c-plate{left:145px}
+  .stage[data-align=center] .c-dock{top:0;left:50%;right:auto;transform:translateX(-50%)}
+  .stage[data-align=center] .c-plate{left:0;top:120px;width:100%;height:calc(100% - 120px)}
+  .controls{display:flex!important;margin-top:24px;color:#64776b;opacity:.7;font-size:11px}
+  .c-card,.crop{display:none!important}.stage .strip{background:#f3f0e724!important;border:1px solid #ffffffc0!important;box-shadow:inset 0 1px 2px #fff9,0 12px 40px #2e544f0b!important;backdrop-filter:blur(18px);border-radius:50px}
+  .tool.is-hover,.tool.product-hover{background:#98a59135!important;border-radius:50%}.tool.is-sel .ico{color:#2e544f}.tool .ico{color:#2e544f}.lens{opacity:.25!important}
+  .tip .tw{background:#f3f0e745!important;backdrop-filter:blur(18px)}.tip .tt b{color:#2e544f}
+  .stage .plate{position:relative;width:100%;height:100%;overflow:visible}
+  .archive-piece{position:absolute;margin:0;transform:rotate(var(--tilt));transition:opacity .4s,filter .4s;opacity:.56;filter:blur(var(--depth));}
+  .archive-piece.related{opacity:.94;filter:blur(0)}.archive-piece.veiled{opacity:.33;filter:blur(calc(var(--depth) + .7px))}
+  .archive-pick{display:block;width:100%;aspect-ratio:4/3;background:transparent;border:0;padding:0;border-radius:50%;cursor:pointer}
+  .archive-pick .variant{display:block;width:100%;height:100%;filter:url(#jewelpal);mask-image:radial-gradient(ellipse,#000 48%,transparent 72%)}
+  .archive-pick:hover,.archive-pick:focus-visible{outline:1px solid #98a59188;outline-offset:5px}.archive-pick[aria-pressed=true]{outline:1px solid #2e544f88;outline-offset:5px}
+  .archive-piece figcaption{font:9px Georgia,serif;letter-spacing:2px;color:#2e544f;text-align:center;opacity:.6}
+  .aura::after{opacity:.10;filter:grayscale(1)}.aura::before{opacity:.13;filter:grayscale(1)}
+  @media(max-width:650px){.stage[data-align] .layout{inset:20px 10px 20px}.stage[data-align] .c-plate{width:calc(100% - 90px)}.stage[data-align=left] .c-plate{left:90px}.stage[data-align=center] .c-plate{width:100%;left:0}.stage{height:760px;min-height:760px}.controls{flex-wrap:wrap}.archive-piece figcaption{font-size:7px;letter-spacing:1px}}
+  @media(prefers-reduced-motion:reduce){.archive-piece{transition:none}}
+
+  .lens .glass{background:#98a59120!important}.tool.is-hover::before{background:#98a59125!important}
+  .stage[data-align]:not([data-align=center]) .c-dock{height:374px}
+  .archive-piece{pointer-events:auto}.archive-pick{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -590,9 +626,9 @@
   <filter id="jewelpal" color-interpolation-filters="sRGB">
     <feColorMatrix in="SourceGraphic" type="matrix" values=".3 .59 .11 0 0  .3 .59 .11 0 0  .3 .59 .11 0 0  0 0 0 0 1" result="lum"/>
     <feComponentTransfer in="lum" result="mapped">
-      <feFuncR type="table" tableValues=".13 .2 .36 .9 .98"/>
-      <feFuncG type="table" tableValues=".32 .52 .66 .6 .92"/>
-      <feFuncB type="table" tableValues=".4 .58 .7 .74 .7"/>
+      <feFuncR type="table" tableValues=".18 .18 .18 .18 .18"/>
+      <feFuncG type="table" tableValues=".33 .33 .33 .33 .33"/>
+      <feFuncB type="table" tableValues=".31 .31 .31 .31 .31"/>
     </feComponentTransfer>
     <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -.96 -1.888 -.352 0 2.96" result="ink"/>
     <feComposite in="mapped" in2="ink" operator="in"/>
@@ -602,12 +638,12 @@
 <div class="wrap">
   <a class="back" href="../../#week7">← Week 7</a>
 
-  <section class="stage scan" id="stage" data-align="center" aria-label="Toolbar prototype">
+  <section class="stage scan" id="stage" data-align="right" aria-label="Toolbar prototype">
     <canvas class="ripple" id="ripple" aria-hidden="true"></canvas>
     <div class="ledger" aria-hidden="true"></div>
     <div class="margin t"></div><div class="margin b"></div>
     <div class="matchbar" role="toolbar" aria-label="Outfit jewellery tools">
-<div class="search-field"><button id="find" aria-label="Search" class="action search-action" aria-expanded="false" aria-controls="finder" data-hint="Find jewellery"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button><input id="query" type="search" placeholder="Search" aria-label="Search jewellery designs"></div><div class="wheel-shell"><div id="categoryWheel" aria-label="Jewellery categories" role="group"></div></div>
+<div class="search-field"><button id="find" disabled tabindex="-1" aria-label="Search (inactive)" class="action search-action" aria-expanded="false" aria-controls="finder" data-hint="Find jewellery"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button><input id="query" disabled tabindex="-1" type="search" placeholder="Search" aria-label="Search jewellery designs"></div><div class="wheel-shell"><div id="categoryWheel" aria-label="Jewellery categories" role="group"></div></div>
 <div class="action-group"><button id="scan" class="action" data-hint="Choose an outfit photo"><svg viewBox="0 0 24 24"><path d="M8 3H4v4m12-4h4v4M4 17v4h4m8 0h4v-4"/><circle cx="12" cy="12" r="4"/></svg><span>Scan</span></button><button id="add" class="action" data-hint="Add selected design to your look"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg><span>Add</span></button></div>
 <button id="play" class="action" aria-pressed="false" data-hint="Preview your jewellery combinations"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/><path d="m10 8 6 4-6 4Z"/></svg><span>Play</span></button>
 <div id="actionTip" role="tooltip" hidden></div>
@@ -642,11 +678,11 @@
   <div class="controls">
     <div class="ctl"><span>Align</span>
       <div class="pills" data-key="align">
-        <button data-v="left" aria-pressed="false">Left</button><button data-v="center" aria-pressed="true">Center</button><button data-v="right">Right</button>
+        <button data-v="left" aria-pressed="false">Left</button><button data-v="center" aria-pressed="false">Center</button><button data-v="right" aria-pressed="true">Right</button>
       </div></div>
     <div class="ctl"><span>Button</span>
       <div class="pills" data-key="content">
-        <button data-v="icon">Icon</button><button data-v="text">Text</button><button data-v="both" aria-pressed="true">Icon + text</button>
+        <button data-v="icon" aria-pressed="true">Icon</button><button data-v="text">Text</button><button data-v="both" aria-pressed="false">Icon + text</button>
       </div></div>
   </div>
 
@@ -724,7 +760,7 @@
   const stage = $('stage'), layout = $('layout'), dock = $('dock'), strip = $('strip'), lens = $('lens'), view = $('view'), tip = $('tip');
   const N = SPECIMENS.length;
   const st = {
-    align: 'center', content: 'both', sel: 0, hover: -1, press: -1, focus: -1, pointerIn: false,
+    align: 'right', content: 'icon', sel: 3, hover: -1, press: -1, focus: -1, pointerIn: false,
     on: false, px: 0, py: 0, x: 0, y: 0, vx: 0, vy: 0, s: 0, vs: 0, raf: 0, last: 0, tipFor: -1,
   };
   let tools = [];
@@ -753,6 +789,10 @@
       const b = makeTool(m, st.content);
       b.tabIndex = i === st.sel ? 0 : -1;
       b.setAttribute('aria-label', `Show ${m.flower} studies`);
+      b.addEventListener('pointerenter',()=>revealCategory(i,true));
+      b.addEventListener('pointerleave',()=>revealCategory(st.sel));
+      b.addEventListener('focus',()=>revealCategory(i,true));
+      b.addEventListener('blur',()=>revealCategory(st.sel));
       b.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch' && e.button === 0) { st.press = i; paint(); } });
       b.addEventListener('click', (e) => { if (e.pointerType === 'touch') return; select(i); });
       b.addEventListener('focus', () => { st.focus = i; if (b.matches(':focus-visible')) focusAim(i); });
@@ -874,20 +914,29 @@
     const m = SPECIMENS[i]; chosenDesign=0;
     showPlate(m, !first);
     $('card').innerHTML = '';
-    $('live').textContent = `${m.name}: three designs selected.`;
+    $('live').textContent = `${m.name}: matching pieces highlighted among 18 archive designs.`;
+  }
+  function revealCategory(i,preview=false){
+    plate.querySelectorAll('.archive-piece').forEach(p=>{const match=Number(p.dataset.category)===i;p.classList.toggle('related',match);p.classList.toggle('veiled',!match);});
+    stage.classList.toggle('previewing',preview);
   }
   function showPlate(m, animate) {
-    const old = [...plate.querySelectorAll('.p')];
-    old.forEach((p) => p.classList.add('out'));
-    setTimeout(() => old.forEach((p) => p.remove()), animate ? 260 : 0);
-    plate.dataset.layout = m.i % 3;
-    for(let v=0;v<3;v++) {
-      const p=document.createElement('figure'); p.className='p design-study'; p.dataset.k=v;
-      p.innerHTML=`<button class="design-pick" aria-label="Select ${m.name} design ${v+1}" aria-pressed="${v===chosenDesign}"><span class="jewel variant" style="background-position:${v*50}% ${m.i*20}%"></span></button><figcaption>${m.name} · ${String(v+1).padStart(2,'0')}</figcaption>`;
-      p.querySelector('button').onclick=()=>{chosenDesign=v; plate.querySelectorAll('.design-pick').forEach(b=>b.setAttribute('aria-pressed',b===p.querySelector('button')));$('matchStatus').textContent=`${m.name} ${v+1} selected — Add to your look.`;};
-      if(animate && !reduced) p.classList.add('in');
-      plate.appendChild(p);
+    if(!plate.children.length){
+      const positions=[[4,5,21],[36,3,15],[69,10,18],[20,23,17],[54,26,20],[79,33,13],[2,45,17],[34,47,19],[65,49,16],[15,67,19],[46,70,15],[77,72,17],[7,85,13],[31,88,14],[58,88,17],[40,18,11],[7,29,11],[76,2,12]];
+      // Interleave categories spatially, like an archival specimen sheet.
+      for(let n=0;n<18;n++){
+        const i=n%6,v=Math.floor(n/6),item=SPECIMENS[i],[x,y,w]=positions[n];
+        const p=document.createElement('figure');p.className='archive-piece';p.dataset.category=i;p.style.cssText=`left:${x}%;top:${y}%;width:${w}%;--depth:${[.3,1.2,2.1][n%3]}px;--tilt:${(n%5-2)*3}deg`;
+        p.innerHTML=`<button class="archive-pick" aria-label="Select ${item.name} design ${v+1}" aria-pressed="false"><span class="jewel variant" style="background-position:${v*50}% ${i*20}%"></span></button><figcaption>${item.no} / ${String(v+1).padStart(2,'0')}</figcaption>`;
+        const button=p.querySelector('button');
+        button.onclick=()=>{select(i);chosenDesign=v;plate.querySelectorAll('.archive-pick').forEach(b=>b.setAttribute('aria-pressed',b===button));$('live').textContent=`${item.name} design ${v+1} selected`;};
+        button.onpointerenter=()=>{revealCategory(i,true);tools[i].classList.add('product-hover');};
+        button.onpointerleave=()=>{revealCategory(st.sel);tools.forEach(b=>b.classList.remove('product-hover'));};
+        button.onfocus=()=>revealCategory(i,true);button.onblur=()=>revealCategory(st.sel);
+        plate.appendChild(p);
+      }
     }
+    revealCategory(m.i);
   }
 
   /* ---------- Controls ---------- */
@@ -907,15 +956,15 @@
     function draw(){
       const w=innerWidth,h=innerHeight,d=Math.min(devicePixelRatio||1,2);
       cv.width=w*d;cv.height=h*d;g.setTransform(d,0,0,d,0,0);
-      g.fillStyle='#e6e9e4';g.fillRect(0,0,w,h);
+      g.fillStyle='#f3f0e7';g.fillRect(0,0,w,h);
       // Elliptical veils dissolve gradually; no distinct colored pools or motifs.
       const veils=[
-        [.12,.34,.70,.62,'170,183,175',.20],
-        [.89,.68,.65,.70,'177,188,181',.18],
-        [.53,.88,.78,.36,'215,216,210',.32],
-        [.48,.12,.80,.52,'247,249,247',.70],
-        [.32,.57,.88,.23,'247,249,247',.48],
-        [.82,.42,.60,.29,'243,246,243',.45]
+        [.12,.34,.70,.62,'152,165,145',.20],
+        [.89,.68,.65,.70,'152,165,145',.18],
+        [.53,.88,.78,.36,'152,165,145',.32],
+        [.48,.12,.80,.52,'243,240,231',.70],
+        [.32,.57,.88,.23,'243,240,231',.48],
+        [.82,.42,.60,.29,'243,240,231',.45]
       ];
       for(const [x,y,rx,ry,rgb,alpha] of veils){
         g.save();g.translate(x*w,y*h);g.scale(rx*w,ry*h);
@@ -1019,7 +1068,7 @@
   wheel.addEventListener('scroll',()=>{if(wheelMoving)return;clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>{const i=Math.max(0,Math.min(5,Math.round(wheel.scrollTop/76)));if(i!==st.sel)chooseCategory(i);},180);});
   function listCategories(){const q=query.value.trim().toLowerCase();results.replaceChildren();finder.hidden=!q;find.setAttribute('aria-expanded',!!q);if(!q)return;SPECIMENS.forEach((m,i)=>{for(let v=0;v<3;v++){if(!(`${categoryNames[i]} ${m.name} ${v+1}`).toLowerCase().includes(q))continue;const b=document.createElement('button');b.className='category';b.innerHTML=icon(m)+`<span>${categoryNames[i]} ${String(v+1).padStart(2,'0')}</span>`;b.onclick=()=>{chooseCategory(i);chosenDesign=v;plate.querySelectorAll('.p:not(.out) .design-pick').forEach((x,j)=>x.setAttribute('aria-pressed',j===v));closeFinder();};results.appendChild(b);}});$('noResults').hidden=!!results.children.length;}
   function closeFinder(){finder.hidden=true;find.setAttribute('aria-expanded','false');}
-  find.onclick=()=>{query.focus();listCategories();};query.oninput=listCategories;
+  // Search is a static placeholder in this toolbar study.
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('.matchbar'))closeFinder();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFinder();$('actionTip').hidden=true;}});
   let photoURL='',timer=0,previewIndex=0;const saved=[];
@@ -1032,8 +1081,26 @@
   function stopPlay(){clearInterval(timer);timer=0;$('play').setAttribute('aria-pressed','false');$('play').querySelector('span').textContent='Play';}
   $('play').onclick=()=>{if(timer){stopPlay();return;}if(!saved.length){status.textContent='Add a design to your look first.';return;}previewIndex=0;preview(saved[0]);$('play').setAttribute('aria-pressed','true');$('play').querySelector('span').textContent='Pause';timer=setInterval(()=>{previewIndex=(previewIndex+1)%saved.length;preview(saved[previewIndex]);},2200);};
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlay();});
-  const actionTip=$('actionTip');document.querySelectorAll('.action,.wheel-item').forEach((b)=>{function show(){actionTip.textContent=b.dataset.hint;actionTip.hidden=false;const r=b.getBoundingClientRect(),host=b.closest('.matchbar').getBoundingClientRect();actionTip.style.left=(r.left-host.left+r.width/2)+'px';b.setAttribute('aria-describedby','actionTip');}function hide(){actionTip.hidden=true;b.removeAttribute('aria-describedby');}b.addEventListener('pointerenter',show);b.addEventListener('pointerleave',hide);b.addEventListener('focus',show);b.addEventListener('blur',hide);});
-  const actionButtons=[...document.querySelectorAll('.action')];actionButtons.forEach((b,i)=>b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();actionButtons[(i+(e.key==='ArrowRight'?1:actionButtons.length-1))%actionButtons.length].focus();}}));
+  const actionTip=$('actionTip');
+  const hintButtons=[...document.querySelectorAll('.action:not(:disabled),.wheel-item')];
+  const hintTrack=document.createElement('span');hintTrack.className='hint-track';actionTip.appendChild(hintTrack);
+  const hintLabels=hintButtons.map(b=>{const label=document.createElement('span');label.className='hint-label';label.textContent=b.dataset.hint;hintTrack.appendChild(label);return label;});
+  let hintHide=0, hintOwner=null;
+  function hideHint(){clearTimeout(hintHide);actionTip.hidden=true;if(hintOwner)hintOwner.removeAttribute('aria-describedby');hintOwner=null;}
+  hintButtons.forEach((b,i)=>{
+    function show(){clearTimeout(hintHide);const first=actionTip.hidden;if(hintOwner)hintOwner.removeAttribute('aria-describedby');hintOwner=b;
+      actionTip.classList.toggle('hint-cold',first);actionTip.hidden=false;
+      const r=b.getBoundingClientRect(),host=b.closest('.matchbar').getBoundingClientRect(),label=hintLabels[i];
+      actionTip.style.left=(r.left-host.left+r.width/2)+'px';actionTip.style.width=label.offsetWidth+'px';
+      hintTrack.style.transform=`translateX(${-label.offsetLeft}px)`;
+      hintLabels.forEach((x,j)=>x.setAttribute('aria-hidden',i!==j));b.setAttribute('aria-describedby','actionTip');
+      if(first){void actionTip.offsetWidth;actionTip.classList.remove('hint-cold');}
+    }
+    function leave(){hintHide=setTimeout(hideHint,160);}
+    b.addEventListener('pointerenter',show);b.addEventListener('pointerleave',leave);b.addEventListener('focus',show);b.addEventListener('blur',leave);
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hideHint();});
+  const actionButtons=[...document.querySelectorAll('.action:not(:disabled)')];actionButtons.forEach((b,i)=>b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();actionButtons[(i+(e.key==='ArrowRight'?1:actionButtons.length-1))%actionButtons.length].focus();}}));
 
   build();
   select(st.sel, true);
