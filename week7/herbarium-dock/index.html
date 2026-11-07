@@ -522,7 +522,7 @@
   @media (prefers-reduced-motion: reduce) { .tip .tw, .tip .tt { transition: none; } .tip.show { animation: none; } }
 
   /* Outfit matching workbench: mist, glass and compact grouped actions. */
-  html { background:#f2f4ee; } .aura::after { opacity:.08; filter:grayscale(1); } .aura::before { opacity:.07; } .vintage { display:none; }
+  html { background:#e6e9e4; } .aura::after { opacity:.045; filter:grayscale(1); } .aura::before { opacity:.035; filter:grayscale(1); } .vintage { display:none; }
   .ripple { opacity:.84; filter:blur(4px); }
   .stage { min-height:790px; overflow:visible; } .controls,.c-dock { display:none!important; }
   .stage[data-align] .layout { inset:180px 70px 80px; display:block; } .stage[data-align] .c-plate { width:100%; max-width:850px; height:480px; margin:auto; }
@@ -556,6 +556,21 @@
   @media(max-width:650px){ .matchbar{gap:6px;width:calc(100% - 24px);justify-content:center}.search-action{width:120px}.action{width:60px}.action-group .action{width:53px}.stage[data-align] .layout{left:18px;right:18px}.look{position:relative;top:170px;left:20px;width:120px;height:170px}.has-outfit .layout{left:160px!important}.glass-panel{width:230px} }
   @media(prefers-reduced-motion:reduce){.action{transition:none}.action:hover{transform:none}}
   .plate .p.design-study { pointer-events:auto; }
+
+  /* Separate search and a persistent scroll wheel, with neighbours above/below. */
+  .matchbar { top:24px; }
+  .search-field { display:flex;align-items:center;width:185px;height:70px;border-radius:22px;background:#ffffff24;border:1px solid #ffffffb0;backdrop-filter:blur(22px);box-shadow:inset 0 1px 2px #fff9,0 5px 18px #536a5910; }
+  .search-field .search-action { width:46px;flex:none;background:none;border:0;box-shadow:none; }
+  .search-field #query { min-width:0;width:130px;border:0;padding:10px 8px 10px 0;font-size:12px; }
+  .wheel-shell { position:relative;width:88px;flex:none;height:222px; }
+  .wheel-shell::before { content:'';position:absolute;inset:76px 0;border:1px solid #ffffffd0;border-radius:22px;background:#ffffff28;box-shadow:inset 0 1px 2px #fff9,0 5px 18px #536a5910;backdrop-filter:blur(22px);pointer-events:none; }
+  #categoryWheel { position:relative;height:222px;overflow-y:auto;scroll-snap-type:none;scrollbar-width:none;overscroll-behavior:contain;padding:76px 0;mask-image:linear-gradient(transparent,#000 24%,#000 76%,transparent); }
+  #categoryWheel::-webkit-scrollbar{display:none}
+  .wheel-item { scroll-snap-align:center;width:88px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:0;border-radius:22px;background:#ffffff20;color:#52675f;font:10px Georgia,serif;cursor:pointer;opacity:.48;margin-bottom:6px; }
+  .wheel-item:last-child{margin-bottom:0}.wheel-item[aria-pressed="true"]{opacity:1;background:#ffffff18}.wheel-item:hover{opacity:1;background:#ffffff50}.wheel-item:focus-visible{outline:1px solid #718879;outline-offset:-4px}.wheel-item .ico{width:25px;height:25px;color:inherit}.wheel-item[aria-pressed="true"] .s{fill:#80998a55}
+  .glass-panel{top:158px}.action,.action-group,#actionTip{background:#ffffff26;backdrop-filter:blur(22px) saturate(.8);-webkit-backdrop-filter:blur(22px) saturate(.8)}
+  #actionTip{bottom:163px}.ripple{opacity:.55;filter:blur(3px)}
+  @media(max-width:650px){.search-field{width:112px}.search-field #query{width:70px}.search-field .search-action{width:32px}.wheel-shell,.wheel-item{width:68px}.action{width:48px}.action-group .action{width:44px}.matchbar{gap:5px}}
 </style>
 </head>
 <body>
@@ -569,7 +584,7 @@
   </filter>
   <filter id="ripplebg" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
     <feFlood flood-color="rgb(128,128,128)" result="flat"/><feImage id="rippleBgMap" x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="img"/><feComposite in="img" in2="flat" operator="over" result="map"/>
-    <feDisplacementMap in="SourceGraphic" in2="map" scale="55" xChannelSelector="R" yChannelSelector="G"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="24" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
   <!-- studies in the aura palette: ink tone mapped deep teal -> teal -> lilac -> pink -> butter; paper knocked out, ink kept dense -->
   <filter id="jewelpal" color-interpolation-filters="sRGB">
@@ -592,11 +607,11 @@
     <div class="ledger" aria-hidden="true"></div>
     <div class="margin t"></div><div class="margin b"></div>
     <div class="matchbar" role="toolbar" aria-label="Outfit jewellery tools">
-<button id="find" class="action search-action" aria-expanded="false" aria-controls="finder" data-hint="Find jewellery"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span>Search</span></button>
+<div class="search-field"><button id="find" aria-label="Search" class="action search-action" aria-expanded="false" aria-controls="finder" data-hint="Find jewellery"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button><input id="query" type="search" placeholder="Search" aria-label="Search jewellery designs"></div><div class="wheel-shell"><div id="categoryWheel" aria-label="Jewellery categories" role="group"></div></div>
 <div class="action-group"><button id="scan" class="action" data-hint="Choose an outfit photo"><svg viewBox="0 0 24 24"><path d="M8 3H4v4m12-4h4v4M4 17v4h4m8 0h4v-4"/><circle cx="12" cy="12" r="4"/></svg><span>Scan</span></button><button id="add" class="action" data-hint="Add selected design to your look"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg><span>Add</span></button></div>
 <button id="play" class="action" aria-pressed="false" data-hint="Preview your jewellery combinations"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/><path d="m10 8 6 4-6 4Z"/></svg><span>Play</span></button>
 <div id="actionTip" role="tooltip" hidden></div>
-<div id="finder" class="glass-panel" hidden><input id="query" type="search" placeholder="Find a piece…" aria-label="Search jewellery categories"><div id="results"></div><p id="noResults" hidden>No matching pieces</p></div>
+<div id="finder" class="glass-panel" hidden><div id="results"></div><p id="noResults" hidden>No matching pieces</p></div>
 </div>
 <input type="file" id="outfitFile" accept="image/*" hidden>
 <div class="look" id="look" hidden><button id="removePhoto" aria-label="Remove outfit photo">×</button><img id="outfitPhoto" alt="Your outfit"><div id="tryOn" aria-hidden="true"></div></div>
@@ -886,16 +901,32 @@
     });
   });
 
-  /* Mist: warm white light with subdued jewellery silhouettes at different depths. */
+  /* Monochromatic atmosphere: broad sage-gray shadows under cool, diffuse mist. */
   (function aura() {
-    const cv=$('aura'),g=cv.getContext('2d'),atlas=new Image();
-    function draw(){const w=innerWidth,h=innerHeight,d=Math.min(devicePixelRatio||1,2);cv.width=w*d;cv.height=h*d;g.setTransform(d,0,0,d,0,0);g.fillStyle='#f2f4ee';g.fillRect(0,0,w,h);
-      if(!atlas.complete || !atlas.naturalWidth)return;
-      const places=[[.72,.05,.48,0,14,.10],[-.12,.53,.50,4,6,.14],[.63,.65,.40,2,22,.12],[.37,-.12,.30,1,10,.08]];
-      for(const [x,y,k,i,blur,alpha] of places){g.save();g.globalAlpha=alpha;g.globalCompositeOperation='multiply';g.filter=`grayscale(1) sepia(.18) blur(${blur}px)`;const size=Math.min(w,h)*k;g.drawImage(atlas,(i%3)*atlas.width/3,Math.floor(i/3)*atlas.height/2,atlas.width/3,atlas.height/2,x*w,y*h,size,size);g.restore();}
-      g.fillStyle='rgba(255,255,255,.35)';g.fillRect(0,0,w,h);
+    const cv=$('aura'),g=cv.getContext('2d');
+    function draw(){
+      const w=innerWidth,h=innerHeight,d=Math.min(devicePixelRatio||1,2);
+      cv.width=w*d;cv.height=h*d;g.setTransform(d,0,0,d,0,0);
+      g.fillStyle='#e6e9e4';g.fillRect(0,0,w,h);
+      // Elliptical veils dissolve gradually; no distinct colored pools or motifs.
+      const veils=[
+        [.12,.34,.70,.62,'170,183,175',.20],
+        [.89,.68,.65,.70,'177,188,181',.18],
+        [.53,.88,.78,.36,'215,216,210',.32],
+        [.48,.12,.80,.52,'247,249,247',.70],
+        [.32,.57,.88,.23,'247,249,247',.48],
+        [.82,.42,.60,.29,'243,246,243',.45]
+      ];
+      for(const [x,y,rx,ry,rgb,alpha] of veils){
+        g.save();g.translate(x*w,y*h);g.scale(rx*w,ry*h);
+        const fog=g.createRadialGradient(0,0,0,0,0,1);
+        fog.addColorStop(0,`rgba(${rgb},${alpha})`);
+        fog.addColorStop(.45,`rgba(${rgb},${alpha*.55})`);
+        fog.addColorStop(1,`rgba(${rgb},0)`);
+        g.fillStyle=fog;g.fillRect(-1,-1,2,2);g.restore();
+      }
     }
-    atlas.onload=draw;atlas.src='assets/jewellery-print-atlas.png';draw();addEventListener('resize',draw);
+    draw();addEventListener('resize',draw);
   })();
 
   /* ---------- Water ripple that follows the pointer ----------
@@ -940,10 +971,10 @@
       for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
         const i = y * w + x, sx = a[i + 1] - a[i - 1], sy = a[i + w] - a[i - w];
         const k = i * 4, hgt = a[i], u = x / w;
-        // colour rings in the background's own palette: crests lift to cream, troughs tint teal -> pink across the page
-        if (hgt > 0) { d[k] = 255; d[k + 1] = 250; d[k + 2] = 236; }
-        else { d[k] = 133; d[k + 1] = 155; d[k + 2] = 145; }
-        d[k + 3] = Math.min(120, Math.abs(hgt) * 40);
+        // Ripple light and shadow stay within the cool off-white / sage-gray palette.
+        if (hgt > 0) { d[k] = 247; d[k + 1] = 249; d[k + 2] = 247; }
+        else { d[k] = 180; d[k + 1] = 191; d[k + 2] = 184; }
+        d[k + 3] = Math.min(hgt>0?100:28, Math.abs(hgt) * (hgt>0?32:9));
         if (!(x & 1) && !(y & 1)) {   // refraction map at half resolution: the slope bends what lies under the water
           const q = ((y >> 1) * mw + (x >> 1)) * 4;
           m[q] = 128 + Math.max(-127, Math.min(127, sx * 22)); m[q + 1] = 128 + Math.max(-127, Math.min(127, sy * 22)); m[q + 2] = 128; m[q + 3] = 255;
@@ -982,10 +1013,13 @@
 
   const finder=$('finder'), find=$('find'), query=$('query'), results=$('results'), status=$('matchStatus');
   const categoryNames=['Ring','Earrings','Bracelet','Brooch','Pendant','Watch'];
-  function listCategories(){const q=query.value.trim().toLowerCase();results.replaceChildren();SPECIMENS.forEach((m,i)=>{if(!(categoryNames[i]+' '+m.name).toLowerCase().includes(q))return;const b=document.createElement('button');b.className='category';b.setAttribute('aria-pressed',i===st.sel);b.innerHTML=icon(m)+`<span>${categoryNames[i]}</span><small>3 designs</small>`;b.onclick=()=>{select(i);listCategories();status.textContent=`${categoryNames[i]} — choose one of three designs.`;};results.appendChild(b);});$('noResults').hidden=!!results.children.length;}
-  function closeFinder(){const restore=finder.contains(document.activeElement);finder.hidden=true;find.setAttribute('aria-expanded','false');if(restore)find.focus();}
-  find.onclick=()=>{finder.hidden=!finder.hidden;find.setAttribute('aria-expanded',!finder.hidden);if(!finder.hidden){listCategories();query.focus();}};
-  query.oninput=listCategories;
+  const wheel=$('categoryWheel');let wheelTimer, wheelMoving=false, wheelRelease;
+  function chooseCategory(i,scroll=true){clearTimeout(wheelTimer);select(i);[...wheel.children].forEach((b,j)=>b.setAttribute('aria-pressed',i===j));if(scroll){wheelMoving=true;clearTimeout(wheelRelease);wheel.scrollTo({top:i*76,behavior:'instant'});wheelRelease=setTimeout(()=>wheelMoving=false,650);}status.textContent=`${categoryNames[i]} — choose one of three designs.`;}
+  SPECIMENS.forEach((m,i)=>{const b=document.createElement('button');b.className='wheel-item';b.dataset.hint=`Browse ${categoryNames[i].toLowerCase()} · scroll to explore`;b.setAttribute('aria-pressed',i===st.sel);b.setAttribute('aria-label',categoryNames[i]);b.innerHTML=icon(m)+`<span>${categoryNames[i]}</span>`;b.onclick=()=>chooseCategory(i);b.onkeydown=e=>{let next=i;if(e.key==='ArrowDown')next=Math.min(5,i+1);else if(e.key==='ArrowUp')next=Math.max(0,i-1);else if(e.key==='Home')next=0;else if(e.key==='End')next=5;else return;e.preventDefault();chooseCategory(next);wheel.children[next].focus({preventScroll:true});};wheel.appendChild(b);});
+  wheel.addEventListener('scroll',()=>{if(wheelMoving)return;clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>{const i=Math.max(0,Math.min(5,Math.round(wheel.scrollTop/76)));if(i!==st.sel)chooseCategory(i);},180);});
+  function listCategories(){const q=query.value.trim().toLowerCase();results.replaceChildren();finder.hidden=!q;find.setAttribute('aria-expanded',!!q);if(!q)return;SPECIMENS.forEach((m,i)=>{for(let v=0;v<3;v++){if(!(`${categoryNames[i]} ${m.name} ${v+1}`).toLowerCase().includes(q))continue;const b=document.createElement('button');b.className='category';b.innerHTML=icon(m)+`<span>${categoryNames[i]} ${String(v+1).padStart(2,'0')}</span>`;b.onclick=()=>{chooseCategory(i);chosenDesign=v;plate.querySelectorAll('.p:not(.out) .design-pick').forEach((x,j)=>x.setAttribute('aria-pressed',j===v));closeFinder();};results.appendChild(b);}});$('noResults').hidden=!!results.children.length;}
+  function closeFinder(){finder.hidden=true;find.setAttribute('aria-expanded','false');}
+  find.onclick=()=>{query.focus();listCategories();};query.oninput=listCategories;
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('.matchbar'))closeFinder();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFinder();$('actionTip').hidden=true;}});
   let photoURL='',timer=0,previewIndex=0;const saved=[];
@@ -998,7 +1032,7 @@
   function stopPlay(){clearInterval(timer);timer=0;$('play').setAttribute('aria-pressed','false');$('play').querySelector('span').textContent='Play';}
   $('play').onclick=()=>{if(timer){stopPlay();return;}if(!saved.length){status.textContent='Add a design to your look first.';return;}previewIndex=0;preview(saved[0]);$('play').setAttribute('aria-pressed','true');$('play').querySelector('span').textContent='Pause';timer=setInterval(()=>{previewIndex=(previewIndex+1)%saved.length;preview(saved[previewIndex]);},2200);};
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlay();});
-  const actionTip=$('actionTip');document.querySelectorAll('.action').forEach((b)=>{function show(){actionTip.textContent=b.dataset.hint;actionTip.hidden=false;const r=b.getBoundingClientRect(),host=b.closest('.matchbar').getBoundingClientRect();actionTip.style.left=(r.left-host.left+r.width/2)+'px';b.setAttribute('aria-describedby','actionTip');}function hide(){actionTip.hidden=true;b.removeAttribute('aria-describedby');}b.addEventListener('pointerenter',show);b.addEventListener('pointerleave',hide);b.addEventListener('focus',show);b.addEventListener('blur',hide);});
+  const actionTip=$('actionTip');document.querySelectorAll('.action,.wheel-item').forEach((b)=>{function show(){actionTip.textContent=b.dataset.hint;actionTip.hidden=false;const r=b.getBoundingClientRect(),host=b.closest('.matchbar').getBoundingClientRect();actionTip.style.left=(r.left-host.left+r.width/2)+'px';b.setAttribute('aria-describedby','actionTip');}function hide(){actionTip.hidden=true;b.removeAttribute('aria-describedby');}b.addEventListener('pointerenter',show);b.addEventListener('pointerleave',hide);b.addEventListener('focus',show);b.addEventListener('blur',hide);});
   const actionButtons=[...document.querySelectorAll('.action')];actionButtons.forEach((b,i)=>b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();actionButtons[(i+(e.key==='ArrowRight'?1:actionButtons.length-1))%actionButtons.length].focus();}}));
 
   build();

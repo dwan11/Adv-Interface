@@ -153,3 +153,9 @@ Search opens a translucent, scrollable category picker with live filtering (incl
 The background now uses #f2f4ee mist with four low-opacity, blurred jewellery silhouettes at varied depths; the rainbow cloud gradient and coloured noise are removed. Controls and tooltips share translucent white glass with backdrop blur. Water impulse and crest opacity rise modestly; troughs are grey-green. Reduced-motion still disables the ripple.
 
 Verified in the 8766 browser: category search/filtering, three-design category switching, selecting and adding design 2 independently, playback state and no console errors. Local image selection code has not been exercised with a personal outfit photo.
+
+
+## Separate search and category wheel refinement
+Search is now an independent text field returning individual designs. A persistent vertical jewellery wheel sits immediately beside it, showing the selected category at the toolbar centre and faded neighbours above/below. Scroll, click, or use Up/Down/Home/End to browse all six categories. Scan, Add and Play retain their existing functions. Hover/focus hints and selected states are shared across the controls.
+
+The mist background now contains larger jewellery silhouettes at several blur depths and three delicate chain strands running behind the controls. Translucent surfaces blur these details at 22px. Ripple troughs use a pale sage tint, capped at 28/255 alpha, while the light crests remain visible; background displacement is reduced to 24. Reduced-motion support remains.
