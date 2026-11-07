@@ -607,6 +607,18 @@
   .lens .glass{background:#98a59120!important}.tool.is-hover::before{background:#98a59125!important}
   .stage[data-align]:not([data-align=center]) .c-dock{height:374px}
   .archive-piece{pointer-events:auto}.archive-pick{pointer-events:auto}
+
+  .ripple{opacity:.78;filter:blur(2px)}
+  .tip .tt b{padding:0 8px}.tip .tw{border-radius:16px}
+  :root{--mist-rgb:243,240,231;--shade-rgb:152,165,145}
+  :root[data-palette=rose]{--paper:#f3ebe7;--ink:#71454b;--soft:#c19b91;--mist-rgb:243,235,231;--shade-rgb:193,155,145}
+  :root[data-palette=blue]{--paper:#ecf0f1;--ink:#354f70;--soft:#91a9bc;--mist-rgb:236,240,241;--shade-rgb:145,169,188}
+  html{background:var(--paper)}.tool .ico,.tool.is-sel .ico,.tip .tt b,.archive-piece figcaption{color:var(--ink)}
+  .tip .tw{background:color-mix(in srgb,var(--paper) 28%,transparent)!important}
+  .stage .strip{background:color-mix(in srgb,var(--paper) 15%,transparent)!important}
+  .tool.is-hover,.tool.product-hover{background:color-mix(in srgb,var(--soft) 22%,transparent)!important}
+  .lens .glass{background:color-mix(in srgb,var(--soft) 12%,transparent)!important}
+  .palette-options{display:flex;gap:4px}.palette-options button{background:none;border:0;padding:7px 10px;color:var(--ink);font:11px Georgia,serif;cursor:pointer}.palette-options button[aria-pressed=true]{box-shadow:inset 0 -1px var(--ink)}
 </style>
 </head>
 <body>
@@ -616,11 +628,11 @@
   <!-- turns the study paper (luminance ~.92) transparent and keeps the ink: alpha = (0.925 - L) x 2.4 -->
   <filter id="ripplefx" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
     <feFlood flood-color="rgb(128,128,128)" result="flat"/><feImage id="rippleMap" x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="img"/><feComposite in="img" in2="flat" operator="over" result="map"/>
-    <feDisplacementMap in="SourceGraphic" in2="map" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="6" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
   <filter id="ripplebg" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
     <feFlood flood-color="rgb(128,128,128)" result="flat"/><feImage id="rippleBgMap" x="0" y="0" width="100" height="100" preserveAspectRatio="none" result="img"/><feComposite in="img" in2="flat" operator="over" result="map"/>
-    <feDisplacementMap in="SourceGraphic" in2="map" scale="24" xChannelSelector="R" yChannelSelector="G"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="48" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
   <!-- studies in the aura palette: ink tone mapped deep teal -> teal -> lilac -> pink -> butter; paper knocked out, ink kept dense -->
   <filter id="jewelpal" color-interpolation-filters="sRGB">
@@ -676,6 +688,7 @@
   </section>
 
   <div class="controls">
+    <div class="ctl"><span>Colour</span><div class="palette-options" aria-label="Archive colour palette"><button data-palette="sage" aria-pressed="true">Sage</button><button data-palette="rose" aria-pressed="false">Rose</button><button data-palette="blue" aria-pressed="false">Blue</button></div></div>
     <div class="ctl"><span>Align</span>
       <div class="pills" data-key="align">
         <button data-v="left" aria-pressed="false">Left</button><button data-v="center" aria-pressed="false">Center</button><button data-v="right" aria-pressed="true">Right</button>
@@ -737,7 +750,8 @@
     const flip = bounds ? origin.left + lx + R + 10 + tipWidth > bounds.right - 8 : align === 'right';
     tip.classList.toggle('flip', flip);
     const h = tip.offsetHeight || 60, w = tip.offsetWidth || 150;
-    const x = flip ? lx - 44 - w : lx + 44;
+    const edge = tip.parentElement.querySelector('.strip')?.getBoundingClientRect();
+    const x = flip ? (edge ? edge.left-origin.left : 0)-12-w : (edge ? edge.right-origin.left : lx+44)+12;
     tip.style.transform = `translate(${x.toFixed(1)}px, ${(ly - h / 2).toFixed(1)}px)`;
   }
   function placeLens(lensEl, viewEl, lx, ly, s = 1) {
@@ -956,15 +970,16 @@
     function draw(){
       const w=innerWidth,h=innerHeight,d=Math.min(devicePixelRatio||1,2);
       cv.width=w*d;cv.height=h*d;g.setTransform(d,0,0,d,0,0);
-      g.fillStyle='#f3f0e7';g.fillRect(0,0,w,h);
+      const theme=getComputedStyle(document.documentElement),mist=theme.getPropertyValue('--mist-rgb').trim(),shade=theme.getPropertyValue('--shade-rgb').trim();
+      g.fillStyle=theme.getPropertyValue('--paper').trim();g.fillRect(0,0,w,h);
       // Elliptical veils dissolve gradually; no distinct colored pools or motifs.
       const veils=[
-        [.12,.34,.70,.62,'152,165,145',.20],
-        [.89,.68,.65,.70,'152,165,145',.18],
-        [.53,.88,.78,.36,'152,165,145',.32],
-        [.48,.12,.80,.52,'243,240,231',.70],
-        [.32,.57,.88,.23,'243,240,231',.48],
-        [.82,.42,.60,.29,'243,240,231',.45]
+        [.12,.34,.70,.62,shade,.20],
+        [.89,.68,.65,.70,shade,.18],
+        [.53,.88,.78,.36,shade,.32],
+        [.48,.12,.80,.52,mist,.70],
+        [.32,.57,.88,.23,mist,.48],
+        [.82,.42,.60,.29,mist,.45]
       ];
       for(const [x,y,rx,ry,rgb,alpha] of veils){
         g.save();g.translate(x*w,y*h);g.scale(rx*w,ry*h);
@@ -975,7 +990,7 @@
         g.fillStyle=fog;g.fillRect(-1,-1,2,2);g.restore();
       }
     }
-    draw();addEventListener('resize',draw);
+    draw();addEventListener('resize',draw);addEventListener('palettechange',draw);
   })();
 
   /* ---------- Water ripple that follows the pointer ----------
@@ -1011,7 +1026,7 @@
         e = 0;
         for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
           const i = y * w + x;
-          const v = ((a[i - 1] + a[i + 1] + a[i - w] + a[i + w]) / 2 - b[i]) * .96;
+          const v = ((a[i - 1] + a[i + 1] + a[i - w] + a[i + w]) / 2 - b[i]) * .975;
           b[i] = v; e += v < 0 ? -v : v;
         }
         const t = a; a = b; b = t;
@@ -1023,7 +1038,7 @@
         // Ripple light and shadow stay within the cool off-white / sage-gray palette.
         if (hgt > 0) { d[k] = 247; d[k + 1] = 249; d[k + 2] = 247; }
         else { d[k] = 180; d[k + 1] = 191; d[k + 2] = 184; }
-        d[k + 3] = Math.min(hgt>0?100:28, Math.abs(hgt) * (hgt>0?32:9));
+        d[k + 3] = Math.min(hgt>0?145:34, Math.abs(hgt) * (hgt>0?44:11));
         if (!(x & 1) && !(y & 1)) {   // refraction map at half resolution: the slope bends what lies under the water
           const q = ((y >> 1) * mw + (x >> 1)) * 4;
           m[q] = 128 + Math.max(-127, Math.min(127, sx * 22)); m[q + 1] = 128 + Math.max(-127, Math.min(127, sy * 22)); m[q + 2] = 128; m[q + 3] = 255;
@@ -1043,7 +1058,7 @@
         $('aura').classList.add('wet');
       }
       // stop once the average movement is negligible, and never later than 1.6 s after the last touch
-      raf = e > w * h * .004 && now - lastDrop < 2400 ? requestAnimationFrame(step) : 0;
+      raf = e > w * h * .004 && now - lastDrop < 3400 ? requestAnimationFrame(step) : 0;
       if (!raf) { a.fill(0); b.fill(0); tPrev = 0; ctx.clearRect(0, 0, w, h); lay.classList.remove('wet'); $('aura').classList.remove('wet'); }
     }
     size();
@@ -1052,11 +1067,11 @@
     stage.addEventListener('pointermove', (ev) => {
       const r = stage.getBoundingClientRect(), now = performance.now(), x = ev.clientX - r.left, y = ev.clientY - r.top;
       // only every 40 ms and after 14 px of travel, so slow or small movements barely stir the water
-      if (now - last < 40 || Math.hypot(x - lx, y - ly) < 14) return;
-      drop(x, y, 4, now - last > 160 ? 5.1 : 2.3);
+      if (now - last < 32 || Math.hypot(x - lx, y - ly) < 9) return;
+      drop(x, y, 5, now - last > 160 ? 7.2 : 3.8);
       last = now; lx = x; ly = y;
     });
-    stage.addEventListener('pointerdown', (ev) => { const r = stage.getBoundingClientRect(); drop(ev.clientX - r.left, ev.clientY - r.top, 5, 8); });
+    stage.addEventListener('pointerdown', (ev) => { const r = stage.getBoundingClientRect(); drop(ev.clientX - r.left, ev.clientY - r.top, 6, 11); });
     let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(size, 150); });
   })();
 
@@ -1102,6 +1117,14 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape')hideHint();});
   const actionButtons=[...document.querySelectorAll('.action:not(:disabled)')];actionButtons.forEach((b,i)=>b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();actionButtons[(i+(e.key==='ArrowRight'?1:actionButtons.length-1))%actionButtons.length].focus();}}));
 
+
+  document.querySelectorAll('.palette-options button').forEach(button=>button.addEventListener('click',()=>{
+    const name=button.dataset.palette;document.documentElement.dataset.palette=name;
+    document.querySelectorAll('.palette-options button').forEach(b=>b.setAttribute('aria-pressed',b===button));
+    const ink={sage:[46,84,79],rose:[113,69,75],blue:[53,79,112]}[name];
+    ['R','G','B'].forEach((channel,i)=>document.querySelector(`#jewelpal feFunc${channel}`).setAttribute('tableValues',Array(5).fill((ink[i]/255).toFixed(4)).join(' ')));
+    dispatchEvent(new Event('palettechange'));
+  }));
   build();
   select(st.sel, true);
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { syncSheet(); paint(); }, 200); });
